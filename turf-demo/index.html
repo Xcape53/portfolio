@@ -471,6 +471,7 @@
     body { margin:0; min-height:100vh; background:radial-gradient(ellipse at 65% 40%,#151027 0,transparent 55%),#070709; }
     button,input,select { font-family:Aldrich,sans-serif; }
     button:focus-visible,select:focus-visible,input:focus-visible,[role="tab"]:focus-visible { outline:2px solid #fff!important; outline-offset:3px; }
+    #gui-version { position:fixed; left:24px; top:32px; color:#a3a0b3; font-size:12px; line-height:16px; letter-spacing:.5px; z-index:100000002; }
     .demo-links { position:fixed; left:24px; bottom:52px; }
     .demo-links a { display:inline-block; background:#141219; color:#e8e4f7; border:1px solid #34303e; border-radius:4px; padding:10px 12px; text-decoration:none; font-size:11px; }
     #demo-menu { position:fixed; top:20px; right:24px; z-index:100000002; background:#0d0d0d; color:#fff; border:2px solid var(--accent,#0040ff); border-radius:4px; padding:8px 10px; font-size:20px; cursor:pointer; }
@@ -484,7 +485,7 @@
         #lombre_ui #scroll_area { max-height:max(100px,calc(100dvh - 190px))!important; }
     }
     @media(max-width:1190px) {
-        .demo-links { position:relative; left:auto; bottom:auto; padding:20px 24px; }
+        .demo-links { position:relative; left:auto; bottom:auto; padding:20px 24px 20px 96px; }
         #demo-licenses { display:none; }
         #lombre_ui { position:relative!important; top:auto!important; left:auto!important; transform:none!important; margin:12px auto 32px; box-sizing:border-box; width:min(614px,calc(100% - 24px))!important; }
     }
@@ -503,6 +504,7 @@
     </style>
 </head>
 <body>
+    <span id="gui-version" aria-label="Interface version">v1.7.1</span>
     <nav class="demo-links" aria-label="Project"><a href="https://github.com/Xcape53/TurfMatchMaking" target="_blank" rel="noopener noreferrer">GITHUB</a></nav>
     <button id="demo-menu" type="button" aria-label="Open Turf Matchmaker">M</button>
     <main id="demo-stage" aria-label="Turf Matchmaker interface"></main>
