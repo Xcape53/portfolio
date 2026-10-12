@@ -4,8 +4,8 @@
     <meta charset="utf-8">
     <meta name="viewport" content="width=device-width, initial-scale=1">
     <meta http-equiv="Content-Security-Policy" content="default-src 'none'; script-src 'unsafe-inline'; style-src 'unsafe-inline'; font-src data:; img-src data:; connect-src 'none'; object-src 'none'; base-uri 'none'; form-action 'none'">
-    <title>Turf Matchmaking - Interactive GUI Demo</title>
-    <meta name="description" content="Try the Turf Matchmaking interface: filters, player lists, themes and notifications. A standalone demo with simulated matchmaking and no game connection.">
+    <title>Turf Matchmaking</title>
+    <meta name="description" content="Explore the Turf Matchmaking interface: filters, player lists, themes and notifications.">
     <meta name="color-scheme" content="dark">
     <link rel="canonical" href="https://piotrjeleniewicz.com/turf-demo/">
     <style>
@@ -471,15 +471,10 @@
     body { margin:0; min-height:100vh; background:radial-gradient(ellipse at 65% 40%,#151027 0,transparent 55%),#070709; }
     button,input,select { font-family:Aldrich,sans-serif; }
     button:focus-visible,select:focus-visible,input:focus-visible,[role="tab"]:focus-visible { outline:2px solid #fff!important; outline-offset:3px; }
-    .demo-intro { position:absolute; top:50%; left:40px; width:280px; transform:translateY(-50%); }
-    .demo-eyebrow { font-size:10px; letter-spacing:2px; color:#9386d2; }
-    .demo-intro h1 { font-size:34px; line-height:1.25; margin:16px 0; letter-spacing:-1px; }
-    .demo-intro p { color:#9996a6; font:14px/1.7 system-ui,sans-serif; }
-    .demo-links { display:flex; gap:12px; flex-wrap:wrap; margin-top:24px; }
-    .demo-links a,.demo-links button { background:#141219; color:#e8e4f7; border:1px solid #34303e; border-radius:4px; padding:10px 12px; text-decoration:none; font-size:11px; cursor:pointer; }
+    .demo-links { position:fixed; left:24px; bottom:52px; }
+    .demo-links a { display:inline-block; background:#141219; color:#e8e4f7; border:1px solid #34303e; border-radius:4px; padding:10px 12px; text-decoration:none; font-size:11px; }
     #demo-menu { position:fixed; top:20px; right:24px; z-index:100000002; background:#0d0d0d; color:#fff; border:2px solid var(--accent,#0040ff); border-radius:4px; padding:8px 10px; font-size:20px; cursor:pointer; }
-    #demo-result { position:fixed; left:50%; transform:translateX(-50%); bottom:30px; max-width:560px; padding:0 20px; color:#a3a0b3; text-align:center; font:12px/1.5 system-ui,sans-serif; }
-    #demo-licenses { position:absolute; bottom:24px; left:40px; z-index:1; color:#77717f; font:11px system-ui,sans-serif; }
+    #demo-licenses { position:fixed; bottom:24px; left:24px; z-index:1; color:#77717f; font:11px system-ui,sans-serif; }
     #demo-licenses[open] { background:#101014; border:1px solid #333; padding:14px; max-width:min(640px,calc(100vw - 70px)); z-index:100000003; }
     #demo-licenses pre { max-height:280px; overflow:auto; white-space:pre-wrap; }
     #lombre_ui { box-shadow:0 24px 100px #0009; }
@@ -489,19 +484,16 @@
         #lombre_ui #scroll_area { max-height:max(100px,calc(100dvh - 190px))!important; }
     }
     @media(max-width:1190px) {
-        .demo-intro { top:20px; left:24px; width:auto; right:90px; transform:none; }
-        .demo-intro h1 { font-size:18px; margin:8px 0; }
-        .demo-intro p { display:none; }
-        .demo-links { margin-top:10px; }
+        .demo-links { position:relative; left:auto; bottom:auto; padding:20px 24px; }
         #demo-licenses { display:none; }
-        #lombre_ui { position:relative!important; top:auto!important; left:auto!important; transform:none!important; margin:155px auto 80px; box-sizing:border-box; width:min(614px,calc(100% - 24px))!important; }
-        #demo-result { position:relative; left:auto; bottom:auto; transform:none; margin:0 auto 24px; }
+        #lombre_ui { position:relative!important; top:auto!important; left:auto!important; transform:none!important; margin:12px auto 32px; box-sizing:border-box; width:min(614px,calc(100% - 24px))!important; }
     }
     @media(max-width:640px) {
         #lombre_ui { padding:18px 14px!important; }
         #lombre_ui > div:nth-child(2) { font-size:18px!important; letter-spacing:1.5px!important; }
         #lombre_ui .tab-btn { padding:10px 4px!important; font-size:10px!important; }
-        #lombre_ui #scroll_area { max-height:min(450px,calc(100dvh - 280px))!important; padding-right:4px!important; }
+        #kb_btn,#cancel_kb_btn,#clear_kb_btn { white-space:normal!important; overflow-wrap:anywhere; line-height:1.4; }
+        #lombre_ui #scroll_area { max-height:min(450px,calc(100dvh - 240px))!important; padding-right:4px!important; }
         #filter_options_box { padding:12px!important; }
         #filter_group_preferred_maps > div:first-child { flex-wrap:wrap; }
         #filter_group_preferred_maps select { max-width:140px!important; }
@@ -511,19 +503,9 @@
     </style>
 </head>
 <body>
-    <aside class="demo-intro">
-        <div class="demo-eyebrow">INTERACTIVE GUI / v1.7.1</div>
-        <h1>Turf<br>Matchmaking.</h1>
-        <p>The actual interface, outside the game. Explore the filters, build player lists, change the palette and preview notifications.</p>
-        <p>Demo only. Searches use sample lobbies. No game connection, analytics, downloads or saved game settings.</p>
-        <div class="demo-links">
-            <a href="https://github.com/Xcape53/TurfMatchMaking" target="_blank" rel="noopener noreferrer">GITHUB</a>
-            <button id="demo-reset" type="button">RESET DEMO</button>
-        </div>
-    </aside>
+    <nav class="demo-links" aria-label="Project"><a href="https://github.com/Xcape53/TurfMatchMaking" target="_blank" rel="noopener noreferrer">GITHUB</a></nav>
     <button id="demo-menu" type="button" aria-label="Open Turf Matchmaker">M</button>
     <main id="demo-stage" aria-label="Turf Matchmaker interface"></main>
-    <p id="demo-result" role="status" aria-live="polite">Demo only: changes last until you reload. Find Game previews a sample search.</p>
     <details id="demo-licenses"><summary>Code and font licenses</summary><pre>MIT License
 Copyright (c) 2026 xcape53
 
@@ -640,7 +622,7 @@ DAMAGES, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING
 FROM, OUT OF THE USE OR INABILITY TO USE THE FONT SOFTWARE OR FROM
 OTHER DEALINGS IN THE FONT SOFTWARE.
 </pre></details>
-    <noscript>This interactive demo requires JavaScript. No game connection is made.</noscript>
+    <noscript>JavaScript is required to display this interface.</noscript>
     <script>
     (() => {
 "use strict";
@@ -847,7 +829,7 @@ overlay.id = 'matchmakerPopupContainer';
 const searchContainer = document.createElement('div');
 searchContainer.id = 'matchmakerSearchContainer';
 searchContainer.innerHTML = '<div id="matchmakerSearchStatus"></div><div id="matchmakerSearchFeedShell"><div id="matchmakerSearchFeed"></div></div><div id="matchmakerSearchCounter"></div><button id="matchmakerSearchCancel">CANCEL</button>';
-let updateStatus = 'Demo mode: automatic updates and native client access are disabled.';
+let updateStatus = '';
 function asArray(value) {
         return Array.isArray(value) ? value : [];
     }
@@ -1596,7 +1578,6 @@ function showRecoveryToast(message) {
         return toast;
     }
 // Standalone interactions only. There is no native bridge, updater or game API.
-const demoResult = document.getElementById('demo-result');
 const renderGameGui = render;
 let demoSearchTimers = [];
 let demoSearchActive = false;
@@ -1637,19 +1618,13 @@ function drawDemo() {
     close.setAttribute('role', 'button');
     close.setAttribute('tabindex', '0');
     close.setAttribute('aria-label', 'Close settings');
-    for (const id of ['load_css_btn', 'load_script_btn']) {
+    for (const id of ['load_css_btn', 'load_script_btn', 'check_updates_btn']) {
         const button = ui.querySelector('#' + id);
         if (button) {
             button.disabled = true;
-            button.title = 'Extension execution is disabled in this standalone demo.';
         }
     }
-    if (STATE.tab === 'extensions') {
-        const note = document.createElement('p');
-        note.textContent = 'Demo only: importing CSS and executing JavaScript are disabled. These controls work in the installed game script.';
-        note.style.cssText = 'font:11px/1.6 Aldrich;color:#999;margin:16px 0;';
-        ui.querySelector('#scroll_area').append(note);
-    }
+    ui.querySelector('#turf_update_status')?.remove();
     if (STATE.binding) ui.querySelector('#kb_btn').textContent = 'PRESS A KEY...';
     if (STATE.bindingCancel) ui.querySelector('#cancel_kb_btn').textContent = 'PRESS A KEY...';
 }
@@ -1672,7 +1647,6 @@ function clearDemoSearch() {
 
 function cancelDemoSearch() {
     clearDemoSearch();
-    demoResult.textContent = 'Sample search cancelled. No game connection was made.';
 }
 
 function showDemoSearch(text) {
@@ -1684,7 +1658,6 @@ function showDemoSearch(text) {
 function startDemoSearch() {
     clearDemoSearch();
     demoSearchActive = true;
-    demoResult.textContent = 'Simulated search: checking the sample lobby list...';
     showDemoSearch('SCANNING LOBBIES');
     demoSearchTimers.push(setTimeout(() => showDemoSearch('HUNTING'), 450));
     demoSearchTimers.push(setTimeout(() => {
@@ -1709,21 +1682,19 @@ function startDemoSearch() {
         clearDemoSearch();
         const lobby = matches[0];
         if (!lobby) {
-            showRecoveryToast('NO SAMPLE LOBBY MATCHES');
-            demoResult.textContent = 'No sample lobby meets these filters. Try Turf Wars or reset the demo. No real server was contacted.';
+            showRecoveryToast('NO MATCHING LOBBIES');
             return;
         }
         previewSearchNotification('turfSearchFinishedNotification', 'LOBBY FOUND');
-        showConnectionToast({ region:lobby.region, ping:`${lobby.ping}ms (sample)`, map:lobby.map,
-            gamemode:GAMEMODE_LABELS[lobby.mode] || lobby.mode, players:`${lobby.players}/8 (sample)` });
-        demoResult.textContent = `Sample lobby: ${lobby.map} / ${lobby.mode} / ${lobby.players} players. This is a simulation, not a game join.`;
+        showConnectionToast({ region:lobby.region, ping:`${lobby.ping}ms`, map:lobby.map,
+            gamemode:GAMEMODE_LABELS[lobby.mode] || lobby.mode, players:`${lobby.players}/8` });
     }, 1100));
 }
 
 function notificationPreview(kind) {
     if (kind === 'search') previewSearchNotification();
     else if (kind === 'recovery') showRecoveryToast('TOO FEW OPPONENTS');
-    else showConnectionToast({ region:'FRA', ping:'32ms (sample)', map:'Sandstorm', gamemode:'FFA', players:'6/8 (sample)' });
+    else showConnectionToast({ region:'FRA', ping:'32ms', map:'Sandstorm', gamemode:'FFA', players:'6/8' });
 }
 
 ui.onclick = event => {
@@ -1803,8 +1774,7 @@ ui.onclick = event => {
     }
     if (id === 'find_btn') return startDemoSearch();
     if (id === 'check_updates_btn') {
-        updateStatus = 'Demo mode: update checks and downloads are disabled.';
-        drawDemo(); return;
+        return;
     }
     for (const kind of ['', 'search', 'recovery']) {
         const prefix = kind ? kind + '_' : '';
@@ -1910,22 +1880,12 @@ document.addEventListener('keydown', event => {
         event.preventDefault();
         if (STATE.doublePressSearchHotkey && Date.now() - firstSearchPress > 1500) {
             firstSearchPress = Date.now();
-            demoResult.textContent = 'Press your search key again within 1.5 seconds.';
             return;
         }
         firstSearchPress = 0;
         startDemoSearch();
     }
 }, true);
-document.getElementById('demo-reset').onclick = () => {
-    clearDemoSearch();
-    for (const id of ['turfConnectionToast', 'turfMatchmakerRecoveryToast']) document.getElementById(id)?.remove();
-    Object.assign(STATE, structuredClone(freshState));
-    ui.querySelector('#scroll_area').scrollTop = 0;
-    applyTheme(STATE.gradColor1, STATE.gradColor2);
-    toggleUI(true);
-    demoResult.textContent = 'Demo reset. Your game settings were not read or changed.';
-};
 mBtn.onclick = () => toggleUI(!STATE.visible);
 document.getElementById('demo-stage').append(ui);
 // Extracted preset dialogs also rerender through the standalone accessibility adapter.
