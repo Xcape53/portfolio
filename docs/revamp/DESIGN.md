@@ -1,10 +1,26 @@
-# Revamp portfolio: koncept "Drzewo" (v2)
+# Revamp portfolio: koncept "Drzewo" (v3)
 
 Plan nowej strony piotrjeleniewicz.com. Proces ze skilla `/awwwards` (juliobsz/skills): brief, koncepty, system, test generyczności. Research: `reports/Revamp portfolio 3D paralaksa wideo.md`.
 
 Wizualizacje (klikalne prototypy z notatkami, źródła w `docs/revamp/src/`, składa je `python docs/revamp/src/build.py`):
-- **v2 (aktualna): `docs/revamp/drzewo.html`**
-- v1 (odrzucona): `docs/revamp/odbiornik.html`. Uwagi do v1: nie ta kolorystyka, zgubione Twoje symbole, za dużo elektroniki i FPGA.
+- **v3 (aktualna): `docs/revamp/v3.html`**, źródła w `docs/revamp/src/v3/`, buduje `python docs/revamp/src/build_v3.py` (hero brany z v2).
+- v2: `docs/revamp/drzewo.html`. Hero zaakceptowany, reszta odrzucona: brzydkie drzewo SVG, tekst niewidoczny za przyklejoną sceną, słabe "wideo" (zrzuty z udawanym paskiem postępu), środkowa sekcja nie pasowała.
+- v1 (odrzucona): `docs/revamp/odbiornik.html`. Nie ta kolorystyka, zgubione symbole, za dużo elektroniki i FPGA.
+
+## v3 w skrócie (co jest pod hero)
+
+Powstało z dwóch niezależnych propozycji (`docs/revamp/proposals/`: kierunek kreatywny + ruch/WebGL), potem dwie rundy ślepej krytyki według rubryki `/jury` (6,4 > 6,75/10) i poprawki.
+
+1. **How I work:** jedno zdanie-konspekt zamiast rysunku drzewa. Każda linia to poziom niżej i przy scrollu wysuwa się na swoje wcięcie, słowa nabierają koloru. Nic nie jest przyklejone, tekst zawsze czytelny.
+2. **Selected work (SeeSky, JobManager, Yapper):** ten sam porządek dla każdego projektu: tytuł, jedno zdanie, duży ekran, podpis, "Need" i "Parts" (rozkład problemu na części, czyli Twoje myślenie strukturalne na prawdziwym projekcie). **Sygnatura "switch on":** ekran rodzi się z węzła: kropka, linia oscyloskopu, linia rozchodzi się falą prostokątną (szereg Fouriera jak w separatorze) i otwiera ekran, ekran opada z przechyłu 3D, pod spodem poświata w kolorze projektu. SeeSky to prawdziwe nagranie z publicznego dema (mapa nieba), JobManager i Yapper to uczciwe zrzuty.
+3. **More work:** projekty w kategoriach (Used by other people, Games, Systems and utilities). Najazd na Turf Matchmaking albo Inventory Generator odtwarza prawdziwe nagranie w podglądzie.
+4. **Oscyloskop** jako przerywnik (dwa razy).
+5. **About: "Software first. Electronics underneath."** Elektronika jako warstwa pod spodem: przyciemnione i wcięte chipy, Twoje zdjęcia (Basys 3, Vivado, CNC), panel "Right now".
+6. **Kontakt:** LET'S TALK w Poppins z obrysowanym TALK, magnetyczny EMAIL ME, a wokół niego odrasta Twój symbol (domknięcie z hero).
+
+Wideo do prototypu nagrałem automatycznie (Playwright) z Twoich publicznych dem: SeeSky, Turf Matchmaking, Inventory Generator (`docs/revamp/src/vid/`, 0,1-0,5 MB każde).
+
+Uwagi krytyka, których jeszcze nie ruszyłem: JobManager i Yapper potrzebują prawdziwych nagrań (zamazany zrzut i karta promocyjna), układ trzech case'ów mógłby się bardziej różnić między sobą, menu na telefonie.
 
 ## 0. Brief (z Twoich materiałów)
 
