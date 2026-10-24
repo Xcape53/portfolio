@@ -6,13 +6,14 @@ import json
 import re
 from pathlib import Path
 
-from bs4 import BeautifulSoup, Comment
+from bs4 import BeautifulSoup, Comment, NavigableString
 
 
 ROOT = Path(__file__).resolve().parents[1]
 SOURCE_HTML = ROOT / "index.html"
 TRANSLATIONS_JS = ROOT / "js" / "i18n.js"
 OUTPUT_HTML = ROOT / "pl" / "index.html"
+HTML_DOCUMENT_PARSER = "lxml"
 
 
 def read_translations() -> dict[str, dict[str, str]]:
@@ -25,21 +26,46 @@ def read_translations() -> dict[str, dict[str, str]]:
     return json.loads(object_literal)
 
 
-def set_meta(soup: BeautifulSoup, selector: str, value: str) -> None:
-    element = soup.select_one(selector)
+def set_meta(soup: BeautifulSoup, attributes: dict[str, str], value: str) -> None:
+    element = soup.find("meta", attrs=attributes)
     if element is not None:
         element["content"] = value
 
 
 def localize_content(soup: BeautifulSoup, dictionary: dict[str, str]) -> None:
-    for element in soup.select("[data-i18n]"):
+    for element in soup.find_all(attrs={"data-i18n": True}):
         key = element.get("data-i18n")
         if key not in dictionary:
             continue
-        fragment = BeautifulSoup(dictionary[key], "html.parser")
+        translated_content = dictionary[key]
         element.clear()
+        if "<" not in translated_content and "&" not in translated_content:
+            element.append(NavigableString(translated_content))
+            continue
+
+        fragment = BeautifulSoup(translated_content, "html.parser")
         for child in list(fragment.contents):
             element.append(child)
+
+
+def customize_polish_navigation(soup: BeautifulSoup) -> None:
+    """Apply navigation differences that are specific to the Polish page."""
+    navigation = soup.find("nav")
+    if navigation is None:
+        return
+
+    cv_link = navigation.find(attrs={"data-i18n": "nav.cv"})
+    if cv_link is None:
+        return
+
+    navigation_item = cv_link.find_parent("li")
+    element_to_remove = navigation_item or cv_link
+    previous_sibling = element_to_remove.previous_sibling
+    next_sibling = element_to_remove.next_sibling
+    element_to_remove.decompose()
+
+    if isinstance(previous_sibling, NavigableString) and isinstance(next_sibling, NavigableString):
+        next_sibling.extract()
 
 
 def prefix_relative_assets(soup: BeautifulSoup) -> None:
@@ -49,12 +75,12 @@ def prefix_relative_assets(soup: BeautifulSoup) -> None:
         return "../" + value.removeprefix("./")
 
     for attribute in ("href", "src", "data-full-src", "data-view-src"):
-        for element in soup.select(f"[{attribute}]"):
+        for element in soup.find_all(attrs={attribute: True}):
             value = element.get(attribute, "")
             element[attribute] = prefixed(value)
 
     for attribute in ("srcset", "data-view-srcset"):
-        for element in soup.select(f"[{attribute}]"):
+        for element in soup.find_all(attrs={attribute: True}):
             candidates = []
             for candidate in element.get(attribute, "").split(","):
                 parts = candidate.strip().split()
@@ -64,45 +90,48 @@ def prefix_relative_assets(soup: BeautifulSoup) -> None:
                 candidates.append(" ".join(parts))
             element[attribute] = ", ".join(candidates)
 
-    for element in soup.select("[style]"):
+    for element in soup.find_all(attrs={"style": True}):
         element["style"] = element["style"].replace("url(images/", "url(../images/")
 
 
 def generate() -> None:
     translations = read_translations()
-    soup = BeautifulSoup(SOURCE_HTML.read_text(encoding="utf-8"), "html.parser")
+    soup = BeautifulSoup(SOURCE_HTML.read_text(encoding="utf-8"), HTML_DOCUMENT_PARSER)
     soup.html["lang"] = "pl"
     localize_content(soup, translations["pl"])
+    customize_polish_navigation(soup)
 
     soup.title.string = "Piotr Jeleniewicz | Software and Automation"
     set_meta(
         soup,
-        'meta[name="description"]',
+        {"name": "description"},
         "Piotr Jeleniewicz - student ostatniego semestru PG. Integracje aplikacji, automatyzacja procesów i projekty tworzone z AI. Gdynia, Trójmiasto.",
     )
-    set_meta(soup, 'meta[property="og:title"]', "Piotr Jeleniewicz | Software and Automation")
+    set_meta(soup, {"property": "og:title"}, "Piotr Jeleniewicz | Software and Automation")
     set_meta(
         soup,
-        'meta[property="og:description"]',
+        {"property": "og:description"},
         "Piotr Jeleniewicz - student ostatniego semestru PG. Integracje aplikacji, automatyzacja procesów i projekty tworzone z AI. Gdynia, Trójmiasto.",
     )
-    set_meta(soup, 'meta[property="og:url"]', "https://piotrjeleniewicz.com/pl/")
-    set_meta(soup, 'meta[property="og:locale"]', "pl_PL")
-    set_meta(soup, 'meta[property="og:locale:alternate"]', "en_US")
-    set_meta(soup, 'meta[property="og:image:alt"]', "Portfolio Piotra Jeleniewicza - elektronika i oprogramowanie")
-    set_meta(soup, 'meta[name="twitter:title"]', "Piotr Jeleniewicz | Software and Automation")
+    set_meta(soup, {"property": "og:url"}, "https://piotrjeleniewicz.com/pl/")
+    set_meta(soup, {"property": "og:locale"}, "pl_PL")
+    set_meta(soup, {"property": "og:locale:alternate"}, "en_US")
+    set_meta(soup, {"property": "og:image:alt"}, "Portfolio Piotra Jeleniewicza - elektronika i oprogramowanie")
+    set_meta(soup, {"name": "twitter:title"}, "Piotr Jeleniewicz | Software and Automation")
     set_meta(
         soup,
-        'meta[name="twitter:description"]',
+        {"name": "twitter:description"},
         "Piotr Jeleniewicz - student ostatniego semestru PG. Integracje aplikacji, automatyzacja procesów i projekty tworzone z AI. Gdynia, Trójmiasto.",
     )
-    set_meta(soup, 'meta[name="twitter:image:alt"]', "Portfolio Piotra Jeleniewicza - elektronika i oprogramowanie")
+    set_meta(soup, {"name": "twitter:image:alt"}, "Portfolio Piotra Jeleniewicza - elektronika i oprogramowanie")
 
-    canonical = soup.select_one('link[rel="canonical"]')
+    canonical = soup.find("link", rel="canonical")
     if canonical is not None:
         canonical["href"] = "https://piotrjeleniewicz.com/pl/"
 
-    for option in soup.select("#lang-toggle [data-lang-option]"):
+    language_toggle = soup.find(id="lang-toggle")
+    language_options = [] if language_toggle is None else language_toggle.find_all(attrs={"data-lang-option": True})
+    for option in language_options:
         is_active = option.get("data-lang-option") == "pl"
         classes = [name for name in option.get("class", []) if name != "is-active"]
         if is_active:
@@ -115,7 +144,7 @@ def generate() -> None:
         else:
             option.attrs.pop("class", None)
 
-    structured_data = soup.select_one('script[type="application/ld+json"]')
+    structured_data = soup.find("script", attrs={"type": "application/ld+json"})
     if structured_data is not None and structured_data.string:
         data = json.loads(structured_data.string)
         for entity in data.get("@graph", []):
@@ -134,6 +163,7 @@ def generate() -> None:
 
     prefix_relative_assets(soup)
     soup.insert(1, Comment(" Generated by scripts/generate_pl.py. Do not edit this file by hand. "))
+    soup.insert(2, "\n")
     OUTPUT_HTML.parent.mkdir(parents=True, exist_ok=True)
     OUTPUT_HTML.write_text(str(soup), encoding="utf-8", newline="\n")
 
