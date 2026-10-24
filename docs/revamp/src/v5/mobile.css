@@ -19,6 +19,8 @@
   .build, .me, .ai, .contact__grid, .layers { grid-template-columns: minmax(0, 1fr); }
   .desk { aspect-ratio: 4 / 5; }
   .win { width: calc(var(--w) * 1.2); left: calc(var(--x) * .55); top: calc(var(--y) * 1.2); }
+  .win:nth-child(n+5) { display: none; }
+  .win:not(.focus) { filter: brightness(.82); }
   .layers__media { display: none; }
   .layer__shot { display: block; margin-top: 18px; border-radius: 10px; overflow: hidden; outline: 1px solid rgba(255,255,255,.08); }
   .layer__shot img { display: block; width: 100%; aspect-ratio: 16 / 10; object-fit: cover; }

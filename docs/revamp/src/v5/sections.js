@@ -156,7 +156,7 @@
     onTick((t) => {
       if (!isOn(jm)) { t0 = null; return; }
       if (RM) { draw(10.6); return; }
-      if (t0 === null) t0 = t - 0.0;
+      if (t0 === null) t0 = t - 4.2;   // start od wypełnionej listy, nie od pustej
       draw((t - t0) % L);
     });
   }
