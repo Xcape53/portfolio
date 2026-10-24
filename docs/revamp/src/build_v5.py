@@ -26,7 +26,7 @@ s = s.replace('<meta name="claude:viewport-fit-sides" content="cover">', '<meta 
 # notatki domyślnie wyłączone
 s = s.replace('  root.classList.add("notes");\n', "")
 s = s.replace('aria-pressed="true">Notatki projektowe: wł.', 'aria-pressed="false">Notatki projektowe: wył.')
-s = s.replace(".hero { position: relative; height: 190svh; }", ".hero { position: relative; height: 150svh; }")
+s = s.replace(".hero { position: relative; height: 190svh; }", ".hero { position: relative; height: 135svh; }")
 s = s.replace("const bx = narrow ? 0 : -3.3, by = narrow ? 1.7 : 0;", "const bx = narrow ? 0 : -3.3, by = narrow ? 2.5 : 0;")
 s = s.replace("G.scale.setScalar(lerp(narrow ? 0.5 : 0.66, 0.25, e));", "G.scale.setScalar(lerp(narrow ? 0.4 : 0.66, 0.25, e));")
 s = s.replace('<a href="#about" class="hide-s">About</a>', '<a href="#about-me" class="hide-s">About</a>')

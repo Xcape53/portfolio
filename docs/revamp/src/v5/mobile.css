@@ -9,10 +9,10 @@
 }
 /* ---------- telefon ---------- */
 @media (max-width: 900px) {
-  .f-tl span, .f-bl { display: none; }
+  .f-tl span, .f-bl, .nav .hide-s { display: none; }
   .nav { gap: 14px; }
   .nav a { padding-block: 12px; }
-  .hero { height: 160svh; }
+  .hero { height: 132svh; }
   .hero__copy { justify-items: start; align-content: end; padding-bottom: calc(70px + env(safe-area-inset-bottom, 0px)); }
   .hero__text { width: 100%; }
   .notes-toggle { display: none; }
@@ -41,6 +41,8 @@
   .stack-dl div { grid-template-columns: 100px 1fr; }
 }
 @media (max-width: 640px) {
+  .nav { gap: 12px; }
+  .nav a { font-size: .72rem !important; letter-spacing: .04em; }
   .stage3d { aspect-ratio: 1 / 1; }
   .jm { aspect-ratio: 4 / 4.4; font-size: 10px; }
   .jm__src { top: 20%; width: 26%; }

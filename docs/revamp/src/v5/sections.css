@@ -57,6 +57,8 @@ html.js-anim .reveal.in { opacity: 1; transform: none; }
 .layer p { color: var(--text); margin: 0 0 14px; max-width: 36rem; }
 .layer__tools { color: #c9d1de; font-size: .8rem; margin: 0 !important; }
 .layer:not(.on) h3 { color: #8f99aa; }
+.layer h3, .layer__tools { transition: color .5s var(--ease), transform .5s var(--ease); }
+.layer:hover h3 { color: var(--white); transform: translateX(.35em); }
 .layer__shot { display: none; }
 
 /* ---------- edukacja: rejestr ---------- */
@@ -179,8 +181,8 @@ html.js-anim .in .ticks i:nth-child(5) { transition-delay: .24s; } html.js-anim 
 .ai { margin-top: clamp(48px, 9vh, 96px); display: grid; grid-template-columns: minmax(0, 5fr) minmax(0, 7fr); gap: clamp(28px, 5vw, 72px); align-items: start; padding-top: clamp(32px, 6vh, 56px); border-top: 1px solid rgba(255,255,255,.08); }
 .ai h3 { font: 600 clamp(1.3rem, 1.1rem + .7vw, 1.65rem)/1.2 var(--f-main); margin: 0 0 14px; }
 .ai__intro p { color: var(--text); margin: 0; }
-.ai__intro a { color: var(--white); text-decoration: underline; text-decoration-color: var(--primary); text-underline-offset: 3px; text-decoration-thickness: 2px; transition: color .3s; }
-.ai__intro a:hover, .ai__intro a:focus-visible { color: var(--primary); }
+.ai__intro a { color: var(--white); text-decoration: none; background: linear-gradient(var(--primary), var(--primary)) 0 100% / 100% 2px no-repeat, linear-gradient(90deg, var(--primary), var(--secondary)) 0 100% / 0 100% no-repeat; padding: 0 2px 2px; border-radius: 2px; transition: background-size .5s var(--ease), color .3s; }
+.ai__intro a:hover, .ai__intro a:focus-visible { background-size: 100% 2px, 100% 100%; }
 .ai__loop { list-style: none; margin: 0; padding: 0; display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 0 clamp(20px, 3vw, 40px); }
 .ai__loop li { padding: 18px 0 20px; border-top: 1px solid rgba(255,255,255,.1); display: grid; grid-template-columns: 28px 1fr; gap: 0 10px; }
 .ai__loop span { color: var(--primary); font-size: .78rem; padding-top: 4px; grid-row: span 2; }
@@ -219,11 +221,18 @@ html.js-anim .in .ticks i:nth-child(5) { transition-delay: .24s; } html.js-anim 
 .cinfo small { display: block; color: var(--text); font-size: .8rem; letter-spacing: .1em; text-transform: uppercase; }
 .cinfo .val { font-size: 1.05rem; }
 .copy { font: 600 .72rem/1 var(--f-main); letter-spacing: .06em; text-transform: uppercase; border: 1px solid rgba(255,255,255,.2); background: none; color: var(--white); padding: 7px 10px; border-radius: 6px; margin-left: 10px; cursor: pointer; }
-.copy:hover { border-color: var(--primary); color: var(--primary); }
+.copy { position: relative; overflow: hidden; isolation: isolate; transition: color .4s var(--ease), border-color .4s; }
+.copy::before { content: ""; position: absolute; inset: 0; background: var(--primary); z-index: -1; transform: translateY(101%); transition: transform .45s var(--ease); }
+.copy:hover, .copy:focus-visible { border-color: var(--primary); color: #fff; }
+.copy:hover::before, .copy:focus-visible::before { transform: none; }
+.cinfo .sep { margin: 0 10px; color: var(--text); }
 .foot { display: flex; justify-content: space-between; flex-wrap: wrap; gap: 12px; margin-top: clamp(60px, 10vh, 110px); padding-block: 22px calc(60px + env(safe-area-inset-bottom, 0px)); border-top: 1px solid rgba(255,255,255,.08); color: var(--text); font-size: .9rem; }
 .foot nav { display: flex; gap: 22px; }
 .foot a { text-decoration: none; }
-.foot a:hover { color: var(--white); }
+.foot a { position: relative; transition: color .3s; }
+.foot a::after { content: ""; position: absolute; left: 0; right: 0; bottom: -3px; height: 1px; background: var(--primary); transform: scaleX(0); transform-origin: 0 50%; transition: transform .45s var(--ease); }
+.foot a:hover, .foot a:focus-visible { color: var(--white); }
+.foot a:hover::after, .foot a:focus-visible::after { transform: scaleX(1); }
 
 /* ---------- lightbox ---------- */
 .lb { position: fixed; inset: 0; z-index: 80; background: rgba(2,8,22,.94); display: grid; place-items: center; padding: 4vh 4vw; opacity: 0; pointer-events: none; transition: opacity .35s; cursor: zoom-out; }
