@@ -1,9 +1,10 @@
-# Revamp portfolio: koncept "Drzewo" (v3)
+# Revamp portfolio (v4)
 
 Plan nowej strony piotrjeleniewicz.com. Proces ze skilla `/awwwards` (juliobsz/skills): brief, koncepty, system, test generyczności. Research: `reports/Revamp portfolio 3D paralaksa wideo.md`.
 
 Wizualizacje (klikalne prototypy z notatkami, źródła w `docs/revamp/src/`, składa je `python docs/revamp/src/build.py`):
-- **v3 (aktualna): `docs/revamp/v3.html`**, źródła w `docs/revamp/src/v3/`, buduje `python docs/revamp/src/build_v3.py` (hero brany z v2).
+- **v4 (aktualna): `docs/revamp/v4.html`**, źródła w `docs/revamp/src/v4/`, buduje `python docs/revamp/src/build_v4.py`. Układ obecnej strony (What I build, Core strengths, Education, Things I have built, More of my work, About me, How I build with AI, Let's talk), dopracowany: hero z v2, bez kropek przy listach, umiarkowane rozmiary czcionek, ostre obrazy w małych miniaturach z lightboxem, responsywna siatka (desktop, tablet, telefon). Trzy główne projekty mają animacje 3D generowane w kodzie (Three.js): JobManager (oferty z 4 portali > filtr > jedna lista > research > powiadomienie), SeeSky (czasza radioteleskopu śledzi gwiazdę), LabInc (taśmociąg z kostkami pierwiastków do fabryki, dym, monety). Pod każdą animacją miniatury prawdziwych zrzutów i nagrań.
+- v3: `docs/revamp/v3.html`. Odrzucona: środek nieczytelny, za dużo kropek, za duże czcionki, rozmyte obrazy, za daleko od obecnej strony., źródła w `docs/revamp/src/v3/`, buduje `python docs/revamp/src/build_v3.py` (hero brany z v2).
 - v2: `docs/revamp/drzewo.html`. Hero zaakceptowany, reszta odrzucona: brzydkie drzewo SVG, tekst niewidoczny za przyklejoną sceną, słabe "wideo" (zrzuty z udawanym paskiem postępu), środkowa sekcja nie pasowała.
 - v1 (odrzucona): `docs/revamp/odbiornik.html`. Nie ta kolorystyka, zgubione symbole, za dużo elektroniki i FPGA.
 
