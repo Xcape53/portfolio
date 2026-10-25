@@ -292,7 +292,6 @@ html.notes .stage3d[data-note]::after, html.notes .pmedia[data-note]::after { to
 .ai__intro { max-width: 46rem; }
 .flow { list-style: none; margin: clamp(32px, 6vh, 52px) 0 0; padding: 0; display: grid; grid-template-columns: repeat(4, minmax(0, 1fr)); gap: 30px 22px; }
 .flow__step { position: relative; display: flex; flex-direction: column; padding: 18px 18px 16px; border: 1px solid rgba(255,255,255,.09); border-radius: 12px; background: rgba(14,18,22,.72); }
-.flow__step:not(:nth-child(4n))::after { content: ""; position: absolute; top: 27px; right: -23px; width: 22px; height: 2px; background: linear-gradient(90deg, rgba(44,127,254,.25), var(--primary)); }
 .flow__n { color: var(--primary); font-size: .74rem; margin-bottom: 10px; }
 .flow__step b { font-weight: 600; font-size: 1.02rem; margin-bottom: 6px; }
 .flow__step p { color: var(--text); font-size: .9rem; line-height: 1.5; margin: 0 0 14px; }
@@ -300,9 +299,6 @@ html.notes .stage3d[data-note]::after, html.notes .pmedia[data-note]::after { to
 .flow__step--gate { border-color: rgba(100,46,253,.55); }
 .flow__step--gate .flow__who { color: #e3dbff; border-color: rgba(100,46,253,.7); background: rgba(100,46,253,.18); }
 .flow__step--loop { border-color: rgba(44,127,254,.5); }
-.flow__back { position: absolute; bottom: calc(100% + 2px); right: 50%; width: calc(100% + 22px); height: 26px; overflow: visible; pointer-events: none; }
-.flow__back path { fill: none; stroke: var(--primary); stroke-width: 1.6; stroke-dasharray: 5 5; vector-effect: non-scaling-stroke; animation: flowBack 1.4s linear infinite; }
-@keyframes flowBack { to { stroke-dashoffset: 20; } }
 html.js-anim .flow__step { opacity: 0; transform: translateY(14px); transition: opacity .6s var(--ease), transform .6s var(--ease); }
 html.js-anim .ai.in .flow__step { opacity: 1; transform: none; }
 html.js-anim .ai.in .flow__step:nth-child(1) { transition-delay: 0.08s; }
@@ -318,5 +314,47 @@ html.js-anim .ai.in .flow__step:nth-child(8) { transition-delay: 0.64s; }
 .ai__guard p { color: var(--text); margin: 0; font-size: .97rem; }
 .ai__honest { margin-top: 24px; }
 @media (prefers-reduced-motion: reduce) { .flow__back path { animation: none; } }
-/* grot pętli recenzji: wskazuje powrót do kroku 06 */
-.flow__step:nth-child(6)::before { content: ""; position: absolute; left: 50%; top: -9px; transform: translateX(-50%); border: 6px solid transparent; border-top: 8px solid var(--primary); border-bottom: 0; }
+
+/* How I build with AI: schemat blokowy w stylu teorii sterowania (inspiracja: schematy TikZ) */
+.cs { margin: clamp(32px, 6vh, 52px) 0 0; padding: clamp(18px, 2.4vw, 30px) clamp(14px, 2vw, 26px) 16px; border: 1px solid rgba(255,255,255,.08); border-radius: 14px;
+  background: radial-gradient(120% 140% at 50% 0%, rgba(20,34,74,.45), rgba(6,10,22,.85) 70%); }
+.cs__scroll { overflow-x: auto; -webkit-overflow-scrolling: touch; }
+.cs__svg { display: block; width: 100%; min-width: 900px; height: auto; font-family: var(--f-main); }
+.cs__svg marker path { fill: #c9d3e3; }
+.cs__ln { fill: none; stroke: #c9d3e3; stroke-width: 1.4; }
+.cs__fb { fill: none; stroke: #7f9cc9; stroke-width: 1.4; }
+.cs__fb--in { stroke: var(--primary); }
+.cs__dist { fill: none; stroke: #ff8a5c; stroke-width: 1.4; stroke-dasharray: 5 4; }
+.cs__sum { fill: #0b1020; stroke: #c9d3e3; stroke-width: 1.4; }
+.cs__x { stroke: #c9d3e3; stroke-width: 1; opacity: .55; }
+.cs__dot { fill: #c9d3e3; }
+.cs__blk rect { fill: #0d1324; stroke: #c9d3e3; stroke-width: 1.4; transition: stroke .3s, fill .3s; }
+.cs__blk .cs__stack { fill: #0a0f1d; stroke: rgba(201,211,227,.45); }
+.cs__gate rect { fill: rgba(100,46,253,.16); stroke: #8a6bff; stroke-width: 1.4; stroke-dasharray: 4 3; transition: fill .3s; }
+.cs__guard rect { fill: rgba(255,138,92,.1); stroke: #ff8a5c; stroke-width: 1.2; }
+.cs__sbx { fill: rgba(44,127,254,.05); stroke: rgba(44,127,254,.6); stroke-width: 1.2; stroke-dasharray: 6 5; }
+.cs__sym { fill: #fff; font: italic 500 24px "Cambria Math", "Cambria", "Times New Roman", serif; text-anchor: middle; }
+.cs__sym--s { font-size: 19px; }
+.cs__sub { font-size: .62em; }
+.cs__sig { fill: #fff; font: italic 500 19px "Cambria Math", "Cambria", "Times New Roman", serif; }
+.cs__sign { fill: #c9d3e3; font: 500 15px var(--f-main); text-anchor: middle; }
+.cs__cap { fill: #a9b8d2; font-size: 15px; text-anchor: middle; }
+.cs__cap--in { fill: #ffd2bf; font-size: 12px; }
+.cs__note { fill: #9aaccc; font-size: 15px; text-anchor: middle; font-style: italic; }
+.cs__note--l { text-anchor: start; fill: #ffb79a; }
+.cs__tag { fill: #8fb4ff; font: 12px var(--f-mono); }
+.cs__pulse circle { fill: #fff; filter: url(#cs-glow); }
+.cs__pulse .cs__pulse--in { fill: var(--primary); }
+.cs__pulse .cs__pulse--out { fill: #8fa3ff; }
+.cs__blk.hl rect:not(.cs__stack) { stroke: var(--primary); fill: rgba(44,127,254,.18); }
+.cs__gate.hl rect { fill: rgba(100,46,253,.35); }
+.cs figcaption { margin: 12px 2px 0; color: #8fa3c4; font-size: .74rem; }
+/* legenda G1..G8 pod schematem */
+.flow { margin-top: 22px; gap: 0 clamp(18px, 2.4vw, 32px); }
+.flow__step { padding: 16px 0 18px; border: 0; border-top: 1px solid rgba(255,255,255,.1); border-radius: 0; background: none; transition: background .3s; }
+.flow__step--gate, .flow__step--loop { border-color: rgba(255,255,255,.1); }
+.flow__step.hl { background: linear-gradient(180deg, rgba(44,127,254,.1), transparent); }
+.flow__n { color: #fff; font: italic 500 1.15rem "Cambria Math", "Cambria", "Times New Roman", serif; margin-bottom: 6px; }
+.flow__n sub { font-size: .65em; }
+@media (prefers-reduced-motion: reduce) { .cs__pulse { display: none; } }
+.cs__hint { display: none; }

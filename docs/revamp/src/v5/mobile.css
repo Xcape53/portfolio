@@ -1,9 +1,6 @@
 /* ---------- tablet ---------- */
 @media (max-width: 1080px) {
   .flow { grid-template-columns: repeat(2, minmax(0, 1fr)); }
-  .flow__step:not(:nth-child(4n))::after { display: none; }
-  .flow__step:nth-child(odd)::after { display: block; }
-  .flow__back, .flow__step:nth-child(6)::before { display: none; }
   .proj, .proj.rev { grid-template-columns: minmax(0, 1fr); }
   .proj.rev .ptext { order: 0; }
   .pmedia { max-width: 760px; }
@@ -43,12 +40,14 @@
   .irow__go { grid-area: go; }
   .irow:hover .irow__name { transform: none; }
   .peek { display: none; }
-  .flow, .ai__guard { grid-template-columns: minmax(0, 1fr); gap: 22px; }
-  .flow__step::after, .flow__step:nth-child(odd)::after { display: block; top: auto; right: auto; left: 27px; bottom: -23px; width: 2px; height: 22px; background: linear-gradient(180deg, rgba(44,127,254,.25), var(--primary)); }
-  .flow__step:last-child::after { display: none; }
+  .flow, .ai__guard { grid-template-columns: minmax(0, 1fr); gap: 0; }
+  .ai__guard { gap: 14px; }
+
   .stack-dl div { grid-template-columns: 100px 1fr; }
 }
 @media (max-width: 640px) {
+  .cs__scroll { -webkit-mask-image: linear-gradient(90deg, #000 85%, transparent); mask-image: linear-gradient(90deg, #000 85%, transparent); }
+  .cs__hint { display: block; margin: 10px 2px 0; color: var(--primary); font-size: .72rem; }
   .nav { gap: 12px; }
   .nav a { font-size: .72rem !important; letter-spacing: .04em; }
   .stage3d { aspect-ratio: 1 / 1; }

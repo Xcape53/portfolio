@@ -263,6 +263,15 @@
   lb.addEventListener("click", (e) => { const im = e.target.closest("img"); if (!im) return; im.classList.toggle("zoom"); lb.classList.toggle("zoomed", im.classList.contains("zoom")); });
   lb.addEventListener("pointermove", (e) => { const im = lb.querySelector("img.zoom"); if (!im) return; const r = im.getBoundingClientRect(); im.style.transformOrigin = ((e.clientX - r.left) / r.width * 100).toFixed(1) + "% " + ((e.clientY - r.top) / r.height * 100).toFixed(1) + "%"; });
 
+  // ---------- schemat AI: blok w schemacie i opis w legendzie podświetlają się razem ----------
+  const csEl = $(".cs");
+  if (csEl) {
+    const parts = [...csEl.querySelectorAll("[data-k]"), ...document.querySelectorAll(".flow__step[data-k]")];
+    const hl = (k) => parts.forEach((el) => el.classList.toggle("hl", el.dataset.k === k));
+    parts.forEach((el) => { el.addEventListener("pointerenter", () => hl(el.dataset.k)); el.addEventListener("pointerleave", () => hl(null)); });
+    if (RM) { const s = csEl.querySelector("svg"); if (s && s.pauseAnimations) s.pauseAnimations(); }
+  }
+
   // ---------- indeks: podgląd przy kursorze (na dotyku miniatury w wierszach) ----------
   const peek = $("#peek");
   if (peek && fine) {
