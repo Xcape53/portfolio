@@ -330,15 +330,10 @@
   if (msym) {
     const NS = "http://www.w3.org/2000/svg";
     msym.innerHTML = '<defs><linearGradient id="msg" gradientUnits="userSpaceOnUse" x1="-300" y1="-300" x2="300" y2="300"><stop offset="0" stop-color="#2c7ffe"/><stop offset="1" stop-color="#642efd"/></linearGradient></defs>';
-    let dA = "M" + P[0].join(" "); for (let i = 1; i <= 26; i++) dA += " L" + P[i].join(" ");
-    let dB = "M" + P[0].join(" "); for (let i = 27; i <= 42; i++) dB += " L" + P[i].join(" ");
-    const sparks = [];
-    ["base", "lit", "spark"].forEach((cls) => [dA, dB].forEach((d) => {
-      const e = document.createElementNS(NS, "path"); e.setAttribute("d", d); e.setAttribute("class", cls); e.setAttribute("pathLength", "1"); msym.appendChild(e);
-      if (cls === "spark") sparks.push(e);
-    }));
-    if (RM) sparks.forEach((s) => (s.style.display = "none"));
-    else { watch(msym); onTick((t) => { if (!isOn(msym)) return; const o = 0.06 - ((t * 0.32) % 1.4); sparks.forEach((s) => s.setAttribute("stroke-dashoffset", o.toFixed(4))); }); }
+    // obie gałęzie jako jedna ścieżka przez korzeń: bez nakładania na środkowym węźle
+    const pts = []; for (let i = 42; i >= 27; i--) pts.push(P[i]); pts.push(P[0]); for (let i = 1; i <= 26; i++) pts.push(P[i]);
+    const d = "M" + pts.map((q) => q.join(" ")).join(" L");
+    ["base", "lit"].forEach((cls) => { const e = document.createElementNS(NS, "path"); e.setAttribute("d", d); e.setAttribute("class", cls); e.setAttribute("pathLength", "1"); msym.appendChild(e); });
   }
 
   // ---------- magnetyczny przycisk + kopiowanie ----------
