@@ -128,12 +128,12 @@ html.js-anim .reveal.in { opacity: 1; transform: none; }
 .win { position: absolute; left: var(--x); top: var(--y); width: var(--w); margin: 0; border-radius: 9px; overflow: hidden; background: #0b0f15;
   outline: 1px solid rgba(255,255,255,.09); box-shadow: 0 18px 40px rgba(0,0,0,.45); filter: brightness(.62) saturate(.85);
   transition: filter .7s var(--ease), box-shadow .7s var(--ease), outline-color .7s var(--ease); will-change: transform; }
-.win figcaption { display: flex; justify-content: space-between; gap: 10px; align-items: center; padding: 7px 11px; background: #1d2128; border-bottom: 1px solid #2a2f37; box-shadow: inset 0 1px 0 rgba(255,255,255,.05);
+.win figcaption { display: flex; justify-content: space-between; gap: 10px; align-items: center; padding: 7px 11px; background: #15181d; border-bottom: 1px solid #22262c; box-shadow: inset 0 1px 0 rgba(255,255,255,.05);
   font: 500 .72rem/1 var(--f-mono); color: #8d97a8; transition: background .7s var(--ease), color .7s var(--ease); }
 .win figcaption small { font-size: .68rem; opacity: .75; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
 .win img { display: block; width: 100%; aspect-ratio: 16 / 10; object-fit: cover; object-position: top; }
 .win.focus { filter: none; box-shadow: 0 34px 70px rgba(0,0,0,.6), 0 0 0 1px rgba(255,255,255,.16); outline-color: transparent; }
-.win.focus figcaption { background: #2b3038; border-bottom-color: #383e48; color: var(--white); }
+.win.focus figcaption { background: #1f2329; border-bottom-color: #2b3037; color: var(--white); }
 
 /* ---------- od układu do kodu: warstwy ---------- */
 .layers { display: grid; grid-template-columns: minmax(0, 6fr) minmax(0, 6fr); gap: clamp(32px, 5vw, 80px); align-items: start; }
@@ -167,19 +167,22 @@ html.js-anim .reveal.in { opacity: 1; transform: none; }
 .entry__status p { margin: 4px 0 0; }
 .entry__status .mono { color: var(--white); font-size: .8rem; }
 .entry__note { color: var(--text); font-size: .88rem; }
-/* pasek semestrów: jeden gradient przez wszystkie odcinki, bieżący semestr wypełniony w połowie */
-.sem { max-width: 260px; margin: 2px 0 10px; }
-.sem__top { display: flex; justify-content: space-between; align-items: baseline; margin: 0 0 9px !important; font-size: .88rem; color: var(--text); }
-.sem__top b { color: var(--white); font-weight: 600; }
-.sem__top .mono { font-size: .72rem; color: #7f8aa0; }
-.sem__bar { display: grid; grid-template-columns: repeat(7, 1fr); gap: 4px; }
-.sem__bar i { height: 6px; border-radius: 3px; background: var(--grad); background-size: 700% 100%; background-position: calc(var(--k) * 100% / 6) 0; }
-.sem__bar i.now { background: rgba(255,255,255,.08); position: relative; overflow: hidden; }
-.sem__bar i.now::before { content: ""; position: absolute; inset: 0 50% 0 0; border-radius: 3px; background: var(--secondary); }
-.entry__status .sem__nums { display: grid; grid-template-columns: repeat(7, 1fr); gap: 4px; margin: 6px 0 0 !important; font-size: .64rem; color: #5f6b80; text-align: center; }
-.entry__status .sem__nums span:last-child { color: var(--white); }
-html.js-anim .sem__bar i { transform: scaleX(0); transform-origin: 0 50%; transition: transform .7s var(--ease) calc(var(--k) * 70ms); }
-html.js-anim .in .sem__bar i { transform: none; }
+/* licznik semestrów jak w v4: pasek wypełnia się płynnie, kafelki zapalają się, gdy wypełnienie je mija */
+.prog { max-width: 270px; margin: 2px 0 10px; --dur: 1.6s; }
+.prog__lbl { display: flex; justify-content: space-between; font-size: .85rem; color: var(--text); margin-bottom: 10px; }
+.prog__lbl b { color: var(--white); font-weight: 600; }
+.prog__bar { height: 6px; border-radius: 99px; background: rgba(255,255,255,.08); position: relative; overflow: hidden; }
+.prog__bar span { position: absolute; inset: 0; width: 86%; border-radius: 99px; background: var(--grad); transform-origin: 0 50%; }
+.prog__sems { display: grid; grid-template-columns: repeat(7, 1fr); gap: 4px; margin-top: 8px; font-size: .72rem; text-align: center; color: var(--text); }
+.prog__sems span { padding: 6px 0; border-radius: 4px; background: rgba(44,127,254,.22); color: var(--white); }
+.prog__sems span.now { background: rgba(100,46,253,.25); outline: 1px solid var(--secondary); }
+html.js-anim .prog__bar span { transform: scaleX(0); transition: transform var(--dur) cubic-bezier(.65, 0, .35, 1) .2s; }
+html.js-anim .in .prog__bar span { transform: none; }
+html.js-anim .prog__sems span { background: rgba(255,255,255,.04); color: var(--text); transition: background .45s var(--ease), color .45s var(--ease), outline-color .45s; transition-delay: calc(.2s + var(--k) * .2s); }
+html.js-anim .prog__sems span.now { outline-color: transparent; }
+html.js-anim .in .prog__sems span { background: rgba(44,127,254,.22); color: var(--white); }
+html.js-anim .in .prog__sems span.now { background: rgba(100,46,253,.25); outline-color: var(--secondary); animation: semNow 2.4s ease-in-out 1.8s infinite; }
+@keyframes semNow { 50% { box-shadow: 0 0 0 3px rgba(100,46,253,.25); } }
 
 /* ---------- projekty ---------- */
 .proj { display: grid; grid-template-columns: minmax(0, 5fr) minmax(0, 7fr); gap: clamp(32px, 5vw, 72px); align-items: center; padding-block: clamp(40px, 7vh, 80px); }
@@ -575,10 +578,10 @@ html.notes .hero__stage[data-note]::after { top: 76px; }
             <p>Lead software developer of the SeeSky radio telescope in the SimLE research club: backend, tracking interface and an interactive sky map. Next stage: the real mount and an SDR receiver.</p>
           </div>
           <div class="entry__status">
-            <div class="sem" role="img" aria-label="Semester 7 of 7: six semesters completed, the seventh in progress">
-              <p class="sem__top"><span>Semester <b>7</b> of 7</span><span class="mono">6 done</span></p>
-              <div class="sem__bar" aria-hidden="true"><i style="--k:0"></i><i style="--k:1"></i><i style="--k:2"></i><i style="--k:3"></i><i style="--k:4"></i><i style="--k:5"></i><i class="now" style="--k:6"></i></div>
-              <p class="sem__nums mono" aria-hidden="true"><span>1</span><span>2</span><span>3</span><span>4</span><span>5</span><span>6</span><span>7</span></p>
+            <div class="prog" role="img" aria-label="Semesters: 6 of 7 done, the seventh in progress">
+              <div class="prog__lbl"><span>Semesters</span><b>6 of 7 done</b></div>
+              <div class="prog__bar" aria-hidden="true"><span></span></div>
+              <div class="prog__sems mono" aria-hidden="true"><span style="--k:0">1</span><span style="--k:1">2</span><span style="--k:2">3</span><span style="--k:3">4</span><span style="--k:4">5</span><span style="--k:5">6</span><span class="now" style="--k:6">7</span></div>
             </div>
             <p class="entry__note">Graduation expected 02.2027</p>
           </div>
