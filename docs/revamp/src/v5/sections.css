@@ -204,7 +204,10 @@ html.js-anim .reveal.in { opacity: 1; transform: none; }
 .ai { margin-top: clamp(48px, 9vh, 96px); display: grid; grid-template-columns: minmax(0, 5fr) minmax(0, 7fr); gap: clamp(28px, 5vw, 72px); align-items: start; padding-top: clamp(32px, 6vh, 56px); border-top: 1px solid rgba(255,255,255,.08); }
 .ai h3 { font: 600 clamp(1.3rem, 1.1rem + .7vw, 1.65rem)/1.2 var(--f-main); margin: 0 0 14px; }
 .ai__intro p { color: var(--text); margin: 0; }
-.ai__intro a { color: var(--white); text-decoration: none; background: linear-gradient(var(--primary), var(--primary)) 0 100% / 100% 2px no-repeat; padding: 0 2px 2px; border-radius: 2px; transition: background-size .45s var(--ease), color .3s; }
+/* podświetlenie w kolorach narzędzi: Claude Code pomarańczowy, Codex ciemnoszary */
+.ai__intro a[href*="claude.com"] { --hl: #d97757; }
+.ai__intro a[href*="codex"] { --hl: #4a4a50; }
+.ai__intro a { color: var(--white); text-decoration: none; background: linear-gradient(var(--hl, var(--primary)), var(--hl, var(--primary))) 0 100% / 100% 2px no-repeat; padding: 0 2px 2px; border-radius: 2px; transition: background-size .45s var(--ease), color .3s; }
 .ai__intro a:hover, .ai__intro a:focus-visible { background-size: 100% 100%; color: #fff; }
 .ai__loop { list-style: none; margin: 0; padding: 0; display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 0 clamp(20px, 3vw, 40px); }
 .ai__loop li { padding: 18px 0 20px; border-top: 1px solid rgba(255,255,255,.1); display: grid; grid-template-columns: 28px 1fr; gap: 0 10px; }
