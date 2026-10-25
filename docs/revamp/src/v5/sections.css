@@ -71,22 +71,13 @@ html.js-anim .reveal.in { opacity: 1; transform: none; }
 .entry__status p { margin: 4px 0 0; }
 .entry__status .mono { color: var(--white); font-size: .8rem; }
 .entry__note { color: var(--text); font-size: .88rem; }
-/* licznik semestrów jak w v4: pasek wypełnia się płynnie, kafelki zapalają się, gdy wypełnienie je mija */
-.prog { max-width: 270px; margin: 2px 0 10px; --dur: 1.6s; }
-.prog__lbl { display: flex; justify-content: space-between; font-size: .85rem; color: var(--text); margin-bottom: 10px; }
-.prog__lbl b { color: var(--white); font-weight: 600; }
-.prog__bar { height: 6px; border-radius: 99px; background: rgba(255,255,255,.08); position: relative; overflow: hidden; }
-.prog__bar span { position: absolute; inset: 0; width: 86%; border-radius: 99px; background: var(--grad); transform-origin: 0 50%; }
-.prog__sems { display: grid; grid-template-columns: repeat(7, 1fr); gap: 4px; margin-top: 8px; font-size: .72rem; text-align: center; color: var(--text); }
-.prog__sems span { padding: 6px 0; border-radius: 4px; background: rgba(44,127,254,.22); color: var(--white); }
-.prog__sems span.now { background: rgba(100,46,253,.25); outline: 1px solid var(--secondary); }
-html.js-anim .prog__bar span { transform: scaleX(0); transition: transform var(--dur) cubic-bezier(.65, 0, .35, 1) .2s; }
-html.js-anim .in .prog__bar span { transform: none; }
-html.js-anim .prog__sems span { background: rgba(255,255,255,.04); color: var(--text); transition: background .45s var(--ease), color .45s var(--ease), outline-color .45s; transition-delay: calc(.2s + var(--k) * .2s); }
-html.js-anim .prog__sems span.now { outline-color: transparent; }
-html.js-anim .in .prog__sems span { background: rgba(44,127,254,.22); color: var(--white); }
-html.js-anim .in .prog__sems span.now { background: rgba(100,46,253,.25); outline-color: var(--secondary); animation: semNow 2.4s ease-in-out 1.8s infinite; }
-@keyframes semNow { 50% { box-shadow: 0 0 0 3px rgba(100,46,253,.25); } }
+/* paski postępu z procentem, który jedzie na końcu wypełnienia i odlicza w górę (jak na obecnej stronie) */
+.prog { max-width: 270px; margin: 2px 0 10px; }
+.prog__lbl { display: flex; justify-content: space-between; font-size: .85rem; color: var(--text); margin-bottom: 30px; }
+.prog__bar { height: 6px; border-radius: 99px; background: rgba(255,255,255,.08); position: relative; }
+.prog__bar span { position: absolute; left: 0; top: 0; bottom: 0; width: calc(var(--p, 0) * 1%); border-radius: 99px; background: var(--grad); }
+.prog__pct { position: absolute; bottom: 14px; left: calc(var(--p, 0) * 1%); transform: translateX(-50%); font-size: .72rem; font-weight: 500; color: #fff; background: #1b2030; border: 1px solid rgba(255,255,255,.12); padding: 4px 7px; border-radius: 5px; white-space: nowrap; }
+.prog__pct::after { content: ""; position: absolute; left: 50%; top: 100%; width: 7px; height: 7px; background: #1b2030; border-right: 1px solid rgba(255,255,255,.12); border-bottom: 1px solid rgba(255,255,255,.12); transform: translate(-50%, -4px) rotate(45deg); }
 
 /* ---------- projekty ---------- */
 .proj { display: grid; grid-template-columns: minmax(0, 5fr) minmax(0, 7fr); gap: clamp(32px, 5vw, 72px); align-items: center; padding-block: clamp(40px, 7vh, 80px); }

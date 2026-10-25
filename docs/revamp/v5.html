@@ -167,22 +167,13 @@ html.js-anim .reveal.in { opacity: 1; transform: none; }
 .entry__status p { margin: 4px 0 0; }
 .entry__status .mono { color: var(--white); font-size: .8rem; }
 .entry__note { color: var(--text); font-size: .88rem; }
-/* licznik semestrów jak w v4: pasek wypełnia się płynnie, kafelki zapalają się, gdy wypełnienie je mija */
-.prog { max-width: 270px; margin: 2px 0 10px; --dur: 1.6s; }
-.prog__lbl { display: flex; justify-content: space-between; font-size: .85rem; color: var(--text); margin-bottom: 10px; }
-.prog__lbl b { color: var(--white); font-weight: 600; }
-.prog__bar { height: 6px; border-radius: 99px; background: rgba(255,255,255,.08); position: relative; overflow: hidden; }
-.prog__bar span { position: absolute; inset: 0; width: 86%; border-radius: 99px; background: var(--grad); transform-origin: 0 50%; }
-.prog__sems { display: grid; grid-template-columns: repeat(7, 1fr); gap: 4px; margin-top: 8px; font-size: .72rem; text-align: center; color: var(--text); }
-.prog__sems span { padding: 6px 0; border-radius: 4px; background: rgba(44,127,254,.22); color: var(--white); }
-.prog__sems span.now { background: rgba(100,46,253,.25); outline: 1px solid var(--secondary); }
-html.js-anim .prog__bar span { transform: scaleX(0); transition: transform var(--dur) cubic-bezier(.65, 0, .35, 1) .2s; }
-html.js-anim .in .prog__bar span { transform: none; }
-html.js-anim .prog__sems span { background: rgba(255,255,255,.04); color: var(--text); transition: background .45s var(--ease), color .45s var(--ease), outline-color .45s; transition-delay: calc(.2s + var(--k) * .2s); }
-html.js-anim .prog__sems span.now { outline-color: transparent; }
-html.js-anim .in .prog__sems span { background: rgba(44,127,254,.22); color: var(--white); }
-html.js-anim .in .prog__sems span.now { background: rgba(100,46,253,.25); outline-color: var(--secondary); animation: semNow 2.4s ease-in-out 1.8s infinite; }
-@keyframes semNow { 50% { box-shadow: 0 0 0 3px rgba(100,46,253,.25); } }
+/* paski postępu z procentem, który jedzie na końcu wypełnienia i odlicza w górę (jak na obecnej stronie) */
+.prog { max-width: 270px; margin: 2px 0 10px; }
+.prog__lbl { display: flex; justify-content: space-between; font-size: .85rem; color: var(--text); margin-bottom: 30px; }
+.prog__bar { height: 6px; border-radius: 99px; background: rgba(255,255,255,.08); position: relative; }
+.prog__bar span { position: absolute; left: 0; top: 0; bottom: 0; width: calc(var(--p, 0) * 1%); border-radius: 99px; background: var(--grad); }
+.prog__pct { position: absolute; bottom: 14px; left: calc(var(--p, 0) * 1%); transform: translateX(-50%); font-size: .72rem; font-weight: 500; color: #fff; background: #1b2030; border: 1px solid rgba(255,255,255,.12); padding: 4px 7px; border-radius: 5px; white-space: nowrap; }
+.prog__pct::after { content: ""; position: absolute; left: 50%; top: 100%; width: 7px; height: 7px; background: #1b2030; border-right: 1px solid rgba(255,255,255,.12); border-bottom: 1px solid rgba(255,255,255,.12); transform: translate(-50%, -4px) rotate(45deg); }
 
 /* ---------- projekty ---------- */
 .proj { display: grid; grid-template-columns: minmax(0, 5fr) minmax(0, 7fr); gap: clamp(32px, 5vw, 72px); align-items: center; padding-block: clamp(40px, 7vh, 80px); }
@@ -578,10 +569,9 @@ html.notes .hero__stage[data-note]::after { top: 76px; }
             <p>Lead software developer of the SeeSky radio telescope in the SimLE research club: backend, tracking interface and an interactive sky map. Next stage: the real mount and an SDR receiver.</p>
           </div>
           <div class="entry__status">
-            <div class="prog" role="img" aria-label="Semesters: 6 of 7 done, the seventh in progress">
-              <div class="prog__lbl"><span>Semesters</span><b>6 of 7 done</b></div>
-              <div class="prog__bar" aria-hidden="true"><span></span></div>
-              <div class="prog__sems mono" aria-hidden="true"><span style="--k:0">1</span><span style="--k:1">2</span><span style="--k:2">3</span><span style="--k:3">4</span><span style="--k:4">5</span><span style="--k:5">6</span><span class="now" style="--k:6">7</span></div>
+            <div class="prog" data-v="86" role="img" aria-label="Semester 6 of 7, 86 percent of the degree completed">
+              <div class="prog__lbl"><span>Semester 6 of 7</span></div>
+              <div class="prog__bar" aria-hidden="true"><span></span><b class="prog__pct mono">86%</b></div>
             </div>
             <p class="entry__note">Graduation expected 02.2027</p>
           </div>
@@ -593,7 +583,13 @@ html.notes .hero__stage[data-note]::after { top: 76px; }
             <p class="entry__org">Internship, Telecommunications and Media Division</p>
             <p>Set up a Windows Server 2019 environment for certificate handling, built a REST endpoint that passes requests to Microsoft AD CS over DCOM, and wrote the setup guide and documentation.</p>
           </div>
-          <div class="entry__status"><p class="mono">Completed</p><p class="entry__note">REST, Windows Server, AD CS</p></div>
+          <div class="entry__status">
+            <div class="prog" data-v="100" role="img" aria-label="Internship completed, 100 percent">
+              <div class="prog__lbl"><span>Internship</span></div>
+              <div class="prog__bar" aria-hidden="true"><span></span><b class="prog__pct mono">100%</b></div>
+            </div>
+            <p class="entry__note">REST, Windows Server, AD CS</p>
+          </div>
         </article>
         <article class="entry reveal">
           <p class="entry__when mono">2019 - 2023</p>
@@ -602,7 +598,12 @@ html.notes .hero__stage[data-note]::after { top: 76px; }
             <p class="entry__org">Polytechnic profile, mathematics and IT</p>
             <p>A strong base in maths and computer science, and the place where I started building my first programs.</p>
           </div>
-          <div class="entry__status"><p class="mono">Completed</p></div>
+          <div class="entry__status">
+            <div class="prog" data-v="100" role="img" aria-label="High school completed, 100 percent">
+              <div class="prog__lbl"><span>Completed</span></div>
+              <div class="prog__bar" aria-hidden="true"><span></span><b class="prog__pct mono">100%</b></div>
+            </div>
+          </div>
         </article>
       </div>
     </div>
@@ -996,6 +997,19 @@ html.notes .hero__stage[data-note]::after { top: 76px; }
     const rio = new IntersectionObserver((es) => es.forEach((e) => { if (e.isIntersecting) { e.target.classList.add("in"); rio.unobserve(e.target); } }), { rootMargin: "0px 0px -10% 0px" });
     document.querySelectorAll(".reveal").forEach((el) => rio.observe(el));
   } else document.querySelectorAll(".reveal").forEach((el) => el.classList.add("in"));
+
+  // ---------- paski postępu: wypełnienie i procent odliczają razem, gdy wpis wjedzie na ekran ----------
+  document.querySelectorAll(".prog").forEach((pg) => {
+    const v = +pg.dataset.v, pct = pg.querySelector(".prog__pct"), entry = pg.closest(".reveal") || pg;
+    let t0 = null;
+    const set = (p) => { pg.style.setProperty("--p", p.toFixed(2)); const s = Math.round(p) + "%"; if (pct.textContent !== s) pct.textContent = s; };
+    if (RM) { set(v); return; }
+    set(0); watch(pg);
+    onTick((t) => {
+      if (t0 === null) { if (!entry.classList.contains("in") || !isOn(pg)) return; t0 = t + 0.25; }
+      const k = clamp((t - t0) / 1.6, 0, 1); set(easeIO(k) * v);
+    });
+  });
 
   // ---------- "What I build": okna na pulpicie, fokus przechodzi z okna na okno ----------
   const desk = $("#desk");

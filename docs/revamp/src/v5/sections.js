@@ -13,6 +13,19 @@
     document.querySelectorAll(".reveal").forEach((el) => rio.observe(el));
   } else document.querySelectorAll(".reveal").forEach((el) => el.classList.add("in"));
 
+  // ---------- paski postępu: wypełnienie i procent odliczają razem, gdy wpis wjedzie na ekran ----------
+  document.querySelectorAll(".prog").forEach((pg) => {
+    const v = +pg.dataset.v, pct = pg.querySelector(".prog__pct"), entry = pg.closest(".reveal") || pg;
+    let t0 = null;
+    const set = (p) => { pg.style.setProperty("--p", p.toFixed(2)); const s = Math.round(p) + "%"; if (pct.textContent !== s) pct.textContent = s; };
+    if (RM) { set(v); return; }
+    set(0); watch(pg);
+    onTick((t) => {
+      if (t0 === null) { if (!entry.classList.contains("in") || !isOn(pg)) return; t0 = t + 0.25; }
+      const k = clamp((t - t0) / 1.6, 0, 1); set(easeIO(k) * v);
+    });
+  });
+
   // ---------- "What I build": okna na pulpicie, fokus przechodzi z okna na okno ----------
   const desk = $("#desk");
   if (desk) {
