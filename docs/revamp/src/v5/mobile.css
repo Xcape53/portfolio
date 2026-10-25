@@ -28,6 +28,11 @@
   .layer:not(.on) h3 { color: var(--white); }
   .entry { grid-template-columns: minmax(0, 1fr); gap: 8px; }
   .entry__status { padding-top: 6px; }
+  /* licznik na telefonie: etykieta i procent w jednej linii, pasek na całą szerokość, bez dymka */
+  .prog { max-width: none; }
+  .prog__lbl { margin-bottom: 10px; padding-right: 48px; }
+  .prog__pct { left: auto !important; right: 0; bottom: 16px; transform: none; padding: 0; background: none; border: 0; font-size: .85rem; color: var(--white); }
+  .prog__pct::after { display: none; }
   .index__head { display: none; }
   .index__list { border-top: 1px solid rgba(255,255,255,.12); }
   .irow > a, .irow__in { grid-template-columns: 96px minmax(0, 1fr) 20px; grid-template-areas: "th nm go" "th ds ds" "th sk sk"; gap: 4px 16px; align-items: start; }
