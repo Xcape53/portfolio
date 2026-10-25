@@ -199,7 +199,6 @@ PL = [
      '<title id="cs-title">Schemat blokowy pracy: zadanie na wejściu, badanie i plan, bramka akceptacji człowieka, podział na bloki, równoległi agenci programujący w sandboxie, recenzja z pętlą powrotną do agentów, druga bramka akceptacji i scalenie oraz zewnętrzna pętla z uwagami użytkowników; treści z zewnątrz, takie jak strony i zgłoszenia, trafiają do agentów tylko przez zabezpieczenia, bo mogą ukrywać polecenia.</title>'),
     ('>user feedback</text>', '>uwagi użytkowników</text>'),
     ('>unauthorized data</text>', '>nieautoryzowane dane</text>'),
-    ('>web pages, issues, docs</text>', '>strony, zgłoszenia, dokumenty</text>'),
     ('>guardrails</text>', '>zabezpieczenia</text>'),
     ('<text class="cs__cap" x="30" y="256">task</text>', '<text class="cs__cap" x="36" y="256">zadanie</text>'),
     ('">research &amp; plan</text>', '">badanie i plan</text>'),
