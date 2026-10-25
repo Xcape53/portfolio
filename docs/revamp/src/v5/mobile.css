@@ -40,7 +40,7 @@
   .irow__go { grid-area: go; }
   .irow:hover .irow__name { transform: none; }
   .peek { display: none; }
-  .flow, .ai__guard { grid-template-columns: minmax(0, 1fr); gap: 12px; }
+  .flow, .ai__guard { grid-template-columns: minmax(0, 1fr); gap: 0; }
   .ai__guard { gap: 14px; }
 
   .stack-dl div { grid-template-columns: 100px 1fr; }

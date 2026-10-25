@@ -466,15 +466,14 @@ html.js-anim .ai.in .flow__step:nth-child(8) { transition-delay: 0.64s; }
 .cs__dsym { font: italic 500 18px "Cambria Math", "Cambria", "Times New Roman", serif; fill: #fff; }
 .cs__dsub { fill: #c99a87; font: italic 12px var(--f-main); text-anchor: middle; }
 .cs__dlab--r { text-anchor: end; }
-/* legenda G1-G5: znacznik pod tytułem, karta z marginesem wewnętrznym */
-.flow { gap: 14px; margin-top: 18px; }
-.flow__step { padding: 16px 16px 18px; border: 1px solid rgba(255,255,255,.07) !important; border-radius: 10px; background: rgba(255,255,255,.02); transition: background .3s, border-color .3s; }
+/* legenda G1-G5: kreska u góry, gradient przy najechaniu, margines wewnętrzny; znacznik pod tytułem */
+.flow { gap: 0 10px; margin-top: 18px; }
+.flow__step { padding: 16px 14px 20px; border: 0; border-top: 1px solid rgba(255,255,255,.1); border-radius: 0 0 10px 10px; background: none; transition: background .3s; }
+.flow__step.hl { background: linear-gradient(180deg, rgba(44,127,254,.12), transparent 85%); }
 .flow__step .flow__n { order: 0; }
 .flow__step b { order: 1; }
 .flow__step .flow__who { order: 2; margin: 2px 0 12px; }
 .flow__step p { order: 3; margin: 0; }
-.flow__step.hl { background: rgba(44,127,254,.09); border-color: rgba(44,127,254,.45) !important; }
-.flow__step--gate .flow__who { order: 2; }
 
 /* ---------- notatki ---------- */
 :where([data-note]) { position: relative; }
@@ -530,7 +529,7 @@ html.notes .hero__stage[data-note]::after { top: 76px; }
   .irow__go { grid-area: go; }
   .irow:hover .irow__name { transform: none; }
   .peek { display: none; }
-  .flow, .ai__guard { grid-template-columns: minmax(0, 1fr); gap: 12px; }
+  .flow, .ai__guard { grid-template-columns: minmax(0, 1fr); gap: 0; }
   .ai__guard { gap: 14px; }
 
   .stack-dl div { grid-template-columns: 100px 1fr; }
