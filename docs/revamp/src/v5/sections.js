@@ -15,7 +15,9 @@
 
   // ---------- paski postępu: wypełnienie i procent odliczają razem, gdy wpis wjedzie na ekran ----------
   document.querySelectorAll(".prog").forEach((pg) => {
-    const v = +pg.dataset.v, pct = pg.querySelector(".prog__pct"), entry = pg.closest(".reveal") || pg;
+    let v = +pg.dataset.v; const pct = pg.querySelector(".prog__pct"), entry = pg.closest(".reveal") || pg;
+    // studia: zaliczone semestry + część bieżącego semestru, która już minęła (liczone z dat)
+    if (pg.dataset.from) { const a = Date.parse(pg.dataset.from), b = Date.parse(pg.dataset.to), f = clamp((Date.now() - a) / (b - a), 0, 1); v = Math.round((+pg.dataset.done + f) / +pg.dataset.of * 100); }
     let t0 = null;
     const set = (p) => { pg.style.setProperty("--p", p.toFixed(2)); const s = Math.round(p) + "%"; if (pct.textContent !== s) pct.textContent = s; };
     if (RM) { set(v); return; }

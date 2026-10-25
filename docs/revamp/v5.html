@@ -569,11 +569,11 @@ html.notes .hero__stage[data-note]::after { top: 76px; }
             <p>Lead software developer of the SeeSky radio telescope in the SimLE research club: backend, tracking interface and an interactive sky map. Next stage: the real mount and an SDR receiver.</p>
           </div>
           <div class="entry__status">
-            <div class="prog" data-v="86" role="img" aria-label="Semester 6 of 7, 86 percent of the degree completed">
-              <div class="prog__lbl"><span>Semester 6 of 7</span></div>
-              <div class="prog__bar" aria-hidden="true"><span></span><b class="prog__pct mono">86%</b></div>
+            <div class="prog" data-v="89" data-from="2026-10-01" data-to="2027-02-02" data-done="6" data-of="7" role="img" aria-label="Semester 7 of 7, final semester in progress">
+              <div class="prog__lbl"><span>Semester 7 of 7</span></div>
+              <div class="prog__bar" aria-hidden="true"><span></span><b class="prog__pct mono">89%</b></div>
             </div>
-            <p class="entry__note">Graduation expected 02.2027</p>
+            <p class="entry__note">Final semester ends 2 February 2027</p>
           </div>
         </article>
         <article class="entry reveal">
@@ -1000,7 +1000,9 @@ html.notes .hero__stage[data-note]::after { top: 76px; }
 
   // ---------- paski postępu: wypełnienie i procent odliczają razem, gdy wpis wjedzie na ekran ----------
   document.querySelectorAll(".prog").forEach((pg) => {
-    const v = +pg.dataset.v, pct = pg.querySelector(".prog__pct"), entry = pg.closest(".reveal") || pg;
+    let v = +pg.dataset.v; const pct = pg.querySelector(".prog__pct"), entry = pg.closest(".reveal") || pg;
+    // studia: zaliczone semestry + część bieżącego semestru, która już minęła (liczone z dat)
+    if (pg.dataset.from) { const a = Date.parse(pg.dataset.from), b = Date.parse(pg.dataset.to), f = clamp((Date.now() - a) / (b - a), 0, 1); v = Math.round((+pg.dataset.done + f) / +pg.dataset.of * 100); }
     let t0 = null;
     const set = (p) => { pg.style.setProperty("--p", p.toFixed(2)); const s = Math.round(p) + "%"; if (pct.textContent !== s) pct.textContent = s; };
     if (RM) { set(v); return; }
