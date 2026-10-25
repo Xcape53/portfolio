@@ -154,8 +154,15 @@
           <div class="acts"><a class="link" href="https://xcape53.github.io/SeeSky-tracking/">Live demo <svg viewBox="0 0 14 14" aria-hidden="true"><path d="M3 11L11 3M5 3h6v6" stroke="currentColor" stroke-width="1.8" fill="none"/></svg></a><a class="link" href="https://github.com/Xcape53/SeeSky-tracking">GitHub <svg viewBox="0 0 14 14" aria-hidden="true"><path d="M3 11L11 3M5 3h6v6" stroke="currentColor" stroke-width="1.8" fill="none"/></svg></a></div>
         </div>
         <div class="pmedia" style="--tint: rgb(214,51,108)">
-          <div class="stage3d" data-scene="dish" data-tag="3D" data-note="Radioteleskop zostaje: czasza śledzi gwiazdę, wiązka pokazuje cel.">
-            <canvas aria-hidden="true"></canvas><div class="tag mono"><i></i>tracking target</div>
+          <div class="skymap" id="skymap" data-tag="SEESKY" data-note="Mapa nieba z projektu SeeSky: ta sama biblioteka d3-celestial i ta sama konfiguracja (rzut airy, zenit nad Gdańskiem, czerwony horyzont). Przeciągnij, żeby obrócić niebo. W lewym dolnym rogu ikona radioteleskopu: czasza obraca się za kursorem, wiązka podąża za nim, a nad gwiazdą przyciąga się do niej i pokazuje dane.">
+            <div id="celestial-map" aria-label="Interactive sky map over Gdańsk, the same map as in the SeeSky interface" role="img"></div>
+            <svg class="skymap__beam" aria-hidden="true"><line id="sky-beam" x1="0" y1="0" x2="0" y2="0"/><circle id="sky-ring" r="11"/></svg>
+            <svg class="skymap__dish" viewBox="0 0 120 120" aria-hidden="true">
+              <path class="base" d="M44 112h32l-8-30h-16z"/><circle class="pivot" cx="60" cy="80" r="5"/>
+              <g id="sky-dish"><path class="refl" d="M24 58 Q60 92 96 58"/><path class="leg" d="M30 63L60 28M90 63L60 28"/><circle class="feed" cx="60" cy="26" r="4.5"/><path class="mast" d="M60 76v-6"/></g>
+            </svg>
+            <div class="skymap__card mono" id="sky-card" aria-live="polite"></div>
+            <div class="tag mono"><i></i><span id="sky-tag">tracking</span></div>
           </div>
           <div class="shots"><button type="button" aria-label="Open full size: SeeSky sky map recording" data-video="seesky"><img src="%%IMG_seeskyPoster%%" alt="SeeSky sky map recording"><span class="play"><span><svg viewBox="0 0 10 10"><path d="M1 0l9 5-9 5z"/></svg></span></span></button><button type="button" aria-label="Open full size: SeeSky tracking panel recording" data-video="seeskyTracking"><img src="%%IMG_seeskyTrackingPoster%%" alt="SeeSky tracking panel recording"><span class="play"><span><svg viewBox="0 0 10 10"><path d="M1 0l9 5-9 5z"/></svg></span></span></button><button type="button" aria-label="Open full size: SeeSky tracking status screen" data-full="%%IMG_seesky%%"><img src="%%IMG_seesky%%" alt="SeeSky tracking status screen"></button></div>
         </div>

@@ -58,33 +58,6 @@
     });
   }
 
-  // ---------- wspólna scena 3D dla projektu ----------
-  function stage3d(el, build) {
-    if (!hasGL) { el.classList.add("nogl"); return; }
-    const cv = el.querySelector("canvas:not(.chart)");
-    const r = new THREE.WebGLRenderer({ canvas: cv, antialias: true, alpha: true });
-    r.setPixelRatio(Math.min(DPR, 1.75)); r.outputEncoding = THREE.sRGBEncoding;
-    const scene = new THREE.Scene(), cam = new THREE.PerspectiveCamera(32, 4 / 3, 0.1, 200);
-    const ctx = { scene, cam, r, el, t: 0, dt: 0, p: 0 };
-    const upd = build(ctx);
-    for (let i = 0; i < 400; i++) { ctx.dt = 1 / 40; ctx.t = i / 40; upd(ctx); }
-    let w0 = 0, last = 0;
-    const size = () => { const w = cv.clientWidth, h = cv.clientHeight; if (!w || !h) return; r.setSize(w, h, false); cam.aspect = w / h; cam.updateProjectionMatrix(); w0 = w; };
-    size(); addEventListener("resize", size); watch(el);
-    onTick((t) => {
-      if (!isOn(el)) { last = t; return; }
-      if (cv.clientWidth !== w0) size();
-      ctx.dt = Math.min(0.05, t - last); last = t; ctx.t = RM ? 0 : t;
-      const rc = el.getBoundingClientRect(); ctx.p = clamp((rc.top + rc.height / 2 - innerHeight / 2) / innerHeight, -1, 1);
-      upd(ctx); r.render(scene, cam);
-    });
-  }
-  const lights = (scene, tint) => {
-    scene.add(new THREE.HemisphereLight(0xaac4ff, 0x080a12, 0.5));
-    const k = new THREE.DirectionalLight(0xffffff, 0.85); k.position.set(-4, 8, 6); scene.add(k);
-    const t = new THREE.DirectionalLight(tint, 0.9); t.position.set(6, 2, -5); scene.add(t);
-  };
-
   // ===== JobManager: 2D w trzech krokach (zbieranie, research, powiadomienie) =====
   const jm = $("#jm");
   if (jm) {
@@ -164,111 +137,83 @@
     });
   }
 
-  // ===== SeeSky: model radioteleskopu z Blendera (GLB) + mapa nieba jak w demie SeeSky =====
-  // Mapa: rzut stereograficzny, zenit w środku, N u góry, E po lewej; RA/Dec J2000 (jak Astropy), Gdańsk 54.35°N.
-  const dishEl = document.querySelector('[data-scene="dish"]');
-  if (dishEl) {
-    const D2R = Math.PI / 180, LAT = 54.35 * D2R;
-    const ST = { Dubhe: [11.062, 61.751], Merak: [11.031, 56.382], Phecda: [11.897, 53.695], Megrez: [12.257, 57.033], Alioth: [12.900, 55.960], Mizar: [13.399, 54.925], Alkaid: [13.792, 49.313],
-      Caph: [0.153, 59.150], Schedar: [0.675, 56.537], Navi: [0.945, 60.717], Ruchbah: [1.430, 60.235], Segin: [1.907, 63.670],
-      Deneb: [20.690, 45.280], Sadr: [20.370, 40.257], Gienah: [20.770, 33.970], Albireo: [19.512, 27.960], Fawaris: [19.750, 45.131],
-      Vega: [18.616, 38.784], Sheliak: [18.835, 33.363], Sulafat: [18.982, 32.690], "ζ Lyr": [18.746, 37.605],
-      Betelgeuse: [5.919, 7.407], Bellatrix: [5.418, 6.350], Alnitak: [5.679, -1.943], Alnilam: [5.604, -1.202], Mintaka: [5.533, -0.299], Saiph: [5.796, -9.670], Rigel: [5.242, -8.202],
-      Capella: [5.278, 45.998], Menkalinan: [5.992, 44.948], Mirfak: [3.405, 49.861], Algol: [3.136, 40.956], Polaris: [2.530, 89.264], Kochab: [14.845, 74.156],
-      Arcturus: [14.261, 19.183], Altair: [19.846, 8.868], Aldebaran: [4.599, 16.509], Pollux: [7.755, 28.026], Castor: [7.577, 31.888], Regulus: [10.139, 11.967], Procyon: [7.655, 5.225], Sirius: [6.753, -16.716] };
-    const RADIO = { "Cas A": [23.391, 58.815, "supernova remnant"], "Cyg A": [19.991, 40.734, "radio galaxy"], "Tau A": [5.575, 22.014, "Crab Nebula"] };
-    const BRIGHT = ["Vega", "Deneb", "Capella", "Arcturus", "Altair", "Polaris", "Dubhe", "Alkaid", "Betelgeuse", "Rigel", "Aldebaran", "Pollux", "Castor", "Procyon", "Sirius", "Regulus", "Mirfak", "Schedar", "Albireo", "Algol"];
-    const CON = [["Ursa Major", ["Dubhe", "Merak", "Phecda", "Megrez", "Dubhe"], ["Megrez", "Alioth", "Mizar", "Alkaid"]], ["Cassiopeia", ["Caph", "Schedar", "Navi", "Ruchbah", "Segin"]],
-      ["Cygnus", ["Deneb", "Sadr", "Albireo"], ["Gienah", "Sadr", "Fawaris"]], ["Lyra", ["Vega", "ζ Lyr", "Sheliak", "Sulafat", "ζ Lyr"]],
-      ["Orion", ["Betelgeuse", "Bellatrix", "Mintaka", "Rigel", "Saiph", "Alnitak", "Betelgeuse"], ["Alnitak", "Alnilam", "Mintaka"]], ["Perseus", ["Algol", "Mirfak"]], ["Auriga", ["Capella", "Menkalinan"]], ["Gemini", ["Castor", "Pollux"]]];
-    const TARGETS = ["Cas A", "Vega", "Cyg A", "Capella", "Polaris", "Deneb", "Tau A", "Dubhe", "Arcturus", "Altair"];
-    let seed = 7; const rnd = () => ((seed = (seed * 16807) % 2147483647) / 2147483647);
-    const BG = Array.from({ length: 900 }, () => [rnd() * 24, Math.asin(rnd() * 2 - 1) / D2R, 0.25 + rnd() * 0.75]);
-    const altaz = (ra, dec, lst) => {
-      const H = lst - ra * 15 * D2R, d = dec * D2R;
-      const alt = Math.asin(Math.sin(LAT) * Math.sin(d) + Math.cos(LAT) * Math.cos(d) * Math.cos(H));
-      const az = Math.atan2(-Math.sin(H) * Math.cos(d), Math.cos(LAT) * Math.sin(d) - Math.sin(LAT) * Math.cos(d) * Math.cos(H));
-      return [alt, az];
+  // ===== SeeSky: mapa d3-celestial z konfiguracją z projektu + ikona teleskopu z wiązką za kursorem =====
+  const skyEl = $("#skymap");
+  if (skyEl && window.Celestial) {
+    const LAT = 54.35, LON = 18.65, D2R = Math.PI / 180, DATA = "https://ofrohn.github.io/data/";
+    let mapW = Math.round(Math.min(skyEl.clientWidth, skyEl.clientHeight) - 8);   // cały krąg horyzontu mieści się w ramce
+    addEventListener("resize", () => { const w = Math.round(Math.min(skyEl.clientWidth, skyEl.clientHeight) - 8); if (Math.abs(w - mapW) > 4) { mapW = w; Celestial.resize({ width: w }); } });
+    Celestial.display({
+      width: mapW, projection: "airy", geopos: [LAT, LON], follow: "zenith", location: true, container: "celestial-map", datapath: DATA, interactive: true, zoomextend: 1, controls: false,
+      background: { fill: "#0a0e17", opacity: 1, stroke: "#1a2235", width: 1 },
+      stars: { show: true, limit: 5.2, colors: true, style: { fill: "#ffffff", opacity: 1 }, designation: false, propername: true,
+        propernameStyle: { fill: "#8899bb", font: "10px 'Spline Sans', sans-serif", align: "left", baseline: "top" }, propernameLimit: 1.6, size: 6, exponent: -0.28 },
+      dsos: { show: true, limit: 4.5, colors: true, style: { fill: "#444444", stroke: "#444444", width: 2, opacity: 1 }, names: false, namesLimit: 3, nameStyle: { fill: "#556677", font: "10px 'Spline Sans', sans-serif" } },
+      constellations: { names: true, namesType: "iau", nameStyle: { fill: "#3a4c78", font: "600 10.5px 'Spline Sans', sans-serif", align: "center", baseline: "middle" }, lines: true, lineStyle: { stroke: "#2a3555", width: 1.2, opacity: 0.6 }, bounds: false },
+      mw: { show: true, style: { fill: "#0d1525", opacity: 0.15 } },
+      lines: { graticule: { show: true, stroke: "#1a2235", width: 0.5, opacity: 0.4, lon: { pos: [] }, lat: { pos: [] } }, equatorial: { show: true, stroke: "#2244aa", width: 0.8, opacity: 0.3 }, ecliptic: { show: false }, galactic: { show: false }, supergalactic: { show: false } },
+      horizon: { show: true, stroke: "#b22f57", width: 3, fill: "#000000", opacity: 0.5 },
+      planets: { show: false }, daylight: { show: false },
+      formFields: { location: false, general: false, stars: false, dsos: false, constellations: false, lines: false, other: false, download: false }
+    });
+    // kółko myszy przewija stronę (zatrzymane przed d3), przeciąganie dalej obraca niebo
+    $("#celestial-map").addEventListener("wheel", (e) => e.stopPropagation(), true);
+    // gwiazdy do najeżdżania: te same dane co mapa (HIP, jasność, nazwy, gwiazdozbiory)
+    let STARS = [];
+    Promise.all([fetch(DATA + "stars.6.json").then((r) => r.json()), fetch(DATA + "starnames.json").then((r) => r.json())]).then(([st, nm]) => {
+      STARS = st.features.filter((f) => f.properties.mag < 4.6).map((f) => { const n = nm[f.id] || {}; return { id: f.id, lon: f.geometry.coordinates[0], dec: f.geometry.coordinates[1], mag: f.properties.mag, name: n.name || "", desig: n.desig || n.bayer || n.flam || "", con: n.c || "" }; });
+    }).catch(() => {});
+    const beam = $("#sky-beam"), ring = $("#sky-ring"), dish = $("#sky-dish"), feed = skyEl.querySelector(".skymap__dish .feed"), card = $("#sky-card"), tag = $("#sky-tag");
+    const fmtRA = (deg) => { const s = Math.round(((deg + 360) % 360) / 15 * 3600); return String(Math.floor(s / 3600) % 24).padStart(2, "0") + "h " + String(Math.floor(s / 60) % 60).padStart(2, "0") + "m " + String(s % 60).padStart(2, "0") + "s"; };
+    const fmtDec = (d) => { const s = Math.round(Math.abs(d) * 3600); return (d < 0 ? "-" : "+") + String(Math.floor(s / 3600)).padStart(2, "0") + "° " + String(Math.floor(s / 60) % 60).padStart(2, "0") + "′"; };
+    const altaz = (raDeg, dec) => {
+      const now = new Date(), jd = now.getTime() / 864e5 + 2440587.5, gmst = (280.46061837 + 360.98564736629 * (jd - 2451545)) % 360;
+      const H = (gmst + LON - raDeg) * D2R, d = dec * D2R, la = LAT * D2R;
+      const alt = Math.asin(Math.sin(la) * Math.sin(d) + Math.cos(la) * Math.cos(d) * Math.cos(H));
+      const az = Math.atan2(-Math.sin(H) * Math.cos(d), Math.cos(la) * Math.sin(d) - Math.sin(la) * Math.cos(d) * Math.cos(H));
+      return [alt / D2R, ((az / D2R) + 360) % 360];
     };
-    const chart = document.createElement("canvas"); chart.className = "chart"; chart.setAttribute("aria-hidden", "true"); dishEl.insertBefore(chart, dishEl.firstChild);
-    const cc = chart.getContext("2d");
-    const lblBox = document.createElement("div"); lblBox.className = "sky"; lblBox.setAttribute("aria-hidden", "true"); dishEl.appendChild(lblBox);
-    const card = document.createElement("div"); card.className = "sky__card mono"; lblBox.appendChild(card);
-    const fmtRA = (h) => { const s = Math.round(h * 3600); return String(Math.floor(s / 3600)).padStart(2, "0") + "h " + String(Math.floor(s / 60) % 60).padStart(2, "0") + "m " + String(s % 60).padStart(2, "0") + "s"; };
-    const fmtDec = (d) => { const s = Math.round(Math.abs(d) * 3600); return (d < 0 ? "-" : "+") + String(Math.floor(s / 3600)).padStart(2, "0") + "° " + String(Math.floor(s / 60) % 60).padStart(2, "0") + "′ " + String(s % 60).padStart(2, "0") + "″"; };
-    const sky = { cx: 0, cy: 0, R: 1, tx: 0, ty: 0, target: null };
-    let ti = 0, tNext = 0, cardKey = "";
-    const LST0 = 22 * 15 * D2R;
-    const drawChart = (t) => {
-      const W = chart.clientWidth, H = chart.clientHeight; fit(chart, W, H);
-      cc.setTransform(DPR, 0, 0, DPR, 0, 0); cc.clearRect(0, 0, W, H);
-      const narrowC = W < 380, R = narrowC ? H * 0.34 : H * 0.44, cx = narrowC ? W * 0.56 : W * 0.64, cy = narrowC ? H * 0.38 : H * 0.47; sky.cx = cx; sky.cy = cy; sky.R = R;
-      const lst = LST0 + t * (2 * Math.PI / 150);   // doba gwiazdowa w 150 s
-      const P = (ra, dec) => { const [alt, az] = altaz(ra, dec, lst); if (alt < 0) return null; const r = R * Math.tan((Math.PI / 2 - alt) / 2); return [cx - r * Math.sin(az), cy - r * Math.cos(az), alt, az]; };
-      const g = cc.createRadialGradient(cx, cy, R * 0.1, cx, cy, R); g.addColorStop(0, "rgba(16,26,56,.55)"); g.addColorStop(1, "rgba(6,10,24,.35)");
-      cc.fillStyle = g; cc.beginPath(); cc.arc(cx, cy, R, 0, 7); cc.fill();
-      cc.strokeStyle = "rgba(255,255,255,.14)"; cc.lineWidth = 1; cc.stroke();
-      cc.setLineDash([3, 5]); cc.strokeStyle = "rgba(44,127,254,.18)";
-      [30, 60].forEach((a) => { cc.beginPath(); cc.arc(cx, cy, R * Math.tan((90 - a) * D2R / 2), 0, 7); cc.stroke(); });
-      cc.setLineDash([]);
-      cc.font = "500 10px " + getComputedStyle(document.body).getPropertyValue("--f-mono"); cc.fillStyle = "rgba(170,185,215,.6)"; cc.textAlign = "center";
-      [["N", 0, -1], ["E", -1, 0], ["S", 0, 1], ["W", 1, 0]].forEach(([s, dx, dy]) => cc.fillText(s, cx + dx * (R + 12), cy + dy * (R + 12) + 4));
-      cc.save(); cc.beginPath(); cc.arc(cx, cy, R, 0, 7); cc.clip();
-      BG.forEach(([ra, dec, m]) => { const q = P(ra, dec); if (!q) return; cc.fillStyle = "rgba(220,228,245," + (m * 0.7).toFixed(2) + ")"; cc.fillRect(q[0], q[1], m * 1.3, m * 1.3); });
-      cc.strokeStyle = "rgba(120,150,220,.32)"; cc.lineWidth = 1;
-      cc.font = "500 10.5px " + getComputedStyle(document.body).getPropertyValue("--f-main");
-      CON.forEach(([name, ...lines]) => {
-        let sx = 0, sy = 0, n = 0;
-        lines.forEach((ln) => { cc.beginPath(); let started = false; ln.forEach((s) => { const q = P(ST[s][0], ST[s][1]); if (!q) { started = false; return; } sx += q[0]; sy += q[1]; n++; if (started) cc.lineTo(q[0], q[1]); else { cc.moveTo(q[0], q[1]); started = true; } }); cc.stroke(); });
-        if (n) { cc.fillStyle = "rgba(120,140,200,.6)"; cc.fillText(name, sx / n, sy / n + 16); }
-      });
-      cc.textAlign = "left"; cc.font = "400 10px " + getComputedStyle(document.body).getPropertyValue("--f-main");
-      Object.keys(ST).forEach((s) => { const q = P(ST[s][0], ST[s][1]); if (!q) return; const b = BRIGHT.includes(s); cc.fillStyle = "#fff"; cc.beginPath(); cc.arc(q[0], q[1], b ? 2.2 : 1.4, 0, 7); cc.fill(); if (b) { cc.fillStyle = "rgba(200,210,230,.75)"; cc.fillText(s, q[0] + 5, q[1] - 4); } });
-      Object.keys(RADIO).forEach((s) => { const q = P(RADIO[s][0], RADIO[s][1]); if (!q) return; cc.strokeStyle = "#ffb347"; cc.lineWidth = 1.4; cc.beginPath(); cc.arc(q[0], q[1], 4, 0, 7); cc.stroke(); cc.fillStyle = "#ffb347"; cc.fillText(s, q[0] + 7, q[1] - 5); });
-      // cel: następny z listy, który jest wysoko nad horyzontem
-      const posOf = (name) => { const o = RADIO[name] || ST[name]; return P(o[0], o[1]); };
-      if (t >= tNext) { for (let k = 1; k <= TARGETS.length; k++) { const q = posOf(TARGETS[(ti + k) % TARGETS.length]); if (q && q[2] > 20 * D2R) { ti = (ti + k) % TARGETS.length; break; } } tNext = t + 7; }
-      const name = TARGETS[ti], q = posOf(name);
-      if (q) {
-        sky.tx = q[0]; sky.ty = q[1]; sky.target = q;
-        const pul = 1 + Math.sin(t * 3) * 0.12;
-        cc.strokeStyle = "#ff4f8b"; cc.lineWidth = 1.6; cc.beginPath(); cc.arc(q[0], q[1], 11 * pul, 0, 7); cc.stroke();
-        [[0, -1], [0, 1], [-1, 0], [1, 0]].forEach(([dx, dy]) => { cc.beginPath(); cc.moveTo(q[0] + dx * 15, q[1] + dy * 15); cc.lineTo(q[0] + dx * 21, q[1] + dy * 21); cc.stroke(); });
-        const o = RADIO[name] || ST[name], key = name + Math.round(q[2] / D2R * 10) + Math.round(q[3] / D2R * 10);
-        if (key !== cardKey) { cardKey = key; const azd = ((q[3] / D2R) + 360) % 360;
-          card.innerHTML = "<b>" + name + "</b>" + (RADIO[name] ? " <i>" + RADIO[name][2] + "</i>" : "") + "<br>RA " + fmtRA(o[0]) + "<br>Dec " + fmtDec(o[1]) + "<br>Alt " + (q[2] / D2R).toFixed(1) + "°  Az " + azd.toFixed(1) + "°"; }
+    const proj = (s) => { const pr = Celestial.mapProjection; if (!pr) return null; const p = pr([s.lon, s.dec]); const cv = skyEl.querySelector("#celestial-map canvas"); if (!p || !cv) return null; const cr = cv.getBoundingClientRect(), sr = skyEl.getBoundingClientRect(); return [p[0] * cr.width / mapW + cr.left - sr.left, p[1] * cr.height / mapW + cr.top - sr.top]; };
+    const st = { mx: null, my: null, star: null, ang: 0.6, tx: 0, ty: 0, auto: 0, autoT: 0 };
+    skyEl.addEventListener("pointermove", (e) => { const r = skyEl.getBoundingClientRect(); st.mx = e.clientX - r.left; st.my = e.clientY - r.top; });
+    skyEl.addEventListener("pointerleave", () => { st.mx = null; });
+    const AUTO = ["Vega", "Deneb", "Capella", "Arcturus", "Polaris", "Altair", "Dubhe", "Aldebaran"];
+    watch(skyEl);
+    onTick((t) => {
+      if (!isOn(skyEl) || !STARS.length) return;
+      const W = skyEl.clientWidth, H = skyEl.clientHeight;
+      let target = null, star = null;
+      if (st.mx !== null) {
+        target = [st.mx, st.my]; let bd = 18;
+        STARS.forEach((s) => { if (altaz((s.lon + 360) % 360, s.dec)[0] < 0) return; const p = proj(s); if (!p) return; const d = Math.hypot(p[0] - st.mx, p[1] - st.my); if (d < bd) { bd = d; star = s; target = p; } });
+      } else {
+        if (t > st.autoT) { st.autoT = t + 6; for (let k = 1; k <= AUTO.length; k++) { const s = STARS.find((q) => q.name === AUTO[(st.auto + k) % AUTO.length]); if (s && altaz(((s.lon + 360) % 360), s.dec)[0] > 15) { st.auto = (st.auto + k) % AUTO.length; break; } } }
+        star = STARS.find((q) => q.name === AUTO[st.auto]) || null; if (star) target = proj(star);
       }
-      cc.restore();
-    };
-    stage3d(dishEl, ({ scene, cam, r }) => {
-      r.toneMapping = THREE.ACESFilmicToneMapping; r.toneMappingExposure = 1.05; r.physicallyCorrectLights = true;
-      if (THREE.RoomEnvironment) { const pm = new THREE.PMREMGenerator(r); scene.environment = pm.fromScene(new THREE.RoomEnvironment(), 0.04).texture; }
-      scene.add(new THREE.HemisphereLight(0xaac4ff, 0x0a0d18, 0.9));
-      const key = new THREE.DirectionalLight(0xffffff, 2.2); key.position.set(-5, 8, 6); scene.add(key);
-      const rim = new THREE.DirectionalLight(0xd6336c, 1.6); rim.position.set(6, 3, -6); scene.add(rim);
-      let azN = null, elN = null, feed = null;
-      new THREE.GLTFLoader().load("%%GLB_dish%%", (g) => { const m = g.scene; scene.add(m); azN = m.getObjectByName("az"); elN = m.getObjectByName("el"); feed = m.getObjectByName("feed_box"); });
-      const beamG = new THREE.BufferGeometry().setFromPoints([new THREE.Vector3(), new THREE.Vector3()]);
-      const beam = new THREE.Line(beamG, new THREE.LineDashedMaterial({ color: 0xff4f8b, dashSize: 0.3, gapSize: 0.18, transparent: true, opacity: 0.8 })); scene.add(beam);
-      const fw = new THREE.Vector3(), pv = new THREE.Vector3(), aim = new THREE.Vector3(), ndc = new THREE.Vector3();
-      const wrap = (a) => Math.atan2(Math.sin(a), Math.cos(a));
-      return ({ t, dt, p }) => {
-        drawChart(t);
-        const W = dishEl.clientWidth, narrowS = W < 380, ang = -0.42 + ptr.sx * 0.12 + p * 0.1;
-        const cd = narrowS ? 18 : 17, look = narrowS ? new THREE.Vector3(0.6, 5.0, 0) : new THREE.Vector3(5.6, 3.4, 0);
-        cam.position.set(Math.sin(ang) * cd, 2.6 - ptr.sy * 0.4, Math.cos(ang) * cd); cam.lookAt(look); cam.updateMatrixWorld();
-        if (!azN || !elN || !sky.target) { beam.visible = false; return; }
-        // czasza celuje wizualnie w znacznik na mapie: promień z kamery przez znacznik, punkt daleko za anteną
-        elN.getWorldPosition(pv);
-        ndc.set(sky.tx / W * 2 - 1, -(sky.ty / dishEl.clientHeight) * 2 + 1, 0.5).unproject(cam).sub(cam.position).normalize();
-        const far = cam.position.clone().addScaledVector(ndc, cam.position.distanceTo(pv) + 2.5);   // punkt prawie w płaszczyźnie anteny: widać profil czaszy
-        aim.copy(far).sub(pv).normalize();
-        const azA = Math.atan2(aim.x, aim.z), elA = Math.asin(clamp(aim.y, -1, 1)), k = Math.min(1, dt * 1.8);
-        azN.rotation.y += wrap(azA - azN.rotation.y) * k;
-        elN.rotation.x = lerp(elN.rotation.x, Math.PI / 2 - Math.max(0.12, elA), k);
-        feed.getWorldPosition(fw); beam.visible = true;
-        const pos = beamG.attributes.position; pos.setXYZ(0, fw.x, fw.y, fw.z); pos.setXYZ(1, far.x, far.y, far.z); pos.needsUpdate = true; beam.computeLineDistances(); beam.material.dashOffset = -t * 0.8;
-      };
+      if (!target) return;
+      // czasza obraca się w stronę celu (wokół osi w ikonie), wiązka wychodzi z tuby
+      const dr = skyEl.querySelector(".skymap__dish").getBoundingClientRect(), sr = skyEl.getBoundingClientRect();
+      const pvx = dr.left - sr.left + dr.width * 0.5, pvy = dr.top - sr.top + dr.height * (80 / 120);
+      const want = clamp(Math.atan2(target[0] - pvx, pvy - target[1]), -0.3, 1.45);
+      st.ang = RM ? want : lerp(st.ang, want, 0.18);
+      dish.setAttribute("transform", "rotate(" + (st.ang / D2R).toFixed(2) + " 60 80)");
+      const fb = feed.getBoundingClientRect(), fx = fb.left - sr.left + fb.width / 2, fy = fb.top - sr.top + fb.height / 2;
+      st.tx = RM ? target[0] : lerp(st.tx || target[0], target[0], 0.3); st.ty = RM ? target[1] : lerp(st.ty || target[1], target[1], 0.3);
+      beam.setAttribute("x1", fx.toFixed(1)); beam.setAttribute("y1", fy.toFixed(1)); beam.setAttribute("x2", st.tx.toFixed(1)); beam.setAttribute("y2", st.ty.toFixed(1));
+      beam.style.strokeDashoffset = String(-(t * 18) % 11);
+      ring.setAttribute("cx", st.tx.toFixed(1)); ring.setAttribute("cy", st.ty.toFixed(1)); ring.style.opacity = star ? "1" : "0";
+      if (star !== st.star) {
+        st.star = star;
+        if (star) { const ra = (star.lon + 360) % 360, [alt, az] = altaz(ra, star.dec);
+          card.innerHTML = "<b>" + (star.name || star.desig + " " + star.con) + "</b>" + (star.name && star.desig ? " <i>" + star.desig + " " + star.con + "</i>" : "") + "<br>mag " + star.mag.toFixed(2) + "<br>RA " + fmtRA(ra) + "<br>Dec " + fmtDec(star.dec) + "<br>Alt " + alt.toFixed(1) + "°  Az " + az.toFixed(1) + "°";
+          tag.textContent = (st.mx !== null ? "pointing at " : "tracking ") + (star.name || star.desig + " " + star.con); }
+        card.classList.toggle("on", !!star);
+      }
+      if (star) {   // karta obok gwiazdy, zawsze w całości wewnątrz ramki
+        const cw = card.offsetWidth, ch = card.offsetHeight, left = st.tx + 18 + cw > W - 8;
+        const x = clamp(left ? st.tx - 18 - cw : st.tx + 18, 8, W - cw - 8), y = clamp(st.ty - ch / 2, 8, H - ch - 8);
+        card.style.transform = "translate3d(" + x.toFixed(1) + "px," + y.toFixed(1) + "px,0)";
+      }
     });
   }
 

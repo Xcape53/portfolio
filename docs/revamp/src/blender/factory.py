@@ -172,9 +172,10 @@ def empty(name, loc):
 
 # podłoga
 # płyta fundamentów (diorama), tło przezroczyste
-floor = box("foundation", (11.0, 15.6, 0.5), (2.3, 4.9, -0.25), fl, bevel=0.08)
-box("foundation_trim", (11.06, 15.66, 0.06), (2.3, 4.9, -0.14), "blue", bevel=0.0)
-box("foundation_under", (10.6, 15.2, 0.4), (2.3, 4.9, -0.55), "dark", bevel=0.05)
+# kwadratowa płyta: w rzucie izometrycznym równy romb
+floor = box("foundation", (14.0, 14.0, 0.5), (2.3, 3.9, -0.25), fl, bevel=0.08)
+box("foundation_trim", (14.06, 14.06, 0.06), (2.3, 3.9, -0.14), "blue", bevel=0.0)
+box("foundation_under", (13.6, 13.6, 0.4), (2.3, 3.9, -0.55), "dark", bevel=0.05)
 
 # ---------- taśmociągi ----------
 def belt(a, b):
@@ -250,19 +251,19 @@ light_m = cyl("miner_beacon", 0.12, 0.12, (MX - 0.15 + 0.6, MY - 0.6, 5.83), "gl
 
 CX, CY = 0.0, 0.0   # wyjście z kopalni (huta połączona z kopalnią w jedną fabrykę)
 # skrzynie
-for (x, y, s) in ((3.4, 0.0, 0.7), (4.1, 0.4, 0.55), (3.5, 0.8, 0.6), (6.4, 1.2, 0.7), (6.9, 1.7, 0.5)):
+for (x, y, s) in ((-3.4, 6.2, 0.7), (-2.8, 6.9, 0.55), (-3.5, 7.2, 0.6), (7.6, -0.8, 0.7), (8.2, -0.2, 0.5), (4.6, 8.6, 0.6), (5.3, 9.1, 0.5)):
     box("crate", (s, s, s), (x, y, s / 2), "grey", 0.04, rot=(0, 0, random.random() * 0.4))
     box("crate_band", (s + 0.02, s * 0.2, s + 0.02), (x, y, s / 2), "blue", 0.0, rot=(0, 0, 0))
 
 # splitter
-SX, SY = 0.0, 5.0
+SX, SY = 0.0, 4.4
 box("split", (1.2, 1.2, 0.95), (SX, SY, BELT_Z - 0.05), "grey", 0.06)
 box("split_top", (1.0, 1.0, 0.08), (SX, SY, BELT_Z + 0.45), "dark", 0.02)
 box("split_arrow1", (0.4, 0.08, 0.02), (SX + 0.2, SY, BELT_Z + 0.5), "glowB", 0.0)
 box("split_arrow2", (0.08, 0.4, 0.02), (SX, SY + 0.2, BELT_Z + 0.5), "glowV", 0.0)
 
 # sprzedaż: lej jak AWESOME Sink
-KX, KY = 0.0, 10.4
+KX, KY = 0.0, 9.2
 cyl("sink_base", 1.9, 0.5, (KX, KY, 0.25), "dark", verts=64)
 cyl("sink_body", 1.45, 1.6, (KX, KY, 1.3), "white", verts=64)
 cyl("sink_band", 1.47, 0.18, (KX, KY, 1.75), "violet", verts=64, bevel=0.0)
@@ -282,7 +283,7 @@ for i in range(6):
 box("sink_in", (0.9, 0.5, 0.6), (KX, KY - 1.55, BELT_Z + 0.05), "dark", 0.04)
 
 # research: laboratorium z kopułą i atomem
-LX, LY = 5.6, 5.0
+LX, LY = 5.8, 4.4
 box("lab_base", (3.2, 3.2, 0.3), (LX, LY, 0.15), "dark", 0.05)
 box("lab_body", (2.8, 2.8, 1.3), (LX, LY, 0.95), "white", 0.1)
 box("lab_band", (2.82, 2.82, 0.16), (LX, LY, 1.45), "blue", 0.02)
@@ -388,9 +389,9 @@ for p, e, c in (((LX, LY, 2.4), 150, (0.3, 0.55, 1.0)), ((KX, KY, 3.6), 160, (0.
     light("POINT", p, e, c).data.shadow_soft_size = 0.4
 
 # ---------- kamera izometryczna ----------
-cd = bpy.data.cameras.new("cam"); cd.type = "ORTHO"; cd.ortho_scale = 19.5
+cd = bpy.data.cameras.new("cam"); cd.type = "ORTHO"; cd.ortho_scale = 21.0
 cam = bpy.data.objects.new("cam", cd); col.objects.link(cam); sc.camera = cam
-tgt = Vector((2.3, 5.0, 1.6))
+tgt = Vector((2.3, 3.9, 1.3))
 cam.rotation_euler = (math.radians(54.7356), 0, math.radians(45))
 dirv = Vector((0, 0, 1)); dirv.rotate(cam.rotation_euler)
 cam.location = tgt + dirv * 40

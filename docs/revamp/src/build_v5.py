@@ -39,8 +39,8 @@ s = s.replace("c.clearRect(-400, -400, 800, 800);", "c.clearRect(-600, -600, 120
 s = s.replace(".loader canvas { width: 160px; height: 160px; }", ".loader canvas { width: 240px; height: 240px; }")
 s = s.replace(".glyph { filter: drop-shadow(0 0 14px rgba(44,127,254,.55)) drop-shadow(0 0 34px rgba(100,46,253,.35)); }", ".glyph { filter: none; }")
 s = s.replace("a przy scrollu odjeżdża i staje się logo w lewym górnym rogu.", "a przy scrollu jedzie razem z tekstem i upraszcza się (43, 7, 2 węzły) jak w animacji D3, w zależności od pozycji na ekranie.")
-# teleskop: GLTFLoader i RoomEnvironment z tej samej wersji Three.js (r128)
-s = s.replace('<script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>', '<script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>\n<script src="https://cdn.jsdelivr.net/npm/three@0.128.0/examples/js/loaders/GLTFLoader.js"></script>\n<script src="https://cdn.jsdelivr.net/npm/three@0.128.0/examples/js/environments/RoomEnvironment.js"></script>', 1)
+# SeeSky: d3-celestial w tej samej wersji co w projekcie (d3 v3)
+s = s.replace('<script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>', '<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/d3-celestial@0.7.35/celestial.css">\n<script src="https://cdn.jsdelivr.net/npm/d3@3.5.17/d3.min.js"></script>\n<script src="https://cdn.jsdelivr.net/npm/d3-celestial@0.7.35/lib/d3.geo.projection.min.js"></script>\n<script src="https://cdn.jsdelivr.net/npm/d3-celestial@0.7.35/celestial.min.js"></script>', 1)
 # notatki domyślnie wyłączone
 s = s.replace('  root.classList.add("notes");\n', "")
 s = s.replace('aria-pressed="true">Notatki projektowe: wł.', 'aria-pressed="false">Notatki projektowe: wył.')
@@ -67,8 +67,6 @@ for k, f in VI.items():
 # podpisy fabryki: rzut punktów sceny z Blendera (factory.py) na kadr
 LBL = {"miner": "15.7%;--ly:22.2%", "smelter": "37.8%;--ly:48.5%", "sell": "69.1%;--ly:27.6%", "lab": "69.7%;--ly:56.4%"}
 for k, v in LBL.items(): s = s.replace("%%LBL_" + k + "%%", v)
-GLB = here / "models" / "dish.glb"
-s = s.replace("%%GLB_dish%%", "data:model/gltf-binary;base64," + b64(GLB))
 left = re.findall(r"%%[A-Z]+_\w+%%", s); assert not left, left
 assert not any(c in s for c in "–—"), "dash"
 (here.parent / "v5.html").write_text(s, encoding="utf8"); print("ok", len(s))

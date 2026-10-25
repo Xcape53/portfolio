@@ -2,7 +2,6 @@
   // Węzły to sprężyny: nowy węzeł wyrasta z rodzica, usunięty chowa się z powrotem do rodzica.
   // Złożoność rośnie płynnie: wzrost po załadowaniu, potem zależnie od pozycji na ekranie (43 -> 7 -> 2 węzły, jak w oryginale).
   // Rysowane jako ciągłe ścieżki z okrągłymi końcami: neon bez płaskich końcówek i bez jasnych plam na złączach.
-  const hasGL = !!window.THREE && (() => { try { const c = document.createElement("canvas"); return !!(c.getContext("webgl") || c.getContext("experimental-webgl")); } catch (e) { return false; } })();
   let grow = RM ? 1 : 0;   // 0..1 postęp wzrostu po loaderze
   {
     const cv = $("#glyph"), g2 = cv.getContext("2d");
