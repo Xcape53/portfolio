@@ -12,7 +12,7 @@
   .f-tl span, .f-bl, .nav .hide-s { display: none; }
   .nav { gap: 14px; }
   .nav a { padding-block: 12px; }
-  .hero { height: 132svh; }
+  .hero { height: 100svh; min-height: 620px; }
   .hero__copy { justify-items: start; align-content: end; padding-bottom: calc(70px + env(safe-area-inset-bottom, 0px)); }
   .hero__text { width: 100%; }
   .notes-toggle { display: none; }
@@ -48,7 +48,7 @@
   .stage3d { aspect-ratio: 1 / 1; }
   .jm { aspect-ratio: 4 / 4.4; font-size: 10px; }
   .jm__src { top: 20%; width: 26%; }
-  .jm__src span { padding: .8em .6em; font-size: .92em; }
+  .jm__src span { padding: .5em .5em; font-size: .8em; }
   .jm__list { left: 34%; }
   .jm__row small { display: none; }
   .factory__labels li { font-size: .62rem; padding: 4px 7px; }

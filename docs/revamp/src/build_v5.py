@@ -30,10 +30,21 @@ s = s.replace("</style>", "@media (prefers-reduced-motion: no-preference) { html
 s = '<!doctype html>\n<html lang="en">\n<meta charset="utf-8">\n' + s
 # symbol bez kropki w węźle głównym (prośba użytkownika)
 s = s.replace("    G.add(rootM, rootH);\n", "")
+# hero: symbol z animacji D3 (wzrost złożoności, ucieczka od kursora) rysowany w 3D, bez kropki i bez płaskich końców rur
+pre, post = cut(s, "  // ---------- symbol 3D ----------", "  const hero = $(\".hero\"), htext")
+s = pre + part("hero.js") + post
+# loader: większy canvas, żeby poświata symbolu nie była przycięta
+s = s.replace("fit(cv, 160, 160); c.setTransform(DPR * 160 / 800, 0, 0, DPR * 160 / 800, DPR * 80, DPR * 80);", "fit(cv, 240, 240); c.setTransform(DPR * 160 / 800, 0, 0, DPR * 160 / 800, DPR * 120, DPR * 120);")
+s = s.replace("c.clearRect(-400, -400, 800, 800);", "c.clearRect(-600, -600, 1200, 1200);")
+s = s.replace(".loader canvas { width: 160px; height: 160px; }", ".loader canvas { width: 240px; height: 240px; }")
+s = s.replace(".glyph { filter: drop-shadow(0 0 14px rgba(44,127,254,.55)) drop-shadow(0 0 34px rgba(100,46,253,.35)); }", ".glyph { filter: none; }")
+s = s.replace("a przy scrollu odjeżdża i staje się logo w lewym górnym rogu.", "a przy scrollu jedzie razem z tekstem i upraszcza się (43, 7, 2 węzły) jak w animacji D3, w zależności od pozycji na ekranie.")
+# teleskop: GLTFLoader i RoomEnvironment z tej samej wersji Three.js (r128)
+s = s.replace('<script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>', '<script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>\n<script src="https://cdn.jsdelivr.net/npm/three@0.128.0/examples/js/loaders/GLTFLoader.js"></script>\n<script src="https://cdn.jsdelivr.net/npm/three@0.128.0/examples/js/environments/RoomEnvironment.js"></script>', 1)
 # notatki domyślnie wyłączone
 s = s.replace('  root.classList.add("notes");\n', "")
 s = s.replace('aria-pressed="true">Notatki projektowe: wł.', 'aria-pressed="false">Notatki projektowe: wył.')
-s = s.replace(".hero { position: relative; height: 190svh; }", ".hero { position: relative; height: 135svh; }")
+s = s.replace(".hero { position: relative; height: 190svh; }", ".hero { position: relative; height: 100svh; min-height: 640px; }")
 s = s.replace("const bx = narrow ? 0 : -3.3, by = narrow ? 1.7 : 0;", "const bx = narrow ? 0 : -3.3, by = narrow ? 2.5 : 0;")
 s = s.replace("G.scale.setScalar(lerp(narrow ? 0.5 : 0.66, 0.25, e));", "G.scale.setScalar(lerp(narrow ? 0.4 : 0.66, 0.25, e));")
 s = s.replace('<a href="#about" class="hide-s">About</a>', '<a href="#about-me" class="hide-s">About</a>')
@@ -56,6 +67,8 @@ for k, f in VI.items():
 # podpisy fabryki: rzut punktów sceny z Blendera (factory.py) na kadr
 LBL = {"miner": "15.7%;--ly:22.2%", "smelter": "37.8%;--ly:48.5%", "sell": "69.1%;--ly:27.6%", "lab": "69.7%;--ly:56.4%"}
 for k, v in LBL.items(): s = s.replace("%%LBL_" + k + "%%", v)
+GLB = here / "models" / "dish.glb"
+s = s.replace("%%GLB_dish%%", "data:model/gltf-binary;base64," + b64(GLB))
 left = re.findall(r"%%[A-Z]+_\w+%%", s); assert not left, left
 assert not any(c in s for c in "–—"), "dash"
 (here.parent / "v5.html").write_text(s, encoding="utf8"); print("ok", len(s))

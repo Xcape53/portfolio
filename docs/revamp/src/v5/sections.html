@@ -71,7 +71,7 @@
   <section class="sec wrap" id="edu" data-path="education" aria-labelledby="ed-h">
     <div class="container">
       <div class="head reveal"><p class="k">Education and experience</p><h2 id="ed-h">From theory to practice</h2></div>
-      <div class="ledger" data-tag="REJESTR" data-note="Bez świecącej osi z kropkami i pasków postępu. Spokojny rejestr: daty, miejsce, co tam robiłem, status. Semestry jako 7 cienkich podziałek, bez gradientu.">
+      <div class="ledger" data-tag="REJESTR" data-note="Bez świecącej osi z kropkami i pasków postępu. Spokojny rejestr: daty, miejsce, co tam robiłem, status.">
         <article class="entry reveal">
           <p class="entry__when mono">2023 - now</p>
           <div class="entry__main">
@@ -80,8 +80,11 @@
             <p>Lead software developer of the SeeSky radio telescope in the SimLE research club: backend, tracking interface and an interactive sky map. Next stage: the real mount and an SDR receiver.</p>
           </div>
           <div class="entry__status">
-            <p class="mono">Semester 7 of 7</p>
-            <div class="ticks" role="img" aria-label="6 of 7 semesters completed, semester 7 in progress"><i></i><i></i><i></i><i></i><i></i><i></i><i class="now"></i></div>
+            <div class="sem" role="img" aria-label="Semester 7 of 7: six semesters completed, the seventh in progress">
+              <p class="sem__top"><span>Semester <b>7</b> of 7</span><span class="mono">6 done</span></p>
+              <div class="sem__bar" aria-hidden="true"><i style="--k:0"></i><i style="--k:1"></i><i style="--k:2"></i><i style="--k:3"></i><i style="--k:4"></i><i style="--k:5"></i><i class="now" style="--k:6"></i></div>
+              <p class="sem__nums mono" aria-hidden="true"><span>1</span><span>2</span><span>3</span><span>4</span><span>5</span><span>6</span><span>7</span></p>
+            </div>
             <p class="entry__note">Graduation expected 02.2027</p>
           </div>
         </article>
@@ -118,7 +121,7 @@
           <h3>JobManager <span class="badge">In use and evolving</span></h3>
           <p>Collects listings from several job portals into one application, filters them with shared rules, researches promising offers with the Gemini API and sends notifications. I develop it through daily use.</p>
           <ul class="lines">
-            <li>Listings from justjoin.it, pracuj.pl, rocketjobs and olx in one list</li>
+            <li>Listings from eight portals, including justjoin.it, pracuj.pl, No Fluff Jobs and LinkedIn, in one list</li>
             <li>Offer research: company, salary against the market, real stack, red flags</li>
             <li>Modular data sources and integrations</li>
             <li>Notifications for offers that match my profile</li>
@@ -128,7 +131,7 @@
         <div class="pmedia" style="--tint: linear-gradient(135deg, rgb(58,245,85), rgb(41,237,129))">
           <div class="jm" id="jm" aria-label="Animation: offers from four portals are collected into one sorted list, researched, and the best ones trigger a notification" role="img" data-tag="2D" data-note="Animacja 2D w trzech krokach (GSAP, ten sam zegar co reszta): 1) oferty wpadają z portali na swoje miejsce w liście posortowanej po dopasowaniu, 2) skan research: każda dostaje ocenę i tagi, słabe przygasają, 3) dwie najlepsze idą dalej i dzwoni powiadomienie.">
             <ol class="jm__steps mono" aria-hidden="true"><li data-s="0"><b>1</b> Collect</li><li data-s="1"><b>2</b> Research</li><li data-s="2"><b>3</b> Notify</li></ol>
-            <div class="jm__src" aria-hidden="true"><span style="--c:#ff4f8b">justjoin.it</span><span style="--c:#2c7ffe">pracuj.pl</span><span style="--c:#ff9f1a">rocketjobs</span><span style="--c:#23e5db">olx</span></div>
+            <div class="jm__src" aria-hidden="true"><span style="--c:#ff4f8b">justjoin.it</span><span style="--c:#2c7ffe">pracuj.pl</span><span style="--c:#ff9f1a">rocketjobs</span><span style="--c:#5ec8ff">nofluffjobs</span><span style="--c:#23e5db">olx</span><span style="--c:#8fb4ff">linkedin</span><span style="--c:#a78bff">indeed</span><span style="--c:#3ddc84">gowork</span></div>
             <div class="jm__list" aria-hidden="true"><div class="jm__head"><span>Offers</span><span class="mono" id="jm-count">0 new</span></div><div class="jm__rows" id="jm-rows"></div><div class="jm__scan"></div></div>
             <div class="jm__notif" aria-hidden="true"><span class="bell"><svg viewBox="0 0 24 24"><path d="M6 16V11a6 6 0 0112 0v5l1.5 2h-15z"/><path d="M10 20a2 2 0 004 0"/></svg><i>2</i></span><div><b>2 offers match your profile</b><small class="mono">JobManager, just now</small></div></div>
           </div>
@@ -173,14 +176,8 @@
           <div class="acts"><a class="link" href="https://github.com/Xcape53/LabInc">GitHub <svg viewBox="0 0 14 14" aria-hidden="true"><path d="M3 11L11 3M5 3h6v6" stroke="currentColor" stroke-width="1.8" fill="none"/></svg></a></div>
         </div>
         <div class="pmedia" style="--tint: rgb(0,122,204)">
-          <div class="factory" data-tag="BLENDER" data-note="Izometryczna fabryka zrobiona w Blenderze (skrypt docs/revamp/src/blender/factory.py, EEVEE, pętla 6 s bez szwu). Koparka na złożu, huta, splitter, a pierwiastki jadą dwiema taśmami: do leja sprzedaży (wyskakują monety) i do laboratorium z atomem pod kopułą. Podpisy to zwykły HTML, więc są ostre i przetłumaczalne.">
+          <div class="factory" data-tag="BLENDER" data-note="Izometryczna fabryka zrobiona w Blenderze (skrypt docs/revamp/src/blender/factory.py, EEVEE, pętla 6 s bez szwu). Kopalnia na złożu wydobywa pierwiastki, które jadą dwiema taśmami: do leja sprzedaży (wyskakują monety) i do laboratorium z atomem pod kopułą. Bez podpisów: kopalnia, splitter, sprzedaż i laboratorium mówią same za siebie.">
             <video muted loop playsinline preload="none" poster="%%IMG_factoryPoster%%" aria-label="Isometric LabInc factory: a miner feeds a smelter, elements are split onto two belts, one to the market and one to the research lab"><source src="%%VID_factory%%" type="video/webm"><source src="%%VID_factoryMp4%%" type="video/mp4"></video>
-            <ul class="factory__labels mono" aria-hidden="true">
-              <li style="--lx:%%LBL_miner%%">Mine</li>
-              <li style="--lx:%%LBL_smelter%%">Process</li>
-              <li style="--lx:%%LBL_sell%%" class="sell">Sell</li>
-              <li style="--lx:%%LBL_lab%%" class="lab">Research</li>
-            </ul>
           </div>
           <div class="shots"><button type="button" aria-label="Open full size: LabInc game screen" data-full="%%IMG_labinc-960%%"><img src="%%IMG_labinc-480%%" alt="LabInc game screen"></button><span style="flex:2"></span></div>
         </div>

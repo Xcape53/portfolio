@@ -61,7 +61,7 @@
   // ---------- wspólna scena 3D dla projektu ----------
   function stage3d(el, build) {
     if (!hasGL) { el.classList.add("nogl"); return; }
-    const cv = el.querySelector("canvas");
+    const cv = el.querySelector("canvas:not(.chart)");
     const r = new THREE.WebGLRenderer({ canvas: cv, antialias: true, alpha: true });
     r.setPixelRatio(Math.min(DPR, 1.75)); r.outputEncoding = THREE.sRGBEncoding;
     const scene = new THREE.Scene(), cam = new THREE.PerspectiveCamera(32, 4 / 3, 0.1, 200);
@@ -88,16 +88,19 @@
   // ===== JobManager: 2D w trzech krokach (zbieranie, research, powiadomienie) =====
   const jm = $("#jm");
   if (jm) {
-    const PORTS = ["#ff4f8b", "#2c7ffe", "#ff9f1a", "#23e5db"], PNAME = ["justjoin.it", "pracuj.pl", "rocketjobs", "olx"];
+    const PORTS = ["#ff4f8b", "#2c7ffe", "#ff9f1a", "#5ec8ff", "#23e5db", "#8fb4ff", "#a78bff", "#3ddc84"];
+    const PNAME = ["justjoin.it", "pracuj.pl", "rocketjobs", "nofluffjobs", "olx", "linkedin", "indeed", "gowork"];
     const OFF = [
       { t: "Junior Python Developer", m: "B2B, hybrid Gdańsk", p: 1, s: 92, r: "Python, REST / salary above median" },
       { t: "Automation Intern", m: "paid, remote", p: 0, s: 88, r: "Python, APIs / part-time ok" },
-      { t: "Integration Engineer, part-time", m: "hybrid Gdynia", p: 2, s: 81, r: "REST, SQL / small team" },
-      { t: "Embedded Software Intern", m: "on site", p: 1, s: 74, r: "C, MCU / no remote" },
-      { t: "QA Automation Trainee", m: "remote", p: 3, s: 61, r: "manual QA mostly" },
-      { t: "Backend Developer, Node.js", m: "3+ years", p: 0, s: 48, r: "senior role / skip" },
+      { t: "Integration Engineer, part-time", m: "hybrid Gdynia", p: 3, s: 83, r: "REST, SQL / small team" },
+      { t: "Junior Software Engineer", m: "hybrid Gdańsk", p: 5, s: 79, r: "TypeScript, Node / mentoring" },
+      { t: "Embedded Software Intern", m: "on site", p: 2, s: 74, r: "C, MCU / no remote" },
+      { t: "IT Support with scripting", m: "Gdynia", p: 7, s: 66, r: "PowerShell / mostly support" },
+      { t: "QA Automation Trainee", m: "remote", p: 6, s: 61, r: "manual QA mostly" },
+      { t: "Backend Developer, Node.js", m: "3+ years", p: 4, s: 48, r: "senior role / skip" },
     ];
-    const ARR = [3, 0, 4, 1, 5, 2], AT = ARR.map((_, i) => 0.5 + i * 0.6); // kolejność i czas przylotu
+    const ARR = [4, 0, 6, 2, 7, 1, 5, 3], AT = ARR.map((_, i) => 0.45 + i * 0.44); // kolejność i czas przylotu
     const arrT = []; ARR.forEach((j, i) => (arrT[j] = AT[i]));
     const L = 13.2, SCAN0 = 4.5, SCAN1 = 6.9, SEND = 8.3, NOTE = 9.3, OUT = 12.5;
     const rowsEl = $("#jm-rows"), cnt = $("#jm-count"), scan = jm.querySelector(".jm__scan"), notif = jm.querySelector(".jm__notif"), bell = jm.querySelector(".bell");
@@ -110,7 +113,7 @@
     const sent = [0, 1];
     watch(jm);
     const draw = (t) => {
-      const R = rowsEl.getBoundingClientRect(), step = R.height * 0.158, rowH = R.height * 0.136;
+      const R = rowsEl.getBoundingClientRect(), step = R.height * 0.122, rowH = R.height * 0.106;
       let arrived = 0;
       OFF.forEach((o, j) => {
         const el = rowEls[j], a = arrT[j];
@@ -161,105 +164,114 @@
     });
   }
 
-  // ===== SeeSky: czasza śledzi gwiazdę =====
+  // ===== SeeSky: model radioteleskopu z Blendera (GLB) + mapa nieba jak w demie SeeSky =====
+  // Mapa: rzut stereograficzny, zenit w środku, N u góry, E po lewej; RA/Dec J2000 (jak Astropy), Gdańsk 54.35°N.
   const dishEl = document.querySelector('[data-scene="dish"]');
-  if (dishEl) stage3d(dishEl, ({ scene, cam }) => {
-    lights(scene, 0xd6336c);
-    const cyl = (a, b, rad, mat) => { const d = new THREE.Vector3().subVectors(b, a), len = d.length(); const m = new THREE.Mesh(new THREE.CylinderGeometry(rad, rad, len, 8), mat); m.position.copy(a).addScaledVector(d, 0.5); m.quaternion.setFromUnitVectors(new THREE.Vector3(0, 1, 0), d.normalize()); return m; };
-    const metal = new THREE.MeshStandardMaterial({ color: 0xb8c2d0, metalness: 0.55, roughness: 0.42, side: THREE.DoubleSide });
-    const dark = new THREE.MeshStandardMaterial({ color: 0x3a4250, metalness: 0.6, roughness: 0.5 });
-    const R = 2.0, F = 1.25, prof = []; for (let i = 0; i <= 28; i++) { const x = R * i / 28; prof.push(new THREE.Vector2(x, x * x / (4 * F))); }
-    const refl = new THREE.Group();
-    refl.add(new THREE.Mesh(new THREE.LatheGeometry(prof, 72), metal));
-    const seams = new THREE.LineSegments(new THREE.EdgesGeometry(new THREE.LatheGeometry(prof.filter((_, i) => i % 4 === 0), 24), 1), new THREE.LineBasicMaterial({ color: 0x5c6c84, transparent: true, opacity: 0.5 })); seams.scale.setScalar(1.004); refl.add(seams);
-    const rimY = R * R / (4 * F);
-    const horn = new THREE.Mesh(new THREE.CylinderGeometry(0.09, 0.15, 0.3, 16), dark); horn.position.y = F; refl.add(horn);
-    for (let k = 0; k < 4; k++) { const a = k * Math.PI / 2 + Math.PI / 4; refl.add(cyl(new THREE.Vector3(Math.cos(a) * R * 0.92, rimY * 0.85, Math.sin(a) * R * 0.92), new THREE.Vector3(0, F + 0.1, 0), 0.017, dark)); }
-    const hub = new THREE.Mesh(new THREE.CylinderGeometry(0.3, 0.4, 0.36, 20), dark); hub.position.y = -0.16; refl.add(hub);
-    for (let k = 0; k < 12; k++) { const a = k * Math.PI / 6; refl.add(cyl(new THREE.Vector3(0, -0.28, 0), new THREE.Vector3(Math.cos(a) * R * 0.75, (R * 0.75) ** 2 / (4 * F) - 0.04, Math.sin(a) * R * 0.75), 0.012, dark)); }
-    const elev = new THREE.Group(); elev.add(refl); elev.position.y = 0.15;
-    const az = new THREE.Group(); az.add(elev);
-    const ped = new THREE.Mesh(new THREE.CylinderGeometry(0.2, 0.32, 2.2, 20), dark); ped.position.y = -1.0; az.add(ped);
-    const yoke = new THREE.Mesh(new THREE.BoxGeometry(0.85, 0.2, 0.46), dark); az.add(yoke);
-    const base = new THREE.Mesh(new THREE.CylinderGeometry(0.9, 1.0, 0.16, 32), dark); base.position.y = -2.1; az.add(base);
-    const ant = new THREE.Group(); ant.add(az); ant.position.set(0, -0.2, 0); scene.add(ant);
-    for (let i = 1; i <= 3; i++) { const g = new THREE.Mesh(new THREE.RingGeometry(i * 1.3, i * 1.3 + 0.01, 96), new THREE.MeshBasicMaterial({ color: 0x2c7ffe, transparent: true, opacity: 0.25 / i, side: THREE.DoubleSide })); g.rotation.x = -Math.PI / 2; g.position.y = -2.28; scene.add(g); }
-    // ---- niebo: prawdziwe gwiazdy i radioźródła (RA/Dec J2000, jak w Astropy SkyCoord), Gdańsk 54.35°N ----
-    cam.fov = 44; cam.updateProjectionMatrix();
-    const LAT = 54.35 * Math.PI / 180, SR = 40, D2R = Math.PI / 180;
-    const CAT = [["Cas A", 23.3908, 58.815, "radio source"], ["Cyg A", 19.9912, 40.7339, "radio galaxy"], ["Vega", 18.6156, 38.7837], ["Deneb", 20.6905, 45.2803], ["Altair", 19.8464, 8.8683],
-      ["Arcturus", 14.261, 19.1825], ["Capella", 5.2782, 45.998], ["Polaris", 2.5303, 89.2641], ["Betelgeuse", 5.9195, 7.4071], ["Rigel", 5.2423, -8.2016], ["Sirius", 6.7525, -16.7161],
-      ["Aldebaran", 4.5987, 16.5093], ["Procyon", 7.655, 5.225], ["Spica", 13.4199, -11.1613], ["Dubhe", 11.0621, 61.751], ["Alkaid", 13.7923, 49.3133]];
-    const TARGETS = ["Cas A", "Dubhe", "Vega", "Polaris", "Cyg A", "Alkaid", "Capella", "Deneb", "Arcturus", "Altair"];
-    // alt/az -> punkt na sferze (wysokość lekko spłaszczona, żeby niebo zmieściło się w kadrze; karta pokazuje prawdziwe wartości)
-    const horiz = (ra, dec, lst, out) => {
+  if (dishEl) {
+    const D2R = Math.PI / 180, LAT = 54.35 * D2R;
+    const ST = { Dubhe: [11.062, 61.751], Merak: [11.031, 56.382], Phecda: [11.897, 53.695], Megrez: [12.257, 57.033], Alioth: [12.900, 55.960], Mizar: [13.399, 54.925], Alkaid: [13.792, 49.313],
+      Caph: [0.153, 59.150], Schedar: [0.675, 56.537], Navi: [0.945, 60.717], Ruchbah: [1.430, 60.235], Segin: [1.907, 63.670],
+      Deneb: [20.690, 45.280], Sadr: [20.370, 40.257], Gienah: [20.770, 33.970], Albireo: [19.512, 27.960], Fawaris: [19.750, 45.131],
+      Vega: [18.616, 38.784], Sheliak: [18.835, 33.363], Sulafat: [18.982, 32.690], "ζ Lyr": [18.746, 37.605],
+      Betelgeuse: [5.919, 7.407], Bellatrix: [5.418, 6.350], Alnitak: [5.679, -1.943], Alnilam: [5.604, -1.202], Mintaka: [5.533, -0.299], Saiph: [5.796, -9.670], Rigel: [5.242, -8.202],
+      Capella: [5.278, 45.998], Menkalinan: [5.992, 44.948], Mirfak: [3.405, 49.861], Algol: [3.136, 40.956], Polaris: [2.530, 89.264], Kochab: [14.845, 74.156],
+      Arcturus: [14.261, 19.183], Altair: [19.846, 8.868], Aldebaran: [4.599, 16.509], Pollux: [7.755, 28.026], Castor: [7.577, 31.888], Regulus: [10.139, 11.967], Procyon: [7.655, 5.225], Sirius: [6.753, -16.716] };
+    const RADIO = { "Cas A": [23.391, 58.815, "supernova remnant"], "Cyg A": [19.991, 40.734, "radio galaxy"], "Tau A": [5.575, 22.014, "Crab Nebula"] };
+    const BRIGHT = ["Vega", "Deneb", "Capella", "Arcturus", "Altair", "Polaris", "Dubhe", "Alkaid", "Betelgeuse", "Rigel", "Aldebaran", "Pollux", "Castor", "Procyon", "Sirius", "Regulus", "Mirfak", "Schedar", "Albireo", "Algol"];
+    const CON = [["Ursa Major", ["Dubhe", "Merak", "Phecda", "Megrez", "Dubhe"], ["Megrez", "Alioth", "Mizar", "Alkaid"]], ["Cassiopeia", ["Caph", "Schedar", "Navi", "Ruchbah", "Segin"]],
+      ["Cygnus", ["Deneb", "Sadr", "Albireo"], ["Gienah", "Sadr", "Fawaris"]], ["Lyra", ["Vega", "ζ Lyr", "Sheliak", "Sulafat", "ζ Lyr"]],
+      ["Orion", ["Betelgeuse", "Bellatrix", "Mintaka", "Rigel", "Saiph", "Alnitak", "Betelgeuse"], ["Alnitak", "Alnilam", "Mintaka"]], ["Perseus", ["Algol", "Mirfak"]], ["Auriga", ["Capella", "Menkalinan"]], ["Gemini", ["Castor", "Pollux"]]];
+    const TARGETS = ["Cas A", "Vega", "Cyg A", "Capella", "Polaris", "Deneb", "Tau A", "Dubhe", "Arcturus", "Altair"];
+    let seed = 7; const rnd = () => ((seed = (seed * 16807) % 2147483647) / 2147483647);
+    const BG = Array.from({ length: 900 }, () => [rnd() * 24, Math.asin(rnd() * 2 - 1) / D2R, 0.25 + rnd() * 0.75]);
+    const altaz = (ra, dec, lst) => {
       const H = lst - ra * 15 * D2R, d = dec * D2R;
       const alt = Math.asin(Math.sin(LAT) * Math.sin(d) + Math.cos(LAT) * Math.cos(d) * Math.cos(H));
       const az = Math.atan2(-Math.sin(H) * Math.cos(d), Math.cos(LAT) * Math.sin(d) - Math.sin(LAT) * Math.cos(d) * Math.cos(H));
-      const a2 = alt * 0.62; out.set(Math.cos(a2) * Math.sin(az) * SR, Math.sin(a2) * SR, -Math.cos(a2) * Math.cos(az) * SR); return [alt, az];
+      return [alt, az];
     };
-    const NB = 1300, bgRa = [], bgDec = [], bp = new Float32Array(NB * 3), bc = [];
-    for (let i = 0; i < NB; i++) { bgRa.push(Math.random() * 24); bgDec.push(Math.asin(Math.random() * 2 - 1) / D2R); const b = 0.35 + Math.random() * 0.55; bc.push(b * 0.85, b * 0.9, b); }
-    const bgG = new THREE.BufferGeometry(); bgG.setAttribute("position", new THREE.BufferAttribute(bp, 3)); bgG.setAttribute("color", new THREE.Float32BufferAttribute(bc, 3));
-    scene.add(new THREE.Points(bgG, new THREE.PointsMaterial({ size: 0.11, vertexColors: true, transparent: true, opacity: 0.85 })));
-    const cp = new Float32Array(CAT.length * 3), cG = new THREE.BufferGeometry(); cG.setAttribute("position", new THREE.BufferAttribute(cp, 3));
-    scene.add(new THREE.Points(cG, new THREE.PointsMaterial({ size: 0.42, color: 0xffffff, transparent: true, opacity: 0.95 })));
-    // siatka RA/Dec: równoleżniki 0, 30, 60° i koła godzinne co 2 h
-    const GRID = []; [0, 30, 60].forEach((dd) => { for (let k = 0; k < 72; k++) GRID.push([k / 72 * 24, dd, (k + 1) / 72 * 24, dd]); });
-    for (let h = 0; h < 24; h += 2) for (let k = 0; k < 18; k++) GRID.push([h, -90 + k * 10, h, -80 + k * 10]);
-    const gp = new Float32Array(GRID.length * 6), gG = new THREE.BufferGeometry(); gG.setAttribute("position", new THREE.BufferAttribute(gp, 3));
-    scene.add(new THREE.LineSegments(gG, new THREE.LineBasicMaterial({ color: 0x2c7ffe, transparent: true, opacity: 0.16 })));
-    const tRing = new THREE.Mesh(new THREE.RingGeometry(0.75, 0.83, 48), new THREE.MeshBasicMaterial({ color: 0xd6336c, transparent: true, opacity: 0.9, side: THREE.DoubleSide }));
-    const tHalo = new THREE.Mesh(new THREE.SphereGeometry(0.7, 16, 12), new THREE.MeshBasicMaterial({ color: 0xd6336c, transparent: true, opacity: 0.25, blending: THREE.AdditiveBlending, depthWrite: false }));
-    scene.add(tRing, tHalo);
-    const beamG = new THREE.BufferGeometry().setFromPoints([new THREE.Vector3(), new THREE.Vector3()]);
-    const beam = new THREE.Line(beamG, new THREE.LineDashedMaterial({ color: 0xd6336c, dashSize: 0.35, gapSize: 0.2, transparent: true, opacity: 0.85 })); scene.add(beam);
-    // podpisy w HTML (ostre, czytelne)
+    const chart = document.createElement("canvas"); chart.className = "chart"; chart.setAttribute("aria-hidden", "true"); dishEl.insertBefore(chart, dishEl.firstChild);
+    const cc = chart.getContext("2d");
     const lblBox = document.createElement("div"); lblBox.className = "sky"; lblBox.setAttribute("aria-hidden", "true"); dishEl.appendChild(lblBox);
-    const names = CAT.map((c) => { const e = document.createElement("span"); e.className = "sky__n mono"; e.textContent = c[0]; lblBox.appendChild(e); return e; });
     const card = document.createElement("div"); card.className = "sky__card mono"; lblBox.appendChild(card);
     const fmtRA = (h) => { const s = Math.round(h * 3600); return String(Math.floor(s / 3600)).padStart(2, "0") + "h " + String(Math.floor(s / 60) % 60).padStart(2, "0") + "m " + String(s % 60).padStart(2, "0") + "s"; };
     const fmtDec = (d) => { const s = Math.round(Math.abs(d) * 3600); return (d < 0 ? "-" : "+") + String(Math.floor(s / 3600)).padStart(2, "0") + "° " + String(Math.floor(s / 60) % 60).padStart(2, "0") + "′ " + String(s % 60).padStart(2, "0") + "″"; };
-    const v = new THREE.Vector3(), tw = new THREE.Vector3(), focusW = new THREE.Vector3(), loc = new THREE.Vector3(), pr = new THREE.Vector3();
-    const wrap = (a) => Math.atan2(Math.sin(a), Math.cos(a));
-    let ti = 0, tNext = 0.5, cardKey = "";
-    const LST0 = 21.2 * 15 * D2R;
-    return ({ t, dt, p }) => {
-      const lst = LST0 + t * (2 * Math.PI / 90);   // doba gwiazdowa w 90 s
-      for (let i = 0; i < NB; i++) { const [alt] = horiz(bgRa[i], bgDec[i], lst, v); if (alt < 0) v.set(0, -999, 0); bp[i * 3] = v.x; bp[i * 3 + 1] = v.y; bp[i * 3 + 2] = v.z; }
-      bgG.attributes.position.needsUpdate = true;
-      const hz = CAT.map((c, i) => { const r = horiz(c[1], c[2], lst, v); cp[i * 3] = r[0] < 0 ? 0 : v.x; cp[i * 3 + 1] = r[0] < 0 ? -999 : v.y; cp[i * 3 + 2] = r[0] < 0 ? 0 : v.z; return { alt: r[0], az: r[1], pos: v.clone() }; });
-      cG.attributes.position.needsUpdate = true;
-      GRID.forEach((g, i) => { const [a1] = horiz(g[0], g[1], lst, v), x1 = v.x, y1 = v.y, z1 = v.z, [a2] = horiz(g[2], g[3], lst, v), ok = a1 > 0 && a2 > 0; gp.set(ok ? [x1, y1, z1, v.x, v.y, v.z] : [0, -999, 0, 0, -999, 0], i * 6); });
-      gG.attributes.position.needsUpdate = true;
-      // wybór celu: następny z listy, który jest wysoko nad horyzontem
-      if (t >= tNext) { for (let k = 1; k <= TARGETS.length; k++) { const c = CAT.findIndex((q) => q[0] === TARGETS[(ti + k) % TARGETS.length]); pr.copy(hz[c].pos).project(cam); if (hz[c].alt > 12 * D2R && Math.abs(pr.x) < 0.7 && pr.y > -0.2 && pr.y < 0.8 && pr.z < 1) { ti = (ti + k) % TARGETS.length; break; } } tNext = t + 7; }
-      const ci = CAT.findIndex((q) => q[0] === TARGETS[ti]), tg = hz[ci];
-      tw.copy(tg.pos); tRing.position.copy(tw); tHalo.position.copy(tw); tRing.lookAt(cam.position);
-      loc.copy(tw).sub(ant.position).normalize();
-      const azA = Math.atan2(loc.x, loc.z), elA = Math.asin(clamp(loc.y, -1, 1)), k = Math.min(1, dt * 1.6);
-      az.rotation.y += wrap(azA - az.rotation.y) * k;
-      elev.rotation.x = lerp(elev.rotation.x, Math.PI / 2 - Math.max(0.15, elA), k);
-      horn.getWorldPosition(focusW);
-      const pos = beamG.attributes.position; pos.setXYZ(0, focusW.x, focusW.y, focusW.z); const end = focusW.clone().lerp(tw, 0.35); pos.setXYZ(1, end.x, end.y, end.z); pos.needsUpdate = true; beam.computeLineDistances(); beam.material.dashOffset = -t * 0.6;
-      tHalo.scale.setScalar(1 + Math.sin(t * 2.4) * 0.15);
-      const ang = -0.35 + ptr.sx * 0.3 + p * 0.3;
-      cam.position.set(Math.sin(ang) * 14, 0.4 - ptr.sy * 0.6 - p * 0.6, Math.cos(ang) * 14); cam.lookAt(0.2, 3.4, -3);
-      cam.updateMatrixWorld();
-      // podpisy: rzut na ekran
-      const W = dishEl.clientWidth, Hh = dishEl.clientHeight;
-      hz.forEach((h, i) => {
-        pr.copy(h.pos).project(cam); const on = h.alt > 0 && pr.z < 1 && Math.abs(pr.x) < 1.05 && Math.abs(pr.y) < 1.05 && i !== ci;
-        names[i].style.opacity = on ? "1" : "0"; if (on) names[i].style.transform = "translate3d(" + ((pr.x + 1) / 2 * W + 8).toFixed(1) + "px," + ((1 - pr.y) / 2 * Hh - 6).toFixed(1) + "px,0)";
+    const sky = { cx: 0, cy: 0, R: 1, tx: 0, ty: 0, target: null };
+    let ti = 0, tNext = 0, cardKey = "";
+    const LST0 = 22 * 15 * D2R;
+    const drawChart = (t) => {
+      const W = chart.clientWidth, H = chart.clientHeight; fit(chart, W, H);
+      cc.setTransform(DPR, 0, 0, DPR, 0, 0); cc.clearRect(0, 0, W, H);
+      const narrowC = W < 380, R = narrowC ? H * 0.34 : H * 0.44, cx = narrowC ? W * 0.56 : W * 0.64, cy = narrowC ? H * 0.38 : H * 0.47; sky.cx = cx; sky.cy = cy; sky.R = R;
+      const lst = LST0 + t * (2 * Math.PI / 150);   // doba gwiazdowa w 150 s
+      const P = (ra, dec) => { const [alt, az] = altaz(ra, dec, lst); if (alt < 0) return null; const r = R * Math.tan((Math.PI / 2 - alt) / 2); return [cx - r * Math.sin(az), cy - r * Math.cos(az), alt, az]; };
+      const g = cc.createRadialGradient(cx, cy, R * 0.1, cx, cy, R); g.addColorStop(0, "rgba(16,26,56,.55)"); g.addColorStop(1, "rgba(6,10,24,.35)");
+      cc.fillStyle = g; cc.beginPath(); cc.arc(cx, cy, R, 0, 7); cc.fill();
+      cc.strokeStyle = "rgba(255,255,255,.14)"; cc.lineWidth = 1; cc.stroke();
+      cc.setLineDash([3, 5]); cc.strokeStyle = "rgba(44,127,254,.18)";
+      [30, 60].forEach((a) => { cc.beginPath(); cc.arc(cx, cy, R * Math.tan((90 - a) * D2R / 2), 0, 7); cc.stroke(); });
+      cc.setLineDash([]);
+      cc.font = "500 10px " + getComputedStyle(document.body).getPropertyValue("--f-mono"); cc.fillStyle = "rgba(170,185,215,.6)"; cc.textAlign = "center";
+      [["N", 0, -1], ["E", -1, 0], ["S", 0, 1], ["W", 1, 0]].forEach(([s, dx, dy]) => cc.fillText(s, cx + dx * (R + 12), cy + dy * (R + 12) + 4));
+      cc.save(); cc.beginPath(); cc.arc(cx, cy, R, 0, 7); cc.clip();
+      BG.forEach(([ra, dec, m]) => { const q = P(ra, dec); if (!q) return; cc.fillStyle = "rgba(220,228,245," + (m * 0.7).toFixed(2) + ")"; cc.fillRect(q[0], q[1], m * 1.3, m * 1.3); });
+      cc.strokeStyle = "rgba(120,150,220,.32)"; cc.lineWidth = 1;
+      cc.font = "500 10.5px " + getComputedStyle(document.body).getPropertyValue("--f-main");
+      CON.forEach(([name, ...lines]) => {
+        let sx = 0, sy = 0, n = 0;
+        lines.forEach((ln) => { cc.beginPath(); let started = false; ln.forEach((s) => { const q = P(ST[s][0], ST[s][1]); if (!q) { started = false; return; } sx += q[0]; sy += q[1]; n++; if (started) cc.lineTo(q[0], q[1]); else { cc.moveTo(q[0], q[1]); started = true; } }); cc.stroke(); });
+        if (n) { cc.fillStyle = "rgba(120,140,200,.6)"; cc.fillText(name, sx / n, sy / n + 16); }
       });
-      pr.copy(tw).project(cam);
-      const cx = (pr.x + 1) / 2 * W, cy = (1 - pr.y) / 2 * Hh, left = cx > W * 0.6;
-      card.style.transform = "translate3d(" + (left ? cx - 22 : cx + 22).toFixed(1) + "px," + (cy - 10).toFixed(1) + "px,0) translateX(" + (left ? "-100%" : "0") + ")";
-      const c = CAT[ci], key = c[0] + Math.round(tg.alt / D2R * 10) + Math.round(tg.az / D2R * 10);
-      if (key !== cardKey) { cardKey = key; const azd = ((tg.az / D2R) + 360) % 360;
-        card.innerHTML = "<b>" + c[0] + "</b>" + (c[3] ? " <i>" + c[3] + "</i>" : "") + "<br>RA " + fmtRA(c[1]) + "<br>Dec " + fmtDec(c[2]) + "<br>Alt " + (tg.alt / D2R).toFixed(1) + "°  Az " + azd.toFixed(1) + "°"; }
+      cc.textAlign = "left"; cc.font = "400 10px " + getComputedStyle(document.body).getPropertyValue("--f-main");
+      Object.keys(ST).forEach((s) => { const q = P(ST[s][0], ST[s][1]); if (!q) return; const b = BRIGHT.includes(s); cc.fillStyle = "#fff"; cc.beginPath(); cc.arc(q[0], q[1], b ? 2.2 : 1.4, 0, 7); cc.fill(); if (b) { cc.fillStyle = "rgba(200,210,230,.75)"; cc.fillText(s, q[0] + 5, q[1] - 4); } });
+      Object.keys(RADIO).forEach((s) => { const q = P(RADIO[s][0], RADIO[s][1]); if (!q) return; cc.strokeStyle = "#ffb347"; cc.lineWidth = 1.4; cc.beginPath(); cc.arc(q[0], q[1], 4, 0, 7); cc.stroke(); cc.fillStyle = "#ffb347"; cc.fillText(s, q[0] + 7, q[1] - 5); });
+      // cel: następny z listy, który jest wysoko nad horyzontem
+      const posOf = (name) => { const o = RADIO[name] || ST[name]; return P(o[0], o[1]); };
+      if (t >= tNext) { for (let k = 1; k <= TARGETS.length; k++) { const q = posOf(TARGETS[(ti + k) % TARGETS.length]); if (q && q[2] > 20 * D2R) { ti = (ti + k) % TARGETS.length; break; } } tNext = t + 7; }
+      const name = TARGETS[ti], q = posOf(name);
+      if (q) {
+        sky.tx = q[0]; sky.ty = q[1]; sky.target = q;
+        const pul = 1 + Math.sin(t * 3) * 0.12;
+        cc.strokeStyle = "#ff4f8b"; cc.lineWidth = 1.6; cc.beginPath(); cc.arc(q[0], q[1], 11 * pul, 0, 7); cc.stroke();
+        [[0, -1], [0, 1], [-1, 0], [1, 0]].forEach(([dx, dy]) => { cc.beginPath(); cc.moveTo(q[0] + dx * 15, q[1] + dy * 15); cc.lineTo(q[0] + dx * 21, q[1] + dy * 21); cc.stroke(); });
+        const o = RADIO[name] || ST[name], key = name + Math.round(q[2] / D2R * 10) + Math.round(q[3] / D2R * 10);
+        if (key !== cardKey) { cardKey = key; const azd = ((q[3] / D2R) + 360) % 360;
+          card.innerHTML = "<b>" + name + "</b>" + (RADIO[name] ? " <i>" + RADIO[name][2] + "</i>" : "") + "<br>RA " + fmtRA(o[0]) + "<br>Dec " + fmtDec(o[1]) + "<br>Alt " + (q[2] / D2R).toFixed(1) + "°  Az " + azd.toFixed(1) + "°"; }
+      }
+      cc.restore();
     };
-  });
+    stage3d(dishEl, ({ scene, cam, r }) => {
+      r.toneMapping = THREE.ACESFilmicToneMapping; r.toneMappingExposure = 1.05; r.physicallyCorrectLights = true;
+      if (THREE.RoomEnvironment) { const pm = new THREE.PMREMGenerator(r); scene.environment = pm.fromScene(new THREE.RoomEnvironment(), 0.04).texture; }
+      scene.add(new THREE.HemisphereLight(0xaac4ff, 0x0a0d18, 0.9));
+      const key = new THREE.DirectionalLight(0xffffff, 2.2); key.position.set(-5, 8, 6); scene.add(key);
+      const rim = new THREE.DirectionalLight(0xd6336c, 1.6); rim.position.set(6, 3, -6); scene.add(rim);
+      let azN = null, elN = null, feed = null;
+      new THREE.GLTFLoader().load("%%GLB_dish%%", (g) => { const m = g.scene; scene.add(m); azN = m.getObjectByName("az"); elN = m.getObjectByName("el"); feed = m.getObjectByName("feed_box"); });
+      const beamG = new THREE.BufferGeometry().setFromPoints([new THREE.Vector3(), new THREE.Vector3()]);
+      const beam = new THREE.Line(beamG, new THREE.LineDashedMaterial({ color: 0xff4f8b, dashSize: 0.3, gapSize: 0.18, transparent: true, opacity: 0.8 })); scene.add(beam);
+      const fw = new THREE.Vector3(), pv = new THREE.Vector3(), aim = new THREE.Vector3(), ndc = new THREE.Vector3();
+      const wrap = (a) => Math.atan2(Math.sin(a), Math.cos(a));
+      return ({ t, dt, p }) => {
+        drawChart(t);
+        const W = dishEl.clientWidth, narrowS = W < 380, ang = -0.42 + ptr.sx * 0.12 + p * 0.1;
+        const cd = narrowS ? 18 : 17, look = narrowS ? new THREE.Vector3(0.6, 5.0, 0) : new THREE.Vector3(5.6, 3.4, 0);
+        cam.position.set(Math.sin(ang) * cd, 2.6 - ptr.sy * 0.4, Math.cos(ang) * cd); cam.lookAt(look); cam.updateMatrixWorld();
+        if (!azN || !elN || !sky.target) { beam.visible = false; return; }
+        // czasza celuje wizualnie w znacznik na mapie: promień z kamery przez znacznik, punkt daleko za anteną
+        elN.getWorldPosition(pv);
+        ndc.set(sky.tx / W * 2 - 1, -(sky.ty / dishEl.clientHeight) * 2 + 1, 0.5).unproject(cam).sub(cam.position).normalize();
+        const far = cam.position.clone().addScaledVector(ndc, cam.position.distanceTo(pv) + 2.5);   // punkt prawie w płaszczyźnie anteny: widać profil czaszy
+        aim.copy(far).sub(pv).normalize();
+        const azA = Math.atan2(aim.x, aim.z), elA = Math.asin(clamp(aim.y, -1, 1)), k = Math.min(1, dt * 1.8);
+        azN.rotation.y += wrap(azA - azN.rotation.y) * k;
+        elN.rotation.x = lerp(elN.rotation.x, Math.PI / 2 - Math.max(0.12, elA), k);
+        feed.getWorldPosition(fw); beam.visible = true;
+        const pos = beamG.attributes.position; pos.setXYZ(0, fw.x, fw.y, fw.z); pos.setXYZ(1, far.x, far.y, far.z); pos.needsUpdate = true; beam.computeLineDistances(); beam.material.dashOffset = -t * 0.8;
+      };
+    });
+  }
+
   // ===== LabInc: pętla z Blendera, gra tylko gdy widać =====
   const fac = $(".factory video");
   if (fac && !RM) {
@@ -313,8 +325,8 @@
       const w = osc.clientWidth, h = osc.clientHeight; fit(osc, w, h);
       let goal = mx;
       if (!fine) goal = RM ? null : (Math.sin(t * 0.3) * 0.38 + 0.5) * w;   // na dotyku: powolny przejazd
-      if (goal !== null) { cx = cx === null ? goal : lerp(cx, goal, 1 - Math.exp(-dt * 7)); amt = Math.min(1, amt + dt / 1.5); }
-      else amt = Math.max(0, amt - dt / 1.8);
+      if (goal !== null) { cx = cx === null ? goal : lerp(cx, goal, 1 - Math.exp(-dt * 11)); amt = Math.min(1, amt + dt / 0.55); }
+      else amt = Math.max(0, amt - dt / 0.8);
       const A = smooth(amt), wh = [0, 1, 2].map((k) => smooth(A * 3.4 - k * 0.8));   // wagi harmonicznych 3, 5, 7
       oc.setTransform(DPR, 0, 0, DPR, 0, 0); oc.clearRect(0, 0, w, h);
       const g = oc.createLinearGradient(0, 0, w, 0); g.addColorStop(0, "#2c7ffe"); g.addColorStop(1, "#642efd");

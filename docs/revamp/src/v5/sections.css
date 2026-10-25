@@ -71,14 +71,19 @@ html.js-anim .reveal.in { opacity: 1; transform: none; }
 .entry__status p { margin: 4px 0 0; }
 .entry__status .mono { color: var(--white); font-size: .8rem; }
 .entry__note { color: var(--text); font-size: .88rem; }
-.ticks { display: grid; grid-template-columns: repeat(7, 1fr); gap: 5px; margin: 12px 0 10px; max-width: 220px; }
-.ticks i { height: 4px; border-radius: 2px; background: rgba(201,209,222,.8); }
-.ticks i.now { background: linear-gradient(90deg, var(--primary) 55%, rgba(44,127,254,.25) 55%); }
-
-html.js-anim .ticks i { transform: scaleX(0); transform-origin: 0 50%; transition: transform .6s var(--ease); }
-html.js-anim .in .ticks i { transform: none; }
-html.js-anim .in .ticks i:nth-child(2) { transition-delay: .06s; } html.js-anim .in .ticks i:nth-child(3) { transition-delay: .12s; } html.js-anim .in .ticks i:nth-child(4) { transition-delay: .18s; }
-html.js-anim .in .ticks i:nth-child(5) { transition-delay: .24s; } html.js-anim .in .ticks i:nth-child(6) { transition-delay: .3s; } html.js-anim .in .ticks i:nth-child(7) { transition-delay: .36s; }
+/* pasek semestrów: jeden gradient przez wszystkie odcinki, bieżący semestr wypełniony w połowie */
+.sem { max-width: 260px; margin: 2px 0 10px; }
+.sem__top { display: flex; justify-content: space-between; align-items: baseline; margin: 0 0 9px !important; font-size: .88rem; color: var(--text); }
+.sem__top b { color: var(--white); font-weight: 600; }
+.sem__top .mono { font-size: .72rem; color: #7f8aa0; }
+.sem__bar { display: grid; grid-template-columns: repeat(7, 1fr); gap: 4px; }
+.sem__bar i { height: 6px; border-radius: 3px; background: var(--grad); background-size: 700% 100%; background-position: calc(var(--k) * 100% / 6) 0; }
+.sem__bar i.now { background: rgba(255,255,255,.08); position: relative; overflow: hidden; }
+.sem__bar i.now::before { content: ""; position: absolute; inset: 0 50% 0 0; border-radius: 3px; background: var(--secondary); }
+.entry__status .sem__nums { display: grid; grid-template-columns: repeat(7, 1fr); gap: 4px; margin: 6px 0 0 !important; font-size: .64rem; color: #5f6b80; text-align: center; }
+.entry__status .sem__nums span:last-child { color: var(--white); }
+html.js-anim .sem__bar i { transform: scaleX(0); transform-origin: 0 50%; transition: transform .7s var(--ease) calc(var(--k) * 70ms); }
+html.js-anim .in .sem__bar i { transform: none; }
 
 /* ---------- projekty ---------- */
 .proj { display: grid; grid-template-columns: minmax(0, 5fr) minmax(0, 7fr); gap: clamp(32px, 5vw, 72px); align-items: center; padding-block: clamp(40px, 7vh, 80px); }
@@ -103,12 +108,14 @@ html.js-anim .in .ticks i:nth-child(5) { transition-delay: .24s; } html.js-anim 
 .shots .play span { width: 30px; height: 30px; border-radius: 50%; background: rgba(255,255,255,.92); display: grid; place-items: center; }
 .shots .play svg { width: 11px; height: 11px; fill: #09080c; margin-left: 2px; }
 
-/* SeeSky: podpisy gwiazd i karta celu */
+/* SeeSky: mapa nieba pod modelem i karta celu */
+.stage3d .chart { z-index: 0; }
+.stage3d canvas:not(.chart) { z-index: 1; }
+.sky { z-index: 2; }
 .sky { position: absolute; inset: 0; pointer-events: none; overflow: hidden; }
-.sky__n { position: absolute; left: 0; top: 0; font-size: .64rem; color: #9fb0cc; white-space: nowrap; transition: opacity .4s; }
-.sky__card { position: absolute; left: 0; top: 0; font-size: .68rem; line-height: 1.55; color: #dfe6f2; padding: 8px 10px; border-radius: 6px; background: rgba(2,8,22,.78); border: 1px solid rgba(214,51,108,.6); white-space: nowrap; }
+.sky__card { position: absolute; left: 14px; top: 14px; font-size: .68rem; line-height: 1.55; color: #dfe6f2; padding: 8px 10px; border-radius: 6px; background: rgba(2,8,22,.82); border: 1px solid rgba(255,79,139,.6); white-space: nowrap; }
 .sky__card b { color: #fff; font-weight: 600; }
-.sky__card i { font-style: normal; color: #f07aa3; }
+.sky__card i { font-style: normal; color: #ffb347; }
 /* JobManager 2D */
 .jm { background: linear-gradient(180deg, #0b1220, #070c16); --row: 11%; font-size: clamp(10px, .86vw, 13px); }
 .jm__steps { position: absolute; left: 4%; right: 4%; top: 4.5%; display: flex; gap: 6%; list-style: none; margin: 0; padding: 0 0 10px; border-bottom: 1px solid rgba(255,255,255,.08); color: #6f7a8d; font-size: 1em; }
@@ -117,17 +124,17 @@ html.js-anim .in .ticks i:nth-child(5) { transition-delay: .24s; } html.js-anim 
 .jm__steps li::after { content: ""; position: absolute; left: 0; right: 0; bottom: -11px; height: 2px; background: #29ed81; transform: scaleX(0); transform-origin: 0 50%; transition: transform .6s var(--ease); }
 .jm__steps li.on { color: var(--white); }
 .jm__steps li.on::after { transform: scaleX(1); }
-.jm__src { position: absolute; left: 4%; top: 22%; bottom: 8%; width: 21%; display: flex; flex-direction: column; justify-content: space-between; }
-.jm__src span { font: 500 1em/1 var(--f-mono); color: #d4dbe7; padding: .9em .8em; border-radius: 7px; background: #111a2b; border: 1px solid rgba(255,255,255,.07); display: flex; gap: .6em; align-items: center; }
+.jm__src { position: absolute; left: 4%; top: 19%; bottom: 6%; width: 22%; display: flex; flex-direction: column; justify-content: space-between; }
+.jm__src span { font: 500 .92em/1 var(--f-mono); color: #d4dbe7; padding: .62em .8em; border-radius: 7px; background: #111a2b; border: 1px solid rgba(255,255,255,.07); display: flex; gap: .6em; align-items: center; }
 .jm__src span::before { content: ""; width: .55em; height: .55em; border-radius: 2px; background: var(--c); flex: none; }
 .jm__list { position: absolute; left: 33%; right: 4%; top: 18%; bottom: 6%; border-radius: 10px; background: #0d1524; border: 1px solid rgba(255,255,255,.08); overflow: hidden; }
 .jm__head { display: flex; justify-content: space-between; padding: 3.2% 4%; font-weight: 600; font-size: 1.05em; border-bottom: 1px solid rgba(255,255,255,.06); }
 .jm__head .mono { color: #29ed81; font-weight: 400; font-size: .92em; }
 .jm__rows { position: absolute; left: 3%; right: 3%; top: 14%; bottom: 3%; }
-.jm__row { position: absolute; left: 0; right: 0; transform-origin: 0 50%; height: 13.6%; display: grid; grid-template-columns: 4px 1fr auto; gap: 0 .9em; align-items: center; padding-right: .9em; border-radius: 6px; background: #121c2e; will-change: transform, opacity; }
+.jm__row { position: absolute; left: 0; right: 0; transform-origin: 0 50%; height: 10.6%; display: grid; grid-template-columns: 4px 1fr auto; gap: 0 .9em; align-items: center; padding-right: .9em; border-radius: 6px; background: #121c2e; will-change: transform, opacity; }
 .jm__row::before { content: ""; height: 100%; border-radius: 6px 0 0 6px; background: var(--c); }
-.jm__row b { font-weight: 500; font-size: .98em; color: #e6ecf6; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; display: block; }
-.jm__row small { display: block; color: #7f8aa0; font: 400 .82em/1.3 var(--f-mono); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+.jm__row b { font-weight: 500; font-size: .92em; color: #e6ecf6; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; display: block; }
+.jm__row small { display: block; color: #7f8aa0; font: 400 .76em/1.25 var(--f-mono); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
 .jm__row .sc { font: 600 .9em/1 var(--f-mono); padding: .45em .55em; border-radius: 4px; background: rgba(255,255,255,.06); color: #8b95a8; min-width: 3.4em; text-align: center; }
 .jm__row.hi .sc { background: rgba(41,237,129,.16); color: #5ff5a0; }
 .jm__row.lo { opacity: .38; }

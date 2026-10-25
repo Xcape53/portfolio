@@ -1,5 +1,5 @@
-# Fabryka LabInc: izometryczna scena w stylu Satisfactory, pÄ™tla 6 s bez szwu.
-# Uruchomienie: blender -b -P factory.py -- <katalog_wyjĹ›cia> [klatka|all]
+# Fabryka LabInc: izometryczna scena w stylu Satisfactory, pętla 6 s bez szwu.
+# Uruchomienie: blender -b -P factory.py -- <katalog_wyjścia> [klatka|all]
 import bpy, bmesh, math, random, sys
 from mathutils import Vector
 
@@ -9,8 +9,8 @@ MODE = argv[1] if len(argv) > 1 else "1"
 random.seed(7)
 
 FPS, T = 30, 6.0
-F = int(FPS * T)          # 180 klatek na pÄ™tlÄ™
-V = 1.6                   # prÄ™dkoĹ›Ä‡ taĹ›my [j/s]
+F = int(FPS * T)          # 180 klatek na pętlę
+V = 1.6                   # prędkość taśmy [j/s]
 BELT_Z = 0.9
 
 # ---------- scena ----------
@@ -39,7 +39,7 @@ def srgb(h):
     h = h.lstrip("#"); c = [int(h[i:i + 2], 16) / 255 for i in (0, 2, 4)]
     return tuple(((x / 12.92) if x <= 0.04045 else ((x + 0.055) / 1.055) ** 2.4) for x in c) + (1,)
 
-# ---------- materiaĹ‚y ----------
+# ---------- materiały ----------
 def mat(name, col, rough=0.5, metal=0.0, emit=None, es=0.0, alpha=1.0, trans=0.0, coat=0.0):
     m = bpy.data.materials.new(name); m.use_nodes = True
     b = m.node_tree.nodes["Principled BSDF"]
@@ -77,7 +77,7 @@ if hasattr(M["glass"], "surface_render_method"): M["glass"].surface_render_metho
 try: M["glass"].use_backface_culling = True
 except Exception: pass
 
-# podĹ‚oga: pĹ‚yty fundamentĂłw z fugami (Brick Texture)
+# podłoga: płyty fundamentów z fugami (Brick Texture)
 fl = bpy.data.materials.new("foundation"); fl.use_nodes = True
 nt = fl.node_tree; b = nt.nodes["Principled BSDF"]; b.inputs["Roughness"].default_value = 0.82
 br = nt.nodes.new("ShaderNodeTexBrick"); br.offset = 0; br.squash = 1
@@ -87,7 +87,7 @@ br.inputs["Mortar Size"].default_value = 0.012; br.inputs["Brick Width"].default
 tc = nt.nodes.new("ShaderNodeTexCoord"); nt.links.new(tc.outputs["Object"], br.inputs["Vector"])
 nt.links.new(br.outputs["Color"], b.inputs["Base Color"])
 
-# taĹ›ma: pasy przesuwane wartoĹ›ciÄ… animowanÄ… (offset = V * t)
+# taśma: pasy przesuwane wartością animowaną (offset = V * t)
 belt_m = bpy.data.materials.new("belt"); belt_m.use_nodes = True
 nt = belt_m.node_tree; b = nt.nodes["Principled BSDF"]; b.inputs["Roughness"].default_value = 0.7
 tc = nt.nodes.new("ShaderNodeTexCoord"); sep = nt.nodes.new("ShaderNodeSeparateXYZ")
@@ -170,13 +170,13 @@ def spin(o, axis, turns, phase=0.0):
 def empty(name, loc):
     e = bpy.data.objects.new(name, None); e.location = loc; col.objects.link(e); return e
 
-# podĹ‚oga
+# podłoga
 # płyta fundamentów (diorama), tło przezroczyste
-floor = box("foundation", (17.2, 15.4, 0.5), (-1.05, 5.1, -0.25), fl, bevel=0.08)
-box("foundation_trim", (17.26, 15.46, 0.06), (-1.05, 5.1, -0.14), "blue", bevel=0.0)
-box("foundation_under", (16.8, 15.0, 0.4), (-1.05, 5.1, -0.55), "dark", bevel=0.05)
+floor = box("foundation", (11.0, 15.6, 0.5), (2.3, 4.9, -0.25), fl, bevel=0.08)
+box("foundation_trim", (11.06, 15.66, 0.06), (2.3, 4.9, -0.14), "blue", bevel=0.0)
+box("foundation_under", (10.6, 15.2, 0.4), (2.3, 4.9, -0.55), "dark", bevel=0.05)
 
-# ---------- taĹ›mociÄ…gi ----------
+# ---------- taśmociągi ----------
 def belt(a, b):
     a, b = Vector(a), Vector(b); d = b - a; L = d.length; ang = math.atan2(d.y, d.x); mid = (a + b) / 2
     parts = []
@@ -195,10 +195,11 @@ def belt(a, b):
     return parts
 
 # ---------- maszyny ----------
-# koparka (Miner) na zĹ‚oĹĽu
-MX, MY = -7.2, 0.0
+# koparka (Miner) na złożu
+MX, MY = 0.15, 0.0
 for i in range(9):
-    a = i / 9 * 2 * math.pi; r = 1.9 + random.random() * 0.4
+    a = i / 9 * 2 * math.pi + 0.35; r = 1.9 + random.random() * 0.4
+    if abs(math.atan2(math.sin(a - math.pi / 2), math.cos(a - math.pi / 2))) < 0.5: continue   # wolne miejsce na taśmę
     bpy.ops.mesh.primitive_ico_sphere_add(subdivisions=2, radius=0.35 + random.random() * 0.3, location=(MX + math.cos(a) * r, MY + math.sin(a) * r, 0.1))
     rk = link(bpy.context.active_object); rk.scale = (1, 0.8 + random.random() * 0.4, 0.55)
     for v in rk.data.vertices: v.co *= 0.85 + random.random() * 0.3
@@ -207,15 +208,15 @@ for i in range(5):
     a = i / 5 * 2 * math.pi + 0.3
     box("crystal", (0.12, 0.12, 0.5 + random.random() * 0.4), (MX + math.cos(a) * 1.65, MY + math.sin(a) * 1.65, 0.25), "glowC", bevel=0.01, rot=(random.random() * 0.6, random.random() * 0.6, a))
 box("miner_base", (3.0, 3.0, 0.5), (MX, MY, 0.25), "dark", 0.06)
-# pasy ostrzegawcze na krawÄ™dzi podstawy
+# pasy ostrzegawcze na krawędzi podstawy
 for i in range(14):
     u = -1.4 + i * 0.215
     for (x, y, rz) in ((MX + u, MY - 1.52, 0), (MX + 1.52, MY + u, math.pi / 2)):
         box("haz", (0.11, 0.04, 0.16), (x, y, 0.3), "hazY" if i % 2 == 0 else "rubber", 0.0, rot=(0, 0, rz))
-# Ĺ›wider wchodzÄ…cy w zĹ‚oĹĽe + poĹ›wiata
+# świder wchodzący w złoże + poświata
 cyl("drill_bit", 0.35, 0.7, (MX - 0.15, MY, 0.55), "steel", verts=24, r2=0.08)
 light_node = cyl("node_glow", 1.25, 0.02, (MX - 0.15, MY, 0.51), "glowC", verts=48, bevel=0.0)
-# drabina i barierka na gĹ‚owicy
+# drabina i barierka na głowicy
 for z in [2.3 + k * 0.32 for k in range(10)]:
     box("rung", (0.04, 0.42, 0.04), (MX - 0.15 - 0.92, MY - 0.75, z), "steel", 0.0)
 for dy in (-0.21, 0.21):
@@ -227,8 +228,8 @@ for (x, y) in ((1.05, 1.05), (-1.05, 1.05), (1.05, -1.05), (-1.05, -1.05), (0, 1
 box("miner_screen", (0.03, 0.7, 0.42), (MX + 1.01, MY - 0.55, 1.35), "screen", 0.0)
 box("miner_body", (2.3, 2.1, 1.5), (MX - 0.15, MY, 1.27), "white", 0.08)
 box("miner_band", (2.32, 2.12, 0.18), (MX - 0.15, MY, 1.62), "blue", 0.02)
-box("miner_port", (0.7, 0.8, 0.5), (MX + 1.15, MY, BELT_Z + 0.05), "dark", 0.04)
-box("miner_port_glow", (0.04, 0.6, 0.08), (MX + 1.5, MY, BELT_Z + 0.25), "glowB", 0.0)
+box("miner_port", (0.8, 0.7, 0.5), (MX - 0.15, MY + 1.15, BELT_Z + 0.05), "dark", 0.04)
+box("miner_port_glow", (0.6, 0.04, 0.08), (MX - 0.15, MY + 1.5, BELT_Z + 0.25), "glowB", 0.0)
 for sx in (-1, 1):
     for sy in (-1, 1):
         box("miner_leg", (0.16, 0.16, 3.2), (MX - 0.15 + sx * 0.75, MY + sy * 0.75, 3.6), "grey", 0.03)
@@ -247,45 +248,9 @@ for i in range(12):
 parent(teeth, gear); spin(gear, "Z", 3)
 light_m = cyl("miner_beacon", 0.12, 0.12, (MX - 0.15 + 0.6, MY - 0.6, 5.83), "glowO", verts=16)
 
-# konstruktor / huta
-CX, CY = 0.0, 0.0
-box("con_base", (3.4, 3.4, 0.3), (CX, CY, 0.15), "dark", 0.05)
-box("con_body", (3.0, 3.0, 2.2), (CX, CY, 1.4), "white", 0.1)
-box("con_band", (3.02, 3.02, 0.2), (CX, CY, 2.1), "blue", 0.02)
-box("con_roof", (2.6, 2.6, 0.35), (CX, CY, 2.67), "grey", 0.06)
-box("con_in", (0.4, 0.9, 0.6), (CX - 1.6, CY, BELT_Z + 0.05), "dark", 0.04)
-box("con_out", (0.9, 0.4, 0.6), (CX, CY + 1.6, BELT_Z + 0.05), "dark", 0.04)
-box("con_window", (0.04, 1.6, 0.42), (CX + 1.51, CY, 1.55), "glowO", 0.0)
-box("con_window2", (1.6, 0.04, 0.42), (CX, CY - 1.51, 1.55), "glowO", 0.0)
-for i in range(4):
-    box("vent", (0.04, 0.5, 0.05), (CX + 1.52, CY - 0.9 + i * 0.6, 0.75), "dark", 0.0)
-for k, (sx, sy) in enumerate(((-0.75, 0.75), (0.75, 0.75))):
-    cyl("stack", 0.3, 1.6, (CX + sx, CY + sy, 3.4), "grey")
-    cyl("stack_ring", 0.32, 0.1, (CX + sx, CY + sy, 4.2), "glowO", bevel=0.0)
-fan_h = cyl("fan_housing", 0.75, 0.25, (CX + 0.3, CY - 0.5, 2.95), "dark")
-fan = empty("fan", (CX + 0.3, CY - 0.5, 3.1))
-bl = [box("blade", (0.62, 0.12, 0.03), (CX + 0.3 + math.cos(i * 2.094) * 0.33, CY - 0.5 + math.sin(i * 2.094) * 0.33, 3.1), "steel", 0.01, rot=(0.35, 0, i * 2.094)) for i in range(3)]
-parent(bl, fan); spin(fan, "Z", 9)
-pipe = cyl("pipe", 0.12, 2.6, (CX - 1.62, CY - 1.0, 1.4), "steel", verts=20)
-# naroĹĽne sĹ‚upy, szczeliny paneli i panel sterowania
-for sx in (-1, 1):
-    for sy in (-1, 1):
-        box("con_pillar", (0.22, 0.22, 2.3), (CX + sx * 1.47, CY + sy * 1.47, 1.45), "dark", 0.03)
-for i in (-0.5, 0.5):
-    box("seam", (0.02, 0.02, 1.0), (CX + 1.51, CY + i, 0.85), "dark", 0.0)
-    box("seam", (0.02, 0.02, 1.0), (CX + i, CY - 1.51, 0.85), "dark", 0.0)
-box("con_panel", (0.05, 0.7, 0.5), (CX + 1.53, CY + 0.95, 0.75), "screen", 0.0)
-box("con_panel2", (0.7, 0.05, 0.5), (CX - 0.95, CY - 1.53, 0.75), "screen", 0.0)
-for k in range(3):
-    cyl("bolt_valve", 0.09, 0.08, (CX + 1.55, CY - 0.3 + k * 0.25, 0.42), "hazY", rot=(0, math.pi / 2, 0), verts=16, bevel=0.0)
-cyl("pipe_h", 0.1, 1.5, (CX - 0.75, CY + 0.75 - 0.75, 4.0), "steel", rot=(math.pi / 2, 0, 0), verts=16)
-# lampy na sĹ‚upach
-for (x, y) in ():
-    box("lamp_post", (0.1, 0.1, 2.6), (x, y, 1.3), "dark", 0.01)
-    box("lamp_head", (0.4, 0.22, 0.1), (x, y, 2.62), "grey", 0.02)
-    box("lamp_glow", (0.32, 0.16, 0.02), (x, y, 2.565), "glowB", 0.0)
+CX, CY = 0.0, 0.0   # wyjście z kopalni (huta połączona z kopalnią w jedną fabrykę)
 # skrzynie
-for (x, y, s) in ((-4.0, 2.4, 0.7), (-3.3, 2.5, 0.55), (-3.7, 3.2, 0.6), (5.9, 1.8, 0.7), (6.6, 2.0, 0.5)):
+for (x, y, s) in ((3.4, 0.0, 0.7), (4.1, 0.4, 0.55), (3.5, 0.8, 0.6), (6.4, 1.2, 0.7), (6.9, 1.7, 0.5)):
     box("crate", (s, s, s), (x, y, s / 2), "grey", 0.04, rot=(0, 0, random.random() * 0.4))
     box("crate_band", (s + 0.02, s * 0.2, s + 0.02), (x, y, s / 2), "blue", 0.0, rot=(0, 0, 0))
 
@@ -296,7 +261,7 @@ box("split_top", (1.0, 1.0, 0.08), (SX, SY, BELT_Z + 0.45), "dark", 0.02)
 box("split_arrow1", (0.4, 0.08, 0.02), (SX + 0.2, SY, BELT_Z + 0.5), "glowB", 0.0)
 box("split_arrow2", (0.08, 0.4, 0.02), (SX, SY + 0.2, BELT_Z + 0.5), "glowV", 0.0)
 
-# sprzedaĹĽ: lej jak AWESOME Sink
+# sprzedaż: lej jak AWESOME Sink
 KX, KY = 0.0, 10.4
 cyl("sink_base", 1.9, 0.5, (KX, KY, 0.25), "dark", verts=64)
 cyl("sink_body", 1.45, 1.6, (KX, KY, 1.3), "white", verts=64)
@@ -316,7 +281,7 @@ for i in range(6):
     box("sink_rib", (0.1, 0.2, 1.6), (KX + math.cos(a) * 1.47, KY + math.sin(a) * 1.47, 1.3), "dark", 0.02, rot=(0, 0, a))
 box("sink_in", (0.9, 0.5, 0.6), (KX, KY - 1.55, BELT_Z + 0.05), "dark", 0.04)
 
-# research: laboratorium z kopuĹ‚Ä… i atomem
+# research: laboratorium z kopułą i atomem
 LX, LY = 5.6, 5.0
 box("lab_base", (3.2, 3.2, 0.3), (LX, LY, 0.15), "dark", 0.05)
 box("lab_body", (2.8, 2.8, 1.3), (LX, LY, 0.95), "white", 0.1)
@@ -342,13 +307,12 @@ box("lab_in", (0.5, 0.9, 0.6), (LX - 1.55, LY, BELT_Z + 0.05), "dark", 0.04)
 for i in range(3):
     box("lab_led", (0.04, 0.3, 0.06), (LX + 1.41, LY - 0.6 + i * 0.6, 0.9), "glowB", 0.0)
 
-# taĹ›my
-belt((MX + 1.5, MY), (CX - 1.8, CY))
+# taśmy
 belt((CX, CY + 1.8), (SX, SY - 0.6))
 belt((SX, SY + 0.6), (KX, KY - 1.8))
 belt((SX + 0.6, SY), (LX - 1.8, LY))
 
-# ---------- przedmioty na taĹ›mach ----------
+# ---------- przedmioty na taśmach ----------
 N = 12; DT = T / N
 def place(o, frame, loc, s):
     o.location = loc; o.scale = (s, s, s)
@@ -362,21 +326,7 @@ def path_pos(pts, d):
     return pts[-1]
 def path_len(pts): return sum((b - a).length for a, b in zip(pts, pts[1:]))
 
-# ruda: koparka -> konstruktor
-ore_path = [Vector((MX + 0.9, MY, BELT_Z + 0.2)), Vector((CX - 1.2, CY, BELT_Z + 0.2))]
-for j in range(N):
-    bpy.ops.mesh.primitive_ico_sphere_add(subdivisions=2, radius=0.2, location=(0, 0, -5))
-    o = link(bpy.context.active_object); o.data.materials.append(M["ore"])
-    for v in o.data.vertices: v.co *= 0.8 + random.random() * 0.4
-    o.rotation_euler = (random.random() * 3, random.random() * 3, random.random() * 3)
-    Lp = path_len(ore_path)
-    for f in range(1, F + 2):
-        t = ((f - 1) / FPS - j * DT) % T; d = t * V
-        on = d <= Lp; p = path_pos(ore_path, min(d, Lp))
-        edge = min(1, d / 0.35, max(0, (Lp - d) / 0.35)) if on else 0
-        place(o, f, p, edge)
-
-# pierwiastki: konstruktor -> splitter -> sprzedaĹĽ / research
+# pierwiastki: kopalnia -> splitter -> sprzedaż / research
 ELS = [("H", "#5ec8ff"), ("C", "#8b95a8"), ("Fe", "#e08a4c"), ("Cu", "#d9773f"), ("Si", "#9db0c8"), ("Au", "#ffc94a"),
        ("O", "#ff6b6b"), ("Al", "#c5ccd8"), ("U", "#7dff9e"), ("Ag", "#e3e8f0"), ("N", "#6aa8ff"), ("Ne", "#ff5fa2")]
 font = None
@@ -401,7 +351,7 @@ for j, (sym, hexc) in enumerate(ELS):
         edge = min(1, d / 0.3, max(0, (Lp - d) / 0.3)) if on else 0
         place(cube, f, p, edge)
 
-# monety nad lejem: jedna na kaĹĽdy sprzedany pierwiastek
+# monety nad lejem: jedna na każdy sprzedany pierwiastek
 Lsell = path_len(to_sell)
 for j in range(0, N, 2):
     c = cyl("coin", 0.22, 0.05, (0, 0, -5), "gold", rot=(math.radians(90), 0, math.radians(45)), verts=32, bevel=0.01)
@@ -422,7 +372,7 @@ for o in col.objects:
         for fc in _fcurves(o.animation_data.action):
             for kp in fc.keyframe_points: kp.interpolation = "LINEAR"
 
-# ---------- Ĺ›wiatĹ‚o ----------
+# ---------- światło ----------
 def light(kind, loc, energy, color, size=1.0, rot=None):
     ld = bpy.data.lights.new(kind, kind); ld.energy = energy; ld.color = color
     if kind == "AREA": ld.size = size
@@ -434,13 +384,13 @@ def light(kind, loc, energy, color, size=1.0, rot=None):
 light("SUN", (0, 0, 10), 2.6, (1.0, 0.95, 0.9), size=3, rot=(math.radians(40), math.radians(-25), math.radians(-30)))
 light("AREA", (-6, 10, 9), 900, (0.45, 0.6, 1.0), size=10, rot=(math.radians(-35), math.radians(-30), 0))
 light("AREA", (10, -6, 7), 600, (0.55, 0.35, 1.0), size=8, rot=(math.radians(50), math.radians(30), 0))
-for p, e, c in (((CX + 2.2, CY - 1.2, 1.5), 120, (1, 0.5, 0.2)), ((LX, LY, 2.4), 150, (0.3, 0.55, 1.0)), ((KX, KY, 3.6), 160, (0.5, 0.3, 1.0)), ((MX, MY, 0.6), 80, (0.3, 1.0, 0.9))):
+for p, e, c in (((LX, LY, 2.4), 150, (0.3, 0.55, 1.0)), ((KX, KY, 3.6), 160, (0.5, 0.3, 1.0)), ((MX, MY - 1.8, 0.8), 90, (0.3, 1.0, 0.9))):
     light("POINT", p, e, c).data.shadow_soft_size = 0.4
 
 # ---------- kamera izometryczna ----------
-cd = bpy.data.cameras.new("cam"); cd.type = "ORTHO"; cd.ortho_scale = 23.5
+cd = bpy.data.cameras.new("cam"); cd.type = "ORTHO"; cd.ortho_scale = 19.5
 cam = bpy.data.objects.new("cam", cd); col.objects.link(cam); sc.camera = cam
-tgt = Vector((-1.05, 5.1, 1.2))
+tgt = Vector((2.3, 5.0, 1.6))
 cam.rotation_euler = (math.radians(54.7356), 0, math.radians(45))
 dirv = Vector((0, 0, 1)); dirv.rotate(cam.rotation_euler)
 cam.location = tgt + dirv * 40
