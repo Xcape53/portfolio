@@ -41,6 +41,11 @@ s = s.replace(".glyph { filter: drop-shadow(0 0 14px rgba(44,127,254,.55)) drop-
 s = s.replace("a przy scrollu odjeżdża i staje się logo w lewym górnym rogu.", "a przy scrollu jedzie razem z tekstem i upraszcza się (43, 7, 2 węzły) jak w animacji D3, w zależności od pozycji na ekranie.")
 # SeeSky: d3-celestial w tej samej wersji co w projekcie (d3 v3)
 s = s.replace('<script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>', '<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/d3-celestial@0.7.35/celestial.css">\n<script src="https://cdn.jsdelivr.net/npm/d3@3.5.17/d3.min.js"></script>\n<script src="https://cdn.jsdelivr.net/npm/d3-celestial@0.7.35/lib/d3.geo.projection.min.js"></script>\n<script src="https://cdn.jsdelivr.net/npm/d3-celestial@0.7.35/celestial.min.js"></script>', 1)
+# hero ma teraz jeden ekran wysokości: postęp przewijania hero był ~0/0, więc tekst znikał po pierwszym ruchu kółka.
+# Tekst i symbol po prostu przewijają się razem ze stroną.
+old_fade = '    if (!RM) { htext.style.transform = "translate3d(0," + (-heroP * 30) + "vh,0)"; htext.style.opacity = String(1 - clamp(heroP * 1.3 - 0.2, 0, 1)); }'
+assert old_fade in s
+s = s.replace(old_fade, "")
 # notatki domyślnie wyłączone
 s = s.replace('  root.classList.add("notes");\n', "")
 s = s.replace('aria-pressed="true">Notatki projektowe: wł.', 'aria-pressed="false">Notatki projektowe: wył.')
