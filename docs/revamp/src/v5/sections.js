@@ -51,7 +51,7 @@
       let best = 0, bd = 1e9; const mid = innerHeight * 0.5;
       rows.forEach((r, k) => { const b = r.getBoundingClientRect(), d = Math.abs(b.top + b.height / 2 - mid); if (d < bd) { bd = d; best = k; } });
       setAct(fine && hoverAct >= 0 && t - hoverT < 5 ? hoverAct : best);
-      if (!RM && t - slideT > 2.8) {
+      if (!RM && t - slideT > 5.5) {
         slideT = t; const imgs = [...media[act].querySelectorAll("img")]; if (imgs.length < 2) return;
         const k = imgs.findIndex((im) => im.classList.contains("on")); imgs[k].classList.remove("on"); const n = imgs[(k + 1) % imgs.length]; n.classList.add("on"); if (cap) cap.textContent = n.dataset.cap || "";
       }
@@ -184,33 +184,82 @@
     const base = new THREE.Mesh(new THREE.CylinderGeometry(0.9, 1.0, 0.16, 32), dark); base.position.y = -2.1; az.add(base);
     const ant = new THREE.Group(); ant.add(az); ant.position.set(0, -0.2, 0); scene.add(ant);
     for (let i = 1; i <= 3; i++) { const g = new THREE.Mesh(new THREE.RingGeometry(i * 1.3, i * 1.3 + 0.01, 96), new THREE.MeshBasicMaterial({ color: 0x2c7ffe, transparent: true, opacity: 0.25 / i, side: THREE.DoubleSide })); g.rotation.x = -Math.PI / 2; g.position.y = -2.28; scene.add(g); }
-    const sky = new THREE.Group(); scene.add(sky);
-    const sp = [], sc = []; for (let i = 0; i < 1400; i++) { const u = Math.random() * 2 - 1, th = Math.random() * Math.PI * 2, rr2 = 40, s = Math.sqrt(1 - u * u); sp.push(Math.cos(th) * s * rr2, u * rr2, Math.sin(th) * s * rr2); const b = 0.5 + Math.random() * 0.5; sc.push(b * 0.85, b * 0.9, b); }
-    const sg = new THREE.BufferGeometry(); sg.setAttribute("position", new THREE.Float32BufferAttribute(sp, 3)); sg.setAttribute("color", new THREE.Float32BufferAttribute(sc, 3));
-    sky.add(new THREE.Points(sg, new THREE.PointsMaterial({ size: 0.12, vertexColors: true, transparent: true, opacity: 0.9, sizeAttenuation: true })));
-    sky.rotation.z = 0.35;
-    const target = new THREE.Mesh(new THREE.SphereGeometry(0.25, 16, 12), new THREE.MeshBasicMaterial({ color: 0xffffff }));
-    const tRing = new THREE.Mesh(new THREE.RingGeometry(0.7, 0.78, 48), new THREE.MeshBasicMaterial({ color: 0xd6336c, transparent: true, opacity: 0.9, side: THREE.DoubleSide }));
+    // ---- niebo: prawdziwe gwiazdy i radioźródła (RA/Dec J2000, jak w Astropy SkyCoord), Gdańsk 54.35°N ----
+    cam.fov = 44; cam.updateProjectionMatrix();
+    const LAT = 54.35 * Math.PI / 180, SR = 40, D2R = Math.PI / 180;
+    const CAT = [["Cas A", 23.3908, 58.815, "radio source"], ["Cyg A", 19.9912, 40.7339, "radio galaxy"], ["Vega", 18.6156, 38.7837], ["Deneb", 20.6905, 45.2803], ["Altair", 19.8464, 8.8683],
+      ["Arcturus", 14.261, 19.1825], ["Capella", 5.2782, 45.998], ["Polaris", 2.5303, 89.2641], ["Betelgeuse", 5.9195, 7.4071], ["Rigel", 5.2423, -8.2016], ["Sirius", 6.7525, -16.7161],
+      ["Aldebaran", 4.5987, 16.5093], ["Procyon", 7.655, 5.225], ["Spica", 13.4199, -11.1613], ["Dubhe", 11.0621, 61.751], ["Alkaid", 13.7923, 49.3133]];
+    const TARGETS = ["Cas A", "Dubhe", "Vega", "Polaris", "Cyg A", "Alkaid", "Capella", "Deneb", "Arcturus", "Altair"];
+    // alt/az -> punkt na sferze (wysokość lekko spłaszczona, żeby niebo zmieściło się w kadrze; karta pokazuje prawdziwe wartości)
+    const horiz = (ra, dec, lst, out) => {
+      const H = lst - ra * 15 * D2R, d = dec * D2R;
+      const alt = Math.asin(Math.sin(LAT) * Math.sin(d) + Math.cos(LAT) * Math.cos(d) * Math.cos(H));
+      const az = Math.atan2(-Math.sin(H) * Math.cos(d), Math.cos(LAT) * Math.sin(d) - Math.sin(LAT) * Math.cos(d) * Math.cos(H));
+      const a2 = alt * 0.62; out.set(Math.cos(a2) * Math.sin(az) * SR, Math.sin(a2) * SR, -Math.cos(a2) * Math.cos(az) * SR); return [alt, az];
+    };
+    const NB = 1300, bgRa = [], bgDec = [], bp = new Float32Array(NB * 3), bc = [];
+    for (let i = 0; i < NB; i++) { bgRa.push(Math.random() * 24); bgDec.push(Math.asin(Math.random() * 2 - 1) / D2R); const b = 0.35 + Math.random() * 0.55; bc.push(b * 0.85, b * 0.9, b); }
+    const bgG = new THREE.BufferGeometry(); bgG.setAttribute("position", new THREE.BufferAttribute(bp, 3)); bgG.setAttribute("color", new THREE.Float32BufferAttribute(bc, 3));
+    scene.add(new THREE.Points(bgG, new THREE.PointsMaterial({ size: 0.11, vertexColors: true, transparent: true, opacity: 0.85 })));
+    const cp = new Float32Array(CAT.length * 3), cG = new THREE.BufferGeometry(); cG.setAttribute("position", new THREE.BufferAttribute(cp, 3));
+    scene.add(new THREE.Points(cG, new THREE.PointsMaterial({ size: 0.42, color: 0xffffff, transparent: true, opacity: 0.95 })));
+    // siatka RA/Dec: równoleżniki 0, 30, 60° i koła godzinne co 2 h
+    const GRID = []; [0, 30, 60].forEach((dd) => { for (let k = 0; k < 72; k++) GRID.push([k / 72 * 24, dd, (k + 1) / 72 * 24, dd]); });
+    for (let h = 0; h < 24; h += 2) for (let k = 0; k < 18; k++) GRID.push([h, -90 + k * 10, h, -80 + k * 10]);
+    const gp = new Float32Array(GRID.length * 6), gG = new THREE.BufferGeometry(); gG.setAttribute("position", new THREE.BufferAttribute(gp, 3));
+    scene.add(new THREE.LineSegments(gG, new THREE.LineBasicMaterial({ color: 0x2c7ffe, transparent: true, opacity: 0.16 })));
+    const tRing = new THREE.Mesh(new THREE.RingGeometry(0.75, 0.83, 48), new THREE.MeshBasicMaterial({ color: 0xd6336c, transparent: true, opacity: 0.9, side: THREE.DoubleSide }));
     const tHalo = new THREE.Mesh(new THREE.SphereGeometry(0.7, 16, 12), new THREE.MeshBasicMaterial({ color: 0xd6336c, transparent: true, opacity: 0.25, blending: THREE.AdditiveBlending, depthWrite: false }));
-    target.position.set(9, 10, -24); tRing.position.copy(target.position); tHalo.position.copy(target.position); sky.add(target, tRing, tHalo);
+    scene.add(tRing, tHalo);
     const beamG = new THREE.BufferGeometry().setFromPoints([new THREE.Vector3(), new THREE.Vector3()]);
     const beam = new THREE.Line(beamG, new THREE.LineDashedMaterial({ color: 0xd6336c, dashSize: 0.35, gapSize: 0.2, transparent: true, opacity: 0.85 })); scene.add(beam);
-    const focusW = new THREE.Vector3(), tw = new THREE.Vector3(), loc = new THREE.Vector3();
+    // podpisy w HTML (ostre, czytelne)
+    const lblBox = document.createElement("div"); lblBox.className = "sky"; lblBox.setAttribute("aria-hidden", "true"); dishEl.appendChild(lblBox);
+    const names = CAT.map((c) => { const e = document.createElement("span"); e.className = "sky__n mono"; e.textContent = c[0]; lblBox.appendChild(e); return e; });
+    const card = document.createElement("div"); card.className = "sky__card mono"; lblBox.appendChild(card);
+    const fmtRA = (h) => { const s = Math.round(h * 3600); return String(Math.floor(s / 3600)).padStart(2, "0") + "h " + String(Math.floor(s / 60) % 60).padStart(2, "0") + "m " + String(s % 60).padStart(2, "0") + "s"; };
+    const fmtDec = (d) => { const s = Math.round(Math.abs(d) * 3600); return (d < 0 ? "-" : "+") + String(Math.floor(s / 3600)).padStart(2, "0") + "° " + String(Math.floor(s / 60) % 60).padStart(2, "0") + "′ " + String(s % 60).padStart(2, "0") + "″"; };
+    const v = new THREE.Vector3(), tw = new THREE.Vector3(), focusW = new THREE.Vector3(), loc = new THREE.Vector3(), pr = new THREE.Vector3();
+    const wrap = (a) => Math.atan2(Math.sin(a), Math.cos(a));
+    let ti = 0, tNext = 0.5, cardKey = "";
+    const LST0 = 21.2 * 15 * D2R;
     return ({ t, dt, p }) => {
-      sky.rotation.y = t * 0.035;
-      target.getWorldPosition(tw); tRing.lookAt(cam.position);
+      const lst = LST0 + t * (2 * Math.PI / 90);   // doba gwiazdowa w 90 s
+      for (let i = 0; i < NB; i++) { const [alt] = horiz(bgRa[i], bgDec[i], lst, v); if (alt < 0) v.set(0, -999, 0); bp[i * 3] = v.x; bp[i * 3 + 1] = v.y; bp[i * 3 + 2] = v.z; }
+      bgG.attributes.position.needsUpdate = true;
+      const hz = CAT.map((c, i) => { const r = horiz(c[1], c[2], lst, v); cp[i * 3] = r[0] < 0 ? 0 : v.x; cp[i * 3 + 1] = r[0] < 0 ? -999 : v.y; cp[i * 3 + 2] = r[0] < 0 ? 0 : v.z; return { alt: r[0], az: r[1], pos: v.clone() }; });
+      cG.attributes.position.needsUpdate = true;
+      GRID.forEach((g, i) => { const [a1] = horiz(g[0], g[1], lst, v), x1 = v.x, y1 = v.y, z1 = v.z, [a2] = horiz(g[2], g[3], lst, v), ok = a1 > 0 && a2 > 0; gp.set(ok ? [x1, y1, z1, v.x, v.y, v.z] : [0, -999, 0, 0, -999, 0], i * 6); });
+      gG.attributes.position.needsUpdate = true;
+      // wybór celu: następny z listy, który jest wysoko nad horyzontem
+      if (t >= tNext) { for (let k = 1; k <= TARGETS.length; k++) { const c = CAT.findIndex((q) => q[0] === TARGETS[(ti + k) % TARGETS.length]); pr.copy(hz[c].pos).project(cam); if (hz[c].alt > 12 * D2R && Math.abs(pr.x) < 0.7 && pr.y > -0.2 && pr.y < 0.8 && pr.z < 1) { ti = (ti + k) % TARGETS.length; break; } } tNext = t + 7; }
+      const ci = CAT.findIndex((q) => q[0] === TARGETS[ti]), tg = hz[ci];
+      tw.copy(tg.pos); tRing.position.copy(tw); tHalo.position.copy(tw); tRing.lookAt(cam.position);
       loc.copy(tw).sub(ant.position).normalize();
-      const azA = Math.atan2(loc.x, loc.z), elA = Math.asin(clamp(loc.y, -1, 1));
-      az.rotation.y = lerp(az.rotation.y, azA, Math.min(1, dt * 2.2));
-      elev.rotation.x = lerp(elev.rotation.x, Math.PI / 2 - Math.max(0.15, elA), Math.min(1, dt * 2.2));
+      const azA = Math.atan2(loc.x, loc.z), elA = Math.asin(clamp(loc.y, -1, 1)), k = Math.min(1, dt * 1.6);
+      az.rotation.y += wrap(azA - az.rotation.y) * k;
+      elev.rotation.x = lerp(elev.rotation.x, Math.PI / 2 - Math.max(0.15, elA), k);
       horn.getWorldPosition(focusW);
       const pos = beamG.attributes.position; pos.setXYZ(0, focusW.x, focusW.y, focusW.z); const end = focusW.clone().lerp(tw, 0.35); pos.setXYZ(1, end.x, end.y, end.z); pos.needsUpdate = true; beam.computeLineDistances(); beam.material.dashOffset = -t * 0.6;
       tHalo.scale.setScalar(1 + Math.sin(t * 2.4) * 0.15);
-      const ang = -0.5 + ptr.sx * 0.35 + p * 0.5;
-      cam.position.set(Math.sin(ang) * 12, 0.9 - ptr.sy * 0.6 - p * 0.6, Math.cos(ang) * 12); cam.lookAt(0.8, 0.9, -1.2);
+      const ang = -0.35 + ptr.sx * 0.3 + p * 0.3;
+      cam.position.set(Math.sin(ang) * 14, 0.4 - ptr.sy * 0.6 - p * 0.6, Math.cos(ang) * 14); cam.lookAt(0.2, 3.4, -3);
+      cam.updateMatrixWorld();
+      // podpisy: rzut na ekran
+      const W = dishEl.clientWidth, Hh = dishEl.clientHeight;
+      hz.forEach((h, i) => {
+        pr.copy(h.pos).project(cam); const on = h.alt > 0 && pr.z < 1 && Math.abs(pr.x) < 1.05 && Math.abs(pr.y) < 1.05 && i !== ci;
+        names[i].style.opacity = on ? "1" : "0"; if (on) names[i].style.transform = "translate3d(" + ((pr.x + 1) / 2 * W + 8).toFixed(1) + "px," + ((1 - pr.y) / 2 * Hh - 6).toFixed(1) + "px,0)";
+      });
+      pr.copy(tw).project(cam);
+      const cx = (pr.x + 1) / 2 * W, cy = (1 - pr.y) / 2 * Hh, left = cx > W * 0.6;
+      card.style.transform = "translate3d(" + (left ? cx - 22 : cx + 22).toFixed(1) + "px," + (cy - 10).toFixed(1) + "px,0) translateX(" + (left ? "-100%" : "0") + ")";
+      const c = CAT[ci], key = c[0] + Math.round(tg.alt / D2R * 10) + Math.round(tg.az / D2R * 10);
+      if (key !== cardKey) { cardKey = key; const azd = ((tg.az / D2R) + 360) % 360;
+        card.innerHTML = "<b>" + c[0] + "</b>" + (c[3] ? " <i>" + c[3] + "</i>" : "") + "<br>RA " + fmtRA(c[1]) + "<br>Dec " + fmtDec(c[2]) + "<br>Alt " + (tg.alt / D2R).toFixed(1) + "°  Az " + azd.toFixed(1) + "°"; }
     };
   });
-
   // ===== LabInc: pętla z Blendera, gra tylko gdy widać =====
   const fac = $(".factory video");
   if (fac && !RM) {
@@ -293,7 +342,6 @@
       const e = document.createElementNS(NS, "path"); e.setAttribute("d", d); e.setAttribute("class", cls); e.setAttribute("pathLength", "1"); msym.appendChild(e);
       if (cls === "spark") sparks.push(e);
     }));
-    const rc = document.createElementNS(NS, "circle"); rc.setAttribute("r", "34"); rc.setAttribute("class", "root"); msym.appendChild(rc);
     if (RM) sparks.forEach((s) => (s.style.display = "none"));
     else { watch(msym); onTick((t) => { if (!isOn(msym)) return; const o = 0.06 - ((t * 0.32) % 1.4); sparks.forEach((s) => s.setAttribute("stroke-dashoffset", o.toFixed(4))); }); }
   }

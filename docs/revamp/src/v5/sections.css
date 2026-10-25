@@ -103,6 +103,12 @@ html.js-anim .in .ticks i:nth-child(5) { transition-delay: .24s; } html.js-anim 
 .shots .play span { width: 30px; height: 30px; border-radius: 50%; background: rgba(255,255,255,.92); display: grid; place-items: center; }
 .shots .play svg { width: 11px; height: 11px; fill: #09080c; margin-left: 2px; }
 
+/* SeeSky: podpisy gwiazd i karta celu */
+.sky { position: absolute; inset: 0; pointer-events: none; overflow: hidden; }
+.sky__n { position: absolute; left: 0; top: 0; font-size: .64rem; color: #9fb0cc; white-space: nowrap; transition: opacity .4s; }
+.sky__card { position: absolute; left: 0; top: 0; font-size: .68rem; line-height: 1.55; color: #dfe6f2; padding: 8px 10px; border-radius: 6px; background: rgba(2,8,22,.78); border: 1px solid rgba(214,51,108,.6); white-space: nowrap; }
+.sky__card b { color: #fff; font-weight: 600; }
+.sky__card i { font-style: normal; color: #f07aa3; }
 /* JobManager 2D */
 .jm { background: linear-gradient(180deg, #0b1220, #070c16); --row: 11%; font-size: clamp(10px, .86vw, 13px); }
 .jm__steps { position: absolute; left: 4%; right: 4%; top: 4.5%; display: flex; gap: 6%; list-style: none; margin: 0; padding: 0 0 10px; border-bottom: 1px solid rgba(255,255,255,.08); color: #6f7a8d; font-size: 1em; }
@@ -135,7 +141,7 @@ html.js-anim .in .ticks i:nth-child(5) { transition-delay: .24s; } html.js-anim 
 .bell i { position: absolute; right: -.35em; top: -.35em; width: 1.35em; height: 1.35em; border-radius: 50%; background: #ff4f6d; color: #fff; font: 700 .72em/1.35em var(--f-main); font-style: normal; text-align: center; }
 
 /* LabInc: wideo z Blendera */
-.factory { background: #020816; }
+.factory { background: none; outline: none; overflow: visible; }
 .factory video { position: absolute; inset: 0; width: 100%; height: 100%; object-fit: cover; display: block; }
 .factory__labels { list-style: none; margin: 0; padding: 0; position: absolute; inset: 0; pointer-events: none; }
 .factory__labels li { position: absolute; left: var(--lx); top: var(--ly); transform: translate(-50%, -100%); font-size: .7rem; letter-spacing: .12em; text-transform: uppercase; color: #dfe6f2; padding: 5px 9px; border-radius: 5px; background: rgba(2,8,22,.72); border: 1px solid rgba(255,255,255,.14); white-space: nowrap; }

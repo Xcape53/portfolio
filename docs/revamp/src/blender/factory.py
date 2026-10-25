@@ -20,7 +20,8 @@ sc.render.engine = "BLENDER_EEVEE"
 sc.render.fps = FPS
 sc.frame_start, sc.frame_end = 1, F
 sc.render.resolution_x, sc.render.resolution_y = 1200, 900
-sc.render.film_transparent = False
+sc.render.film_transparent = True
+sc.render.image_settings.color_mode = "RGBA"
 sc.view_settings.view_transform = "AgX"
 sc.view_settings.look = "AgX - Medium High Contrast"
 ee = sc.eevee
@@ -170,7 +171,10 @@ def empty(name, loc):
     e = bpy.data.objects.new(name, None); e.location = loc; col.objects.link(e); return e
 
 # podĹ‚oga
-bpy.ops.mesh.primitive_plane_add(size=80, location=(1.5, 3, 0)); floor = link(bpy.context.active_object); floor.data.materials.append(fl)
+# płyta fundamentów (diorama), tło przezroczyste
+floor = box("foundation", (17.2, 15.4, 0.5), (-1.05, 5.1, -0.25), fl, bevel=0.08)
+box("foundation_trim", (17.26, 15.46, 0.06), (-1.05, 5.1, -0.14), "blue", bevel=0.0)
+box("foundation_under", (16.8, 15.0, 0.4), (-1.05, 5.1, -0.55), "dark", bevel=0.05)
 
 # ---------- taĹ›mociÄ…gi ----------
 def belt(a, b):
@@ -281,7 +285,7 @@ for (x, y) in ():
     box("lamp_head", (0.4, 0.22, 0.1), (x, y, 2.62), "grey", 0.02)
     box("lamp_glow", (0.32, 0.16, 0.02), (x, y, 2.565), "glowB", 0.0)
 # skrzynie
-for (x, y, s) in ((-4.0, 2.4, 0.7), (-3.3, 2.5, 0.55), (-3.7, 3.2, 0.6), (7.9, 2.0, 0.7), (8.6, 2.3, 0.5)):
+for (x, y, s) in ((-4.0, 2.4, 0.7), (-3.3, 2.5, 0.55), (-3.7, 3.2, 0.6), (5.9, 1.8, 0.7), (6.6, 2.0, 0.5)):
     box("crate", (s, s, s), (x, y, s / 2), "grey", 0.04, rot=(0, 0, random.random() * 0.4))
     box("crate_band", (s + 0.02, s * 0.2, s + 0.02), (x, y, s / 2), "blue", 0.0, rot=(0, 0, 0))
 
@@ -434,14 +438,15 @@ for p, e, c in (((CX + 2.2, CY - 1.2, 1.5), 120, (1, 0.5, 0.2)), ((LX, LY, 2.4),
     light("POINT", p, e, c).data.shadow_soft_size = 0.4
 
 # ---------- kamera izometryczna ----------
-cd = bpy.data.cameras.new("cam"); cd.type = "ORTHO"; cd.ortho_scale = 20.0
+cd = bpy.data.cameras.new("cam"); cd.type = "ORTHO"; cd.ortho_scale = 23.5
 cam = bpy.data.objects.new("cam", cd); col.objects.link(cam); sc.camera = cam
-tgt = Vector((-0.9, 3.9, 2.7))
+tgt = Vector((-1.05, 5.1, 1.2))
 cam.rotation_euler = (math.radians(54.7356), 0, math.radians(45))
 dirv = Vector((0, 0, 1)); dirv.rotate(cam.rotation_euler)
 cam.location = tgt + dirv * 40
 
 sc.render.image_settings.file_format = "PNG"
+sc.render.image_settings.color_mode = "RGBA"
 sc.render.filepath = OUT.rstrip("/\\") + "/f_"
 if MODE == "all":
     bpy.ops.render.render(animation=True)

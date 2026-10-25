@@ -23,6 +23,13 @@ s = s.replace("const oy = heroP * h * L.sp,", "const oy = scrollY * L.sp * 0.6,"
 s = s.replace(".field { position: fixed !important; inset: 0; width: 100%; height: 100%; z-index: 0;", ".field { position: fixed !important; inset: 0; width: 100%; height: 100%; z-index: -1;")
 # telefon: bez tego przeglądarka renderuje 980 px i pomniejsza stronę
 s = s.replace('<meta name="claude:viewport-fit-sides" content="cover">', '<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">\n<meta name="description" content="Piotr Jeleniewicz: software development and system integration. Automation tools, API integrations and desktop applications.">', 1)
+# przewijanie natywne: Lenis zacinał się i blokował kółko myszy (także w v4)
+s = s.replace('<script src="https://cdn.jsdelivr.net/npm/lenis@1.1.13/dist/lenis.min.js"></script>\n', "")
+s = s.replace("</style>", "@media (prefers-reduced-motion: no-preference) { html { scroll-behavior: smooth; } }\n</style>", 1)
+# szablon to fragment bez nagłówka: bez charset przeglądarka psuje polskie znaki
+s = '<!doctype html>\n<html lang="en">\n<meta charset="utf-8">\n' + s
+# symbol bez kropki w węźle głównym (prośba użytkownika)
+s = s.replace("    G.add(rootM, rootH);\n", "")
 # notatki domyślnie wyłączone
 s = s.replace('  root.classList.add("notes");\n', "")
 s = s.replace('aria-pressed="true">Notatki projektowe: wł.', 'aria-pressed="false">Notatki projektowe: wył.')
@@ -47,7 +54,7 @@ for k, f in IM.items():
 for k, f in VI.items():
     if "%%VID_" + k + "%%" in s: s = s.replace("%%VID_" + k + "%%", "data:video/" + f.suffix[1:] + ";base64," + b64(f))
 # podpisy fabryki: rzut punktów sceny z Blendera (factory.py) na kadr
-LBL = {"miner": "13.4%;--ly:21.8%", "smelter": "39.4%;--ly:52.7%", "sell": "76.2%;--ly:28.2%", "lab": "76.9%;--ly:62.0%"}
+LBL = {"miner": "15.7%;--ly:22.2%", "smelter": "37.8%;--ly:48.5%", "sell": "69.1%;--ly:27.6%", "lab": "69.7%;--ly:56.4%"}
 for k, v in LBL.items(): s = s.replace("%%LBL_" + k + "%%", v)
 left = re.findall(r"%%[A-Z]+_\w+%%", s); assert not left, left
 assert not any(c in s for c in "–—"), "dash"
