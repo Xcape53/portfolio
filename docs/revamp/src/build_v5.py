@@ -46,6 +46,8 @@ s = s.replace('<script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128
 old_fade = '    if (!RM) { htext.style.transform = "translate3d(0," + (-heroP * 30) + "vh,0)"; htext.style.opacity = String(1 - clamp(heroP * 1.3 - 0.2, 0, 1)); }'
 assert old_fade in s
 s = s.replace(old_fade, "")
+# hero: pełne zdanie zamiast równoważnika (humanizer)
+s = s.replace('I build applications and automation tools that connect APIs, data and AI services. Final semester of Electronics and Telecommunications at Gdańsk University of Technology, so software that talks to hardware is familiar ground.', "I build applications and automation tools that connect APIs, data and AI services. I'm in my final semester of Electronics and Telecommunications at Gdańsk University of Technology, so software that talks to hardware is familiar ground.", 1)
 # notatki domyślnie wyłączone
 s = s.replace('  root.classList.add("notes");\n', "")
 s = s.replace('aria-pressed="true">Notatki projektowe: wł.', 'aria-pressed="false">Notatki projektowe: wył.')
