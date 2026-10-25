@@ -141,17 +141,17 @@
   const skyEl = $("#skymap");
   if (skyEl && window.Celestial) {
     const LAT = 54.35, LON = 18.65, D2R = Math.PI / 180, DATA = "https://ofrohn.github.io/data/";
-    let mapW = Math.round(Math.min(skyEl.clientWidth, skyEl.clientHeight) - 8);   // cały krąg horyzontu mieści się w ramce
-    addEventListener("resize", () => { const w = Math.round(Math.min(skyEl.clientWidth, skyEl.clientHeight) - 8); if (Math.abs(w - mapW) > 4) { mapW = w; Celestial.resize({ width: w }); } });
+    let mapW = Math.round(skyEl.clientWidth);   // zbliżenie na niebo północne, krawędzie wygaszone maską
+    addEventListener("resize", () => { const w = Math.round(skyEl.clientWidth); if (Math.abs(w - mapW) > 4) { mapW = w; Celestial.resize({ width: w }); } });
     Celestial.display({
-      width: mapW, projection: "airy", geopos: [LAT, LON], follow: "zenith", location: true, container: "celestial-map", datapath: DATA, interactive: true, zoomextend: 1, controls: false,
-      background: { fill: "#0a0e17", opacity: 1, stroke: "#1a2235", width: 1 },
-      stars: { show: true, limit: 5.2, colors: true, style: { fill: "#ffffff", opacity: 1 }, designation: false, propername: true,
-        propernameStyle: { fill: "#8899bb", font: "10px 'Spline Sans', sans-serif", align: "left", baseline: "top" }, propernameLimit: 1.6, size: 6, exponent: -0.28 },
-      dsos: { show: true, limit: 4.5, colors: true, style: { fill: "#444444", stroke: "#444444", width: 2, opacity: 1 }, names: false, namesLimit: 3, nameStyle: { fill: "#556677", font: "10px 'Spline Sans', sans-serif" } },
+      width: mapW, projection: "airy", geopos: [LAT, LON], follow: "center", center: [37.9, 86, 0], zoomlevel: 1.55, container: "celestial-map", datapath: DATA, interactive: true, zoomextend: 4, controls: false,
+      background: { fill: "#0a0e17", opacity: 0, stroke: "#0a0e17", width: 0 },
+      stars: { show: true, limit: 4.6, colors: true, style: { fill: "#ffffff", opacity: 1 }, designation: false, propername: true,
+        propernameStyle: { fill: "#8899bb", font: "10px 'Spline Sans', sans-serif", align: "left", baseline: "top" }, propernameLimit: 1.3, size: 6, exponent: -0.28 },
+      dsos: { show: false, limit: 4.5, colors: true, style: { fill: "#444444", stroke: "#444444", width: 2, opacity: 1 }, names: false, namesLimit: 3, nameStyle: { fill: "#556677", font: "10px 'Spline Sans', sans-serif" } },
       constellations: { names: true, namesType: "iau", nameStyle: { fill: "#3a4c78", font: "600 10.5px 'Spline Sans', sans-serif", align: "center", baseline: "middle" }, lines: true, lineStyle: { stroke: "#2a3555", width: 1.2, opacity: 0.6 }, bounds: false },
-      mw: { show: true, style: { fill: "#0d1525", opacity: 0.15 } },
-      lines: { graticule: { show: true, stroke: "#1a2235", width: 0.5, opacity: 0.4, lon: { pos: [] }, lat: { pos: [] } }, equatorial: { show: true, stroke: "#2244aa", width: 0.8, opacity: 0.3 }, ecliptic: { show: false }, galactic: { show: false }, supergalactic: { show: false } },
+      mw: { show: false, style: { fill: "#0d1525", opacity: 0.15 } },
+      lines: { graticule: { show: false, stroke: "#1a2235", width: 0.5, opacity: 0.4, lon: { pos: [] }, lat: { pos: [] } }, equatorial: { show: false, stroke: "#2244aa", width: 0.8, opacity: 0.3 }, ecliptic: { show: false }, galactic: { show: false }, supergalactic: { show: false } },
       horizon: { show: true, stroke: "#b22f57", width: 3, fill: "#000000", opacity: 0.5 },
       planets: { show: false }, daylight: { show: false },
       formFields: { location: false, general: false, stars: false, dsos: false, constellations: false, lines: false, other: false, download: false }
@@ -163,7 +163,7 @@
     Promise.all([fetch(DATA + "stars.6.json").then((r) => r.json()), fetch(DATA + "starnames.json").then((r) => r.json())]).then(([st, nm]) => {
       STARS = st.features.filter((f) => f.properties.mag < 4.6).map((f) => { const n = nm[f.id] || {}; return { id: f.id, lon: f.geometry.coordinates[0], dec: f.geometry.coordinates[1], mag: f.properties.mag, name: n.name || "", desig: n.desig || n.bayer || n.flam || "", con: n.c || "" }; });
     }).catch(() => {});
-    const beam = $("#sky-beam"), ring = $("#sky-ring"), dish = $("#sky-dish"), feed = skyEl.querySelector(".skymap__dish .feed"), card = $("#sky-card"), tag = $("#sky-tag");
+    const beam = $("#sky-beam"), ring = $("#sky-ring"), dish = $("#sky-dish"), feed = skyEl.querySelector(".skymap__dish .feed"), card = $("#sky-card");
     const fmtRA = (deg) => { const s = Math.round(((deg + 360) % 360) / 15 * 3600); return String(Math.floor(s / 3600) % 24).padStart(2, "0") + "h " + String(Math.floor(s / 60) % 60).padStart(2, "0") + "m " + String(s % 60).padStart(2, "0") + "s"; };
     const fmtDec = (d) => { const s = Math.round(Math.abs(d) * 3600); return (d < 0 ? "-" : "+") + String(Math.floor(s / 3600)).padStart(2, "0") + "° " + String(Math.floor(s / 60) % 60).padStart(2, "0") + "′"; };
     const altaz = (raDeg, dec) => {
@@ -205,8 +205,7 @@
       if (star !== st.star) {
         st.star = star;
         if (star) { const ra = (star.lon + 360) % 360, [alt, az] = altaz(ra, star.dec);
-          card.innerHTML = "<b>" + (star.name || star.desig + " " + star.con) + "</b>" + (star.name && star.desig ? " <i>" + star.desig + " " + star.con + "</i>" : "") + "<br>mag " + star.mag.toFixed(2) + "<br>RA " + fmtRA(ra) + "<br>Dec " + fmtDec(star.dec) + "<br>Alt " + alt.toFixed(1) + "°  Az " + az.toFixed(1) + "°";
-          tag.textContent = (st.mx !== null ? "pointing at " : "tracking ") + (star.name || star.desig + " " + star.con); }
+          card.innerHTML = "<b>" + (star.name || (star.desig ? star.desig + " " + star.con : "HIP " + star.id)) + "</b>" + (star.name && star.desig ? " <i>" + star.desig + " " + star.con + "</i>" : "") + "<br>mag " + star.mag.toFixed(2) + "<br>RA " + fmtRA(ra) + "<br>Dec " + fmtDec(star.dec) + "<br>Alt " + alt.toFixed(1) + "°  Az " + az.toFixed(1) + "°"; }
         card.classList.toggle("on", !!star);
       }
       if (star) {   // karta obok gwiazdy, zawsze w całości wewnątrz ramki
