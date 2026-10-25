@@ -188,7 +188,7 @@
       let target = null, star = null;
       if (st.mx !== null) {
         target = [st.mx, st.my]; let bd = 18;
-        STARS.forEach((s) => { if (altaz((s.lon + 360) % 360, s.dec)[0] < 0) return; const p = proj(s); if (!p) return; const d = Math.hypot(p[0] - st.mx, p[1] - st.my); if (d < bd) { bd = d; star = s; target = p; } });
+        STARS.forEach((s) => { const p = proj(s); if (!p) return; const d = Math.hypot(p[0] - st.mx, p[1] - st.my); if (d < bd) { bd = d; star = s; target = p; } });
       } else {
         if (t > st.autoT) { st.autoT = t + 6; for (let k = 1; k <= AUTO.length; k++) { const s = STARS.find((q) => q.name === AUTO[(st.auto + k) % AUTO.length]); if (s && altaz(((s.lon + 360) % 360), s.dec)[0] > 15) { st.auto = (st.auto + k) % AUTO.length; break; } } }
         star = STARS.find((q) => q.name === AUTO[st.auto]) || null; if (star) target = proj(star);
