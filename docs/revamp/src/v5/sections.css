@@ -254,7 +254,8 @@ html.js-anim .reveal.in { opacity: 1; transform: none; }
 .cinfo .sep { margin: 0 10px; color: var(--text); }
 .foot { display: flex; justify-content: space-between; flex-wrap: wrap; gap: 12px; margin-top: clamp(60px, 10vh, 110px); padding-block: 22px calc(60px + env(safe-area-inset-bottom, 0px)); border-top: 1px solid rgba(255,255,255,.08); color: var(--text); font-size: .9rem; }
 .foot nav { display: flex; gap: 22px; }
-.foot__note { flex-basis: 100%; order: 3; margin: 6px 0 0; font-size: .82rem; color: #7f8aa0; max-width: 46rem; }
+.foot__note { flex: 0 0 100%; order: 3; margin: 6px 0 0; font-size: .82rem; color: #7f8aa0; }
+.foot__note em { display: block; max-width: 46rem; }
 .foot a { text-decoration: none; }
 .foot a { position: relative; transition: color .3s; }
 .foot a::after { content: ""; position: absolute; left: 0; right: 0; bottom: -3px; height: 1px; background: var(--primary); transform: scaleX(0); transform-origin: 0 50%; transition: transform .45s var(--ease); }

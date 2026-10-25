@@ -69,4 +69,16 @@ LBL = {"miner": "15.7%;--ly:22.2%", "smelter": "37.8%;--ly:48.5%", "sell": "69.1
 for k, v in LBL.items(): s = s.replace("%%LBL_" + k + "%%", v)
 left = re.findall(r"%%[A-Z]+_\w+%%", s); assert not left, left
 assert not any(c in s for c in "–—"), "dash"
+# przełącznik EN / PL między plikami
+s = s.replace('<a href="#pl" class="lang"><b>EN</b> / PL</a>', '<a href="v5-pl.html" class="lang" lang="pl"><b>EN</b> / PL</a>', 1)
 (here.parent / "v5.html").write_text(s, encoding="utf8"); print("ok", len(s))
+# wersja polska: słownik z v5/pl.py; każdy angielski tekst musi się znaleźć
+import importlib.util
+spec = importlib.util.spec_from_file_location("pl", here / "v5" / "pl.py"); pl = importlib.util.module_from_spec(spec); spec.loader.exec_module(pl)
+spl, missing = s, []
+for en, tr in pl.PL:
+    if en not in spl: missing.append(en[:70]); continue
+    spl = spl.replace(en, tr)
+assert not missing, missing
+assert not any(c in spl for c in "\u2013\u2014"), "dash"
+(here.parent / "v5-pl.html").write_text(spl, encoding="utf8"); print("ok pl", len(spl))
