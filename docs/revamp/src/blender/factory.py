@@ -399,6 +399,73 @@ cam.rotation_euler = (math.radians(54.7356), 0, math.radians(45))
 dirv = Vector((0, 0, 1)); dirv.rotate(cam.rotation_euler)
 cam.location = tgt + dirv * 40
 
+# ---------- styl rysowany jak w grze LabInc: płaskie kolory w 3 tonach, cienie, czarny kontur ----------
+STYLE = "toon"
+if STYLE == "toon":
+    sc.view_settings.view_transform = "Standard"; sc.view_settings.look = "None"
+    PAL = {  # kolory z interfejsu i grafik LabInc
+        "paint_white": "#e1e2e5", "paint_grey": "#9a9ea6", "paint_blue": "#f47b20", "paint_violet": "#f47b20",
+        "metal_dark": "#3b3f46", "steel": "#a7acb4", "rubber": "#2c2f34", "hazY": "#f6b333",
+        "glow_blue": "#ffe2c4", "glow_violet": "#f47b20", "glow_orange": "#ffd27a", "glow_cyan": "#8fdc5a",
+        "glass": "#9fd2ff", "screen": "#2f9bf0", "gold": "#3cc46b", "dollar": "#3cc46b",
+        "rock": "#4b4e54", "ore": "#5a5e65", "ink": "#111111",
+    }
+    GLOW = {"glow_blue": 0.25, "glow_violet": 0.35, "glow_orange": 0.4, "glow_cyan": 0.3, "screen": 0.35, "dollar": 0.2}
+    # podstawa: jasnoszary wierzch z delikatnymi fugami, pomarańczowe boki jak platformy w grze
+    br.inputs["Color1"].default_value = srgb("#c9cbd0"); br.inputs["Color2"].default_value = srgb("#c3c5ca"); br.inputs["Mortar"].default_value = srgb("#a8abb1")
+    mix.inputs[6].default_value = srgb("#2c2f34"); mix.inputs[7].default_value = srgb("#4b4f56")
+    # platforma jak w grze: cienki jasny wierzch, grubszy pomarańczowy bok
+    fo = bpy.data.objects.get("foundation"); fu = bpy.data.objects.get("foundation_under")
+    if fo and fu:
+        fo.scale = (1, 1, 0.4); fo.location.z = -0.1
+        fu.scale = (fo.dimensions.x / fu.dimensions.x, fo.dimensions.y / fu.dimensions.y, 1.6); fu.location.z = -0.52
+    # kratownica wieży wydobywczej na pomarańczowo, jak wieża KW w grze
+    for o in col.objects:
+        if o.name.startswith(("miner_leg", "brace", "railing", "post", "ladder_rail", "rung")):
+            o.data.materials.clear(); o.data.materials.append(M["blue"])
+    for nm in ("foundation_under", "foundation_trim"):
+        o = bpy.data.objects.get(nm)
+        if o: o.data.materials.clear(); o.data.materials.append(M["blue"])
+    def toonify(m):
+        nt = m.node_tree; P = nt.nodes.get("Principled BSDF"); out = nt.nodes.get("Material Output")
+        if not P or not out: return
+        bc = P.inputs["Base Color"]
+        if m.name in PAL: bc.default_value = srgb(PAL[m.name])
+        src = bc.links[0].from_socket if bc.links else None
+        dif = nt.nodes.new("ShaderNodeBsdfDiffuse"); dif.inputs["Color"].default_value = (1, 1, 1, 1)
+        s2r = nt.nodes.new("ShaderNodeShaderToRGB"); nt.links.new(dif.outputs[0], s2r.inputs[0])
+        bw = nt.nodes.new("ShaderNodeRGBToBW"); nt.links.new(s2r.outputs[0], bw.inputs[0])
+        ramp = nt.nodes.new("ShaderNodeValToRGB"); cr = ramp.color_ramp; cr.interpolation = "CONSTANT"
+        cr.elements[0].position = 0.0; cr.elements[0].color = (0.5, 0.5, 0.52, 1)
+        cr.elements[1].position = 0.45; cr.elements[1].color = (1, 1, 1, 1)
+        e = cr.elements.new(0.12); e.color = (0.74, 0.74, 0.76, 1)
+        nt.links.new(bw.outputs[0], ramp.inputs[0])
+        mul = nt.nodes.new("ShaderNodeMix"); mul.data_type = "RGBA"; mul.blend_type = "MULTIPLY"; mul.inputs[0].default_value = 1.0
+        nt.links.new(ramp.outputs[0], mul.inputs[6])
+        if src: nt.links.new(src, mul.inputs[7])
+        else: mul.inputs[7].default_value = bc.default_value
+        em = nt.nodes.new("ShaderNodeEmission"); nt.links.new(mul.outputs[2], em.inputs[0])
+        em.inputs[1].default_value = 1.0 + GLOW.get(m.name, 0.0)
+        shader = em.outputs[0]
+        a = P.inputs["Alpha"].default_value
+        if a < 1:   # szkło kopuły: półprzezroczyste płaskie
+            tr = nt.nodes.new("ShaderNodeBsdfTransparent"); mx = nt.nodes.new("ShaderNodeMixShader"); mx.inputs[0].default_value = 0.35
+            nt.links.new(tr.outputs[0], mx.inputs[1]); nt.links.new(em.outputs[0], mx.inputs[2]); shader = mx.outputs[0]
+        nt.links.new(shader, out.inputs["Surface"])
+    for m in list(bpy.data.materials):
+        if m.use_nodes: toonify(m)
+    # światło: jedno słońce daje czytelne cienie, słabe wypełnienie bez kolorowych odblasków
+    for o in [o for o in col.objects if o.type == "LIGHT"]:
+        if o.data.type != "SUN": bpy.data.objects.remove(o, do_unlink=True)
+        else: o.data.energy = 3.2; o.data.color = (1, 1, 1)
+    # czarny kontur (Freestyle), grubość jak kreska w grze
+    sc.render.use_freestyle = True; sc.render.line_thickness_mode = "ABSOLUTE"; sc.render.line_thickness = 1.0
+    fs = bpy.context.view_layer.freestyle_settings; fs.crease_angle = math.radians(134)
+    ls = fs.linesets[0] if len(fs.linesets) else fs.linesets.new("outline")
+    ls.select_silhouette = True; ls.select_border = True; ls.select_crease = True; ls.select_external_contour = True
+    if ls.linestyle is None: ls.linestyle = bpy.data.linestyles.new("ink")
+    ls.linestyle.color = (0.03, 0.03, 0.035); ls.linestyle.thickness = 2.6
+
 sc.render.image_settings.file_format = "PNG"
 sc.render.image_settings.color_mode = "RGBA"
 sc.render.filepath = OUT.rstrip("/\\") + "/f_"
