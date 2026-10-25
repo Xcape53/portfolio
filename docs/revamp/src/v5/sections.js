@@ -141,8 +141,8 @@
   const skyEl = $("#skymap");
   if (skyEl && window.Celestial) {
     const LAT = 54.35, LON = 18.65, D2R = Math.PI / 180, DATA = "https://ofrohn.github.io/data/";
-    let mapW = Math.round(skyEl.clientWidth);   // zbliżenie na niebo północne, krawędzie wygaszone maską
-    addEventListener("resize", () => { const w = Math.round(skyEl.clientWidth); if (Math.abs(w - mapW) > 4) { mapW = w; Celestial.resize({ width: w }); } });
+    let mapW = Math.round(skyEl.clientWidth * 1.15);   // zbliżenie na niebo północne; canvas większy od ramki, krawędzie wygaszone maską
+    addEventListener("resize", () => { const w = Math.round(skyEl.clientWidth * 1.15); if (Math.abs(w - mapW) > 4) { mapW = w; Celestial.resize({ width: w }); } });
     Celestial.display({
       width: mapW, projection: "airy", geopos: [LAT, LON], follow: "center", center: [37.9, 86, 0], zoomlevel: 1.55, container: "celestial-map", datapath: DATA, interactive: true, zoomextend: 4, controls: false,
       background: { fill: "#0a0e17", opacity: 0, stroke: "#0a0e17", width: 0 },
@@ -156,6 +156,9 @@
       planets: { show: false }, daylight: { show: false },
       formFields: { location: false, general: false, stars: false, dsos: false, constellations: false, lines: false, other: false, download: false }
     });
+    // d3-celestial nadpisuje style canvasa: wyśrodkuj go ręcznie (większy od ramki, więc wygaszanie działa ze wszystkich stron)
+    const centerMap = () => { const cv = $("#celestial-map canvas"); if (cv) Object.assign(cv.style, { position: "absolute", left: "50%", top: "50%", transform: "translate(-50%, -50%)", margin: "0" }); };
+    centerMap(); setTimeout(centerMap, 300); addEventListener("resize", () => setTimeout(centerMap, 100));
     // kółko myszy przewija stronę (zatrzymane przed d3), przeciąganie dalej obraca niebo
     $("#celestial-map").addEventListener("wheel", (e) => e.stopPropagation(), true);
     // gwiazdy do najeżdżania: te same dane co mapa (HIP, jasność, nazwy, gwiazdozbiory)

@@ -352,24 +352,27 @@ for j, (sym, hexc) in enumerate(ELS):
         edge = min(1, d / 0.3, max(0, (Lp - d) / 0.3)) if on else 0
         place(cube, f, p, edge)
 
-# monety nad lejem: jedna na każdy sprzedany pierwiastek
+# znaki dolara nad lejem: jeden na każdy sprzedany pierwiastek (czytelniej niż monety)
 Lsell = path_len(to_sell)
+cash = mat("dollar", srgb("#ffd54a"), 0.3, 0.5, emit=srgb("#ffbf1f"), es=3.5)
 for j in range(0, N, 2):
-    c = cyl("coin", 0.22, 0.05, (0, 0, -5), "gold", rot=(math.radians(90), 0, math.radians(45)), verts=32, bevel=0.01)
+    cu = bpy.data.curves.new("dollar", "FONT"); cu.body = "$"; cu.size = 1.7; cu.align_x = "CENTER"; cu.align_y = "CENTER"; cu.extrude = 0.1; cu.bevel_depth = 0.018
+    if font: cu.font = font
+    c = bpy.data.objects.new("dollar", cu); col.objects.link(c); c.data.materials.append(cash)
+    c.rotation_euler = (math.radians(90), 0, math.radians(45))   # stoi pionowo, przodem do kamery izometrycznej
     for f in range(1, F + 2):
         t = ((f - 1) / FPS - j * DT - Lsell / V) % T
-        k = t / 1.4
+        k = t / 1.5
         if k < 1:
-            place(c, f, (KX, KY, 3.4 + k * 1.6), math.sin(min(1, k * 1.2) * math.pi) ** 0.6)
+            place(c, f, (KX, KY, 3.6 + k * 2.4), math.sin(min(1, k * 1.15) * math.pi) ** 0.5)
         else:
-            place(c, f, (KX, KY, 3.4), 0)
-    spin(c, "Z", 3)
+            place(c, f, (KX, KY, 3.3), 0)
 spin(vort, "Z", 2); spin(vort2, "Z", -3); spin(vort3, "Z", 4)
 for o in [o for o in col.objects if o.name.startswith("sink_vane")]:
     pv = empty("vane_p", (KX, KY, 2.95)); parent([o], pv); spin(pv, "Z", -2)
 
 for o in col.objects:
-    if o.animation_data and o.animation_data.action and o.name.startswith(("el_", "ore", "Ico", "coin")):
+    if o.animation_data and o.animation_data.action and o.name.startswith(("el_", "ore", "Ico", "coin", "dollar")):
         for fc in _fcurves(o.animation_data.action):
             for kp in fc.keyframe_points: kp.interpolation = "LINEAR"
 

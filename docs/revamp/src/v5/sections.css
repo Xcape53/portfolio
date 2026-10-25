@@ -32,12 +32,12 @@ html.js-anim .reveal.in { opacity: 1; transform: none; }
 .win { position: absolute; left: var(--x); top: var(--y); width: var(--w); margin: 0; border-radius: 9px; overflow: hidden; background: #0b0f15;
   outline: 1px solid rgba(255,255,255,.09); box-shadow: 0 18px 40px rgba(0,0,0,.45); filter: brightness(.62) saturate(.85);
   transition: filter .7s var(--ease), box-shadow .7s var(--ease), outline-color .7s var(--ease); will-change: transform; }
-.win figcaption { display: flex; justify-content: space-between; gap: 10px; align-items: center; padding: 7px 11px; background: #141a23; border-bottom: 1px solid rgba(255,255,255,.06);
+.win figcaption { display: flex; justify-content: space-between; gap: 10px; align-items: center; padding: 7px 11px; background: #1d2128; border-bottom: 1px solid #2a2f37; box-shadow: inset 0 1px 0 rgba(255,255,255,.05);
   font: 500 .72rem/1 var(--f-mono); color: #8d97a8; transition: background .7s var(--ease), color .7s var(--ease); }
 .win figcaption small { font-size: .68rem; opacity: .75; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
 .win img { display: block; width: 100%; aspect-ratio: 16 / 10; object-fit: cover; object-position: top; }
-.win.focus { filter: none; box-shadow: 0 34px 70px rgba(0,0,0,.6), 0 0 0 1px rgba(44,127,254,.55); outline-color: transparent; }
-.win.focus figcaption { background: linear-gradient(90deg, rgba(44,127,254,.32), rgba(100,46,253,.22)); color: var(--white); }
+.win.focus { filter: none; box-shadow: 0 34px 70px rgba(0,0,0,.6), 0 0 0 1px rgba(255,255,255,.16); outline-color: transparent; }
+.win.focus figcaption { background: #2b3038; border-bottom-color: #383e48; color: var(--white); }
 
 /* ---------- od układu do kodu: warstwy ---------- */
 .layers { display: grid; grid-template-columns: minmax(0, 6fr) minmax(0, 6fr); gap: clamp(32px, 5vw, 80px); align-items: start; }
@@ -109,9 +109,14 @@ html.js-anim .in .sem__bar i { transform: none; }
 .shots .play svg { width: 11px; height: 11px; fill: #09080c; margin-left: 2px; }
 
 /* SeeSky: mapa d3-celestial jak w projekcie, ikona teleskopu i wiązka za kursorem */
-.skymap { position: relative; z-index: 1; aspect-ratio: 4 / 3; overflow: hidden; cursor: crosshair; background: radial-gradient(ellipse 58% 58% at 50% 50%, rgba(8,11,20,.96) 55%, rgba(8,11,20,0) 100%); }
-#celestial-map { position: absolute; inset: 0; display: grid; place-items: center; -webkit-mask-image: radial-gradient(ellipse 50% 50% at 50% 50%, #000 62%, transparent 100%); mask-image: radial-gradient(ellipse 50% 50% at 50% 50%, #000 62%, transparent 100%); }
-#celestial-map canvas { display: block; max-width: 100%; max-height: 100%; }
+.skymap { position: relative; z-index: 1; aspect-ratio: 4 / 3; overflow: hidden; cursor: crosshair; }
+/* równe wygaszanie ze wszystkich czterech stron (dwa gradienty, część wspólna) */
+#celestial-map { position: absolute !important; inset: 0 !important; width: 100% !important; min-width: 0 !important; max-width: 100% !important; height: 100% !important; margin: 0 !important; display: block;
+  -webkit-mask-image: linear-gradient(90deg, transparent, #000 16%, #000 84%, transparent), linear-gradient(180deg, transparent, #000 18%, #000 82%, transparent); -webkit-mask-composite: source-in;
+  mask-image: linear-gradient(90deg, transparent, #000 16%, #000 84%, transparent), linear-gradient(180deg, transparent, #000 18%, #000 82%, transparent); mask-composite: intersect; }
+/* canvas wyśrodkowany i większy od ramki z każdej strony, więc wygaszanie działa na wszystkich krawędziach */
+#celestial-map canvas { position: absolute; left: 50%; top: 50%; transform: translate(-50%, -50%); display: block; }
+#celestial-map > :not(canvas) { display: none; }
 .skymap__beam { position: absolute; inset: 0; width: 100%; height: 100%; pointer-events: none; overflow: visible; }
 #sky-beam { stroke: #d44a73; stroke-width: 1.6; stroke-dasharray: 6 5; filter: drop-shadow(0 0 4px rgba(178,47,87,.8)); }
 #sky-ring { fill: none; stroke: #d44a73; stroke-width: 1.6; opacity: 0; transition: opacity .25s; }
@@ -120,7 +125,7 @@ html.js-anim .in .sem__bar i { transform: none; }
 .skymap__dish .refl { stroke: #d44a73; stroke-width: 6; }
 .skymap__dish .leg { stroke-width: 2.4; }
 .skymap__dish .feed { fill: #d44a73; stroke: none; }
-.skymap__dish .base, .skymap__dish .pivot { fill: #b22f57; stroke: #b22f57; }
+.skymap__dish .base, .skymap__dish .pivot { fill: #b22f57; stroke: #b22f57; stroke-width: 2; }
 .skymap__card { position: absolute; left: 0; top: 0; font-size: .68rem; line-height: 1.55; color: #e0e4f0; padding: 8px 10px; border-radius: 6px; background: rgba(15,20,41,.92); border: 1px solid #b22f57; box-shadow: 0 0 16px rgba(178,47,87,.3); white-space: nowrap; pointer-events: none; opacity: 0; transition: opacity .2s; }
 .skymap__card.on { opacity: 1; }
 .skymap__card b { color: #fff; font-weight: 600; }
@@ -268,3 +273,6 @@ html.js-anim .in .sem__bar i { transform: none; }
 html.frame-away .f-bl, html.frame-away .f-br { translate: 0 220%; opacity: 0; }
 .notes-toggle { left: 16px; transform: none; font-size: 11px; padding: 8px 12px; bottom: calc(46px + env(safe-area-inset-bottom, 0px)); }
 html.notes .stage3d[data-note]::after, html.notes .pmedia[data-note]::after { top: auto; bottom: calc(100% + 8px); }
+
+/* SeeSky: bez poświaty projektu za mapą */
+#p-seesky .pmedia::before { display: none; }

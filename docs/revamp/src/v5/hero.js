@@ -34,7 +34,8 @@
       cx = lerp(cx, goal, 1 - Math.exp(-dt * 6));
       const shown = Math.max(2, Math.round(cx)), simple = shown <= 2;
       // obrót: powoli w spoczynku, za kursorem i przy scrollu (pochyla się, gdy wyjeżdża z ekranu)
-      const ry = Math.sin(idle * 0.25) * 0.35 + ptr.sx * 0.45 + (u - Math.min(0.5, u0)) * 1.6, rx = Math.sin(idle * 0.18) * 0.12 - ptr.sy * 0.25 + (u - Math.min(0.5, u0)) * 0.9, rz = -idle * 0.04;
+      // większość czasu frontem, jak na zdjęciach: małe kołysanie, umiarkowana reakcja na kursor i scroll, bez ciągłego obrotu
+      const du = u - Math.min(0.5, u0), ry = Math.sin(idle * 0.22) * 0.1 + ptr.sx * 0.22 + du * 0.9, rx = Math.sin(idle * 0.17) * 0.05 - ptr.sy * 0.14 + du * 0.5, rz = Math.sin(idle * 0.11) * 0.025;
       const T = [bx, by, 0];
       const proj = (q) => { const r3 = rot(q, rx, ry, rz), z = T[2] + r3[2] * gs, k = CAMZ / (CAMZ - z); return [W / 2 + (T[0] + r3[0] * gs) * k * ppu, H / 2 - (T[1] + r3[1] * gs) * k * ppu, k]; };
       // fizyka węzłów: sprężyna do celu albo do rodzica, drżenie, ucieczka od kursora
@@ -64,10 +65,13 @@
       grad.addColorStop(0, "#2c7ffe"); grad.addColorStop(1, "#642efd");
       const core = 0.19 * gs * ppu, kk = sp[0][2];
       g2.lineCap = "round"; g2.lineJoin = "round"; g2.strokeStyle = grad;
-      const path = (b) => { g2.beginPath(); b.forEach((n, k) => (k ? g2.lineTo(sp[n][0], sp[n][1]) : g2.moveTo(sp[n][0], sp[n][1]))); };
-      [[6, 0.05], [4.2, 0.07], [2.9, 0.11], [1.9, 0.22]].forEach(([w, a]) => { g2.globalAlpha = a; g2.lineWidth = core * w * kk; branches.forEach((b) => { if (b.length > 1) { path(b); g2.stroke(); } }); });
-      g2.globalAlpha = 1; g2.lineWidth = core * kk; branches.forEach((b) => { if (b.length > 1) { path(b); g2.stroke(); } });
-      g2.globalAlpha = 0.55; g2.strokeStyle = "#e6eeff"; g2.lineWidth = core * 0.38 * kk; branches.forEach((b) => { if (b.length > 1) { path(b); g2.stroke(); } });
+      // obie gałęzie jako jedna ścieżka przez korzeń: bez podwójnej poświaty na środkowym węźle
+      const one = branches[1].slice().reverse().concat(branches[0].slice(1));
+      const path = () => { g2.beginPath(); one.forEach((n, k) => (k ? g2.lineTo(sp[n][0], sp[n][1]) : g2.moveTo(sp[n][0], sp[n][1]))); };
+      const draw = one.length > 1;
+      [[6, 0.05], [4.2, 0.07], [2.9, 0.11], [1.9, 0.22]].forEach(([w, a]) => { g2.globalAlpha = a; g2.lineWidth = core * w * kk; if (draw) { path(); g2.stroke(); } });
+      g2.globalAlpha = 1; g2.lineWidth = core * kk; if (draw) { path(); g2.stroke(); }
+      g2.globalAlpha = 0.55; g2.strokeStyle = "#e6eeff"; g2.lineWidth = core * 0.38 * kk; if (draw) { path(); g2.stroke(); }
       g2.globalAlpha = 1;
     });
   }
