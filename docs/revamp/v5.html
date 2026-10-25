@@ -461,9 +461,11 @@ html.js-anim .ai.in .flow__step:nth-child(8) { transition-delay: 0.64s; }
 .flow { grid-template-columns: repeat(5, minmax(0, 1fr)); }
 .cs__note--e { text-anchor: start; fill: #7fb0ff; }
 /* H wyśrodkowane w bramce, podpis zakłócenia d nad strzałką */
-.cs__sym--h { dominant-baseline: central; }
+
 .cs__dlab { fill: #ffb79a; font: 500 14px var(--f-main); text-anchor: middle; }
 .cs__dsym { font: italic 500 18px "Cambria Math", "Cambria", "Times New Roman", serif; fill: #fff; }
+.cs__dsub { fill: #c99a87; font: italic 12px var(--f-main); text-anchor: middle; }
+.cs__dlab--r { text-anchor: end; }
 
 /* ---------- notatki ---------- */
 :where([data-note]) { position: relative; }
@@ -849,15 +851,15 @@ html.notes .hero__stage[data-note]::after { top: 76px; }
         <figure class="cs" aria-labelledby="cs-cap">
           <div class="cs__scroll">
           <svg class="cs__svg" viewBox="0 0 1000 430" role="img" aria-labelledby="cs-title">
-            <title id="cs-title">Block diagram of the workflow: task in, research and plan, a human approval gate, a split into blocks, parallel coding agents in a sandbox, review with a loop back to the agents, a second approval gate and merge, plus an outer loop of user feedback; untrusted input enters through guardrails.</title>
+            <title id="cs-title">Block diagram of the workflow: task in, research and plan, a human approval gate, a split into blocks, parallel coding agents in a sandbox, review with a loop back to the agents, a second approval gate and merge, plus an outer loop of user feedback; outside content such as web pages and issues reaches the agents only through guardrails, because it can hide instructions.</title>
             <defs>
               <marker id="cs-ar" viewBox="0 0 10 7" refX="9.5" refY="3.5" markerWidth="8" markerHeight="6.4" orient="auto-start-reverse"><path d="M0 0 L10 3.5 L0 7 L2.6 3.5 z"/></marker>
               <filter id="cs-glow" x="-50%" y="-50%" width="200%" height="200%"><feGaussianBlur stdDeviation="2.2"/></filter>
             </defs>
             <path class="cs__fb" d="M900 230 V32 H55 V215" marker-end="url(#cs-ar)"/>
             <text class="cs__note" x="250" y="22">user feedback</text>
-            <path class="cs__dist" d="M500 58 V69" marker-end="url(#cs-ar)"/>
-            <text class="cs__dlab" x="500" y="52"><tspan class="cs__dsym">d</tspan><tspan dx="6">untrusted input</tspan></text>
+            <path class="cs__dist" d="M424 84 H448" marker-end="url(#cs-ar)"/>
+            <text class="cs__dlab cs__dlab--r" x="418" y="80">unauthorized data</text><text class="cs__dsub cs__dlab--r" x="418" y="96">web pages, issues, docs</text>
             <g class="cs__guard"><rect x="450" y="71" width="100" height="26" rx="3"/><text class="cs__cap cs__cap--in" x="500" y="89">guardrails</text></g>
             <path class="cs__dist" d="M500 97 V108" marker-end="url(#cs-ar)"/>
             <path class="cs__ln" d="M10 230 H40" marker-end="url(#cs-ar)"/>
@@ -867,7 +869,7 @@ html.notes .hero__stage[data-note]::after { top: 76px; }
             <path class="cs__ln" d="M68 230 H88" marker-end="url(#cs-ar)"/>
             <g class="cs__blk" data-k="1"><rect x="90" y="200" width="104" height="60" rx="3"/><text class="cs__sym" x="142.0" y="238"><tspan>G</tspan><tspan class="cs__sub" dy="6">1</tspan></text><text class="cs__cap" x="142.0" y="284">research &amp; plan</text></g>
             <path class="cs__ln" d="M194 230 H212" marker-end="url(#cs-ar)"/>
-            <g class="cs__gate" data-k="1"><rect x="214" y="210" width="40" height="40" rx="3"/><text class="cs__sym cs__sym--h" x="234" y="230">H</text><text class="cs__cap" x="234" y="274">approve</text></g>
+            <g class="cs__gate" data-k="1"><rect x="214" y="210" width="40" height="40" rx="3"/><text class="cs__sym cs__sym--h" x="231.2" y="238">H</text><text class="cs__cap" x="234" y="274">approve</text></g>
             <path class="cs__ln" d="M254 230 H276" marker-end="url(#cs-ar)"/>
             <g class="cs__blk" data-k="2"><rect x="278" y="200" width="80" height="60" rx="3"/><text class="cs__sym" x="318.0" y="238"><tspan>G</tspan><tspan class="cs__sub" dy="6">2</tspan></text><text class="cs__cap" x="318.0" y="284">split</text></g>
             <path class="cs__ln" d="M358 230 H385" marker-end="url(#cs-ar)"/>
@@ -885,7 +887,7 @@ html.notes .hero__stage[data-note]::after { top: 76px; }
             <g class="cs__blk" data-k="4"><rect x="592" y="200" width="88" height="60" rx="3"/><text class="cs__sym" x="636.0" y="238"><tspan>G</tspan><tspan class="cs__sub" dy="6">4</tspan></text><text class="cs__cap" x="636.0" y="284">review</text></g>
             <path class="cs__ln" d="M680 230 H712" marker-end="url(#cs-ar)"/>
             <circle class="cs__dot" cx="700" cy="230" r="3.2"/>
-            <g class="cs__gate" data-k="5"><rect x="714" y="210" width="40" height="40" rx="3"/><text class="cs__sym cs__sym--h" x="734" y="230">H</text><text class="cs__cap" x="734" y="274">approve</text></g>
+            <g class="cs__gate" data-k="5"><rect x="714" y="210" width="40" height="40" rx="3"/><text class="cs__sym cs__sym--h" x="731.2" y="238">H</text><text class="cs__cap" x="734" y="274">approve</text></g>
             <path class="cs__ln" d="M754 230 H776" marker-end="url(#cs-ar)"/>
             <g class="cs__blk" data-k="5"><rect x="778" y="200" width="80" height="60" rx="3"/><text class="cs__sym" x="818.0" y="238"><tspan>G</tspan><tspan class="cs__sub" dy="6">5</tspan></text><text class="cs__cap" x="818.0" y="284">merge</text></g>
             <path class="cs__ln" d="M858 230 H950" marker-end="url(#cs-ar)"/>

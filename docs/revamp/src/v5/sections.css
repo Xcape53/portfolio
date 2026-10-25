@@ -365,6 +365,8 @@ html.js-anim .ai.in .flow__step:nth-child(8) { transition-delay: 0.64s; }
 .flow { grid-template-columns: repeat(5, minmax(0, 1fr)); }
 .cs__note--e { text-anchor: start; fill: #7fb0ff; }
 /* H wyśrodkowane w bramce, podpis zakłócenia d nad strzałką */
-.cs__sym--h { dominant-baseline: central; }
+
 .cs__dlab { fill: #ffb79a; font: 500 14px var(--f-main); text-anchor: middle; }
 .cs__dsym { font: italic 500 18px "Cambria Math", "Cambria", "Times New Roman", serif; fill: #fff; }
+.cs__dsub { fill: #c99a87; font: italic 12px var(--f-main); text-anchor: middle; }
+.cs__dlab--r { text-anchor: end; }
