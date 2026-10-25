@@ -415,7 +415,7 @@ html.js-anim .ai.in .flow__step:nth-child(8) { transition-delay: 0.64s; }
 .cs { margin: clamp(32px, 6vh, 52px) 0 0; padding: clamp(18px, 2.4vw, 30px) clamp(14px, 2vw, 26px) 16px; border: 1px solid rgba(255,255,255,.08); border-radius: 14px;
   background: radial-gradient(120% 140% at 50% 0%, rgba(20,34,74,.45), rgba(6,10,22,.85) 70%); }
 .cs__scroll { overflow-x: auto; -webkit-overflow-scrolling: touch; }
-.cs__svg { display: block; width: 100%; min-width: 900px; height: auto; font-family: var(--f-main); }
+.cs__svg { display: block; width: 100%; min-width: 760px; height: auto; font-family: var(--f-main); }
 .cs__svg marker path { fill: #c9d3e3; }
 .cs__ln { fill: none; stroke: #c9d3e3; stroke-width: 1.4; }
 .cs__fb { fill: none; stroke: #7f9cc9; stroke-width: 1.4; }
@@ -454,6 +454,11 @@ html.js-anim .ai.in .flow__step:nth-child(8) { transition-delay: 0.64s; }
 .flow__n sub { font-size: .65em; }
 @media (prefers-reduced-motion: reduce) { .cs__pulse { display: none; } }
 .cs__hint { display: none; }
+.cs__cell { fill: #111a30; stroke: rgba(201,211,227,.5); stroke-width: 1; }
+.cs__mini { fill: #c9d3e3; font: 500 11.5px var(--f-main); text-anchor: middle; }
+.cs__ln--s { stroke-width: 1.1; }
+.cs__cap--r { text-anchor: end; }
+.flow { grid-template-columns: repeat(5, minmax(0, 1fr)); }
 
 /* ---------- notatki ---------- */
 :where([data-note]) { position: relative; }
@@ -838,84 +843,73 @@ html.notes .hero__stage[data-note]::after { top: 76px; }
 
         <figure class="cs" aria-labelledby="cs-cap">
           <div class="cs__scroll">
-          <svg class="cs__svg" viewBox="0 0 1440 500" role="img" aria-labelledby="cs-title">
-            <title id="cs-title">Schemat blokowy pracy: zadanie na wejściu, osiem etapów, dwie bramki akceptacji człowieka, równoległi agenci programujący w sandboxie, wewnętrzna pętla recenzji i zewnętrzna pętla z prawdziwego użycia; niezaufane wejście trafia jako zakłócenie przez zabezpieczenia.</title>
+          <svg class="cs__svg" viewBox="0 0 1000 470" role="img" aria-labelledby="cs-title">
+            <title id="cs-title">Schemat blokowy pracy: zadanie na wejściu, badanie i plan, bramka akceptacji człowieka, podział na bloki, równoległi agenci programujący w sandboxie, niezależna recenzja z pętlą powrotną do agentów, druga bramka akceptacji i scalenie oraz zewnętrzna pętla z prawdziwego użycia; niezaufane wejście trafia jako zakłócenie przez zabezpieczenia.</title>
             <defs>
-              <marker id="cs-ar" viewBox="0 0 10 7" refX="9.5" refY="3.5" markerWidth="9" markerHeight="7" orient="auto-start-reverse"><path d="M0 0 L10 3.5 L0 7 L2.6 3.5 z"/></marker>
-              <filter id="cs-glow" x="-50%" y="-50%" width="200%" height="200%"><feGaussianBlur stdDeviation="2.4"/></filter>
+              <marker id="cs-ar" viewBox="0 0 10 7" refX="9.5" refY="3.5" markerWidth="8" markerHeight="6.4" orient="auto-start-reverse"><path d="M0 0 L10 3.5 L0 7 L2.6 3.5 z"/></marker>
+              <filter id="cs-glow" x="-50%" y="-50%" width="200%" height="200%"><feGaussianBlur stdDeviation="2.2"/></filter>
             </defs>
-            <!-- pętla zewnętrzna: problemy z prawdziwego użycia wracają do wymagań -->
-            <path id="cs-outer" class="cs__fb" d="M1404 270 V64 H70 V255" marker-end="url(#cs-ar)"/>
-            <text class="cs__note" x="737" y="52">problemy z prawdziwego użycia stają się kolejnymi wymaganiami</text>
-            <!-- zakłócenie: niezaufane wejście przez zabezpieczenia do sandboxa -->
-            <path class="cs__dist" d="M994 84 V103" marker-end="url(#cs-ar)"/>
-            <text class="cs__sig" x="1006" y="96">d</text><text class="cs__note cs__note--l" x="1022" y="96">niezaufane wejście: strony, zgłoszenia, wyniki narzędzi</text>
-            <g class="cs__guard"><rect x="944" y="105" width="100" height="28" rx="3"/><text class="cs__cap cs__cap--in" x="994" y="124">zabezpieczenia</text></g>
-            <path class="cs__dist" d="M994 133 V149" marker-end="url(#cs-ar)"/>
+            <!-- pętla zewnętrzna -->
+            <path class="cs__fb" d="M966 260 V44 H60 V245" marker-end="url(#cs-ar)"/>
+            <text class="cs__note" x="513" y="34">problemy z prawdziwego użycia stają się kolejnymi wymaganiami</text>
+            <!-- zakłócenie d przez zabezpieczenia -->
+            <path class="cs__dist" d="M615 62 V89" marker-end="url(#cs-ar)"/>
+            <text class="cs__sig" x="626" y="76">d</text><text class="cs__note cs__note--l" x="642" y="76">niezaufane dane: strony, zgłoszenia, narzędzia</text>
+            <g class="cs__guard"><rect x="565" y="91" width="100" height="28" rx="3"/><text class="cs__cap cs__cap--in" x="615" y="110">zabezpieczenia</text></g>
+            <path class="cs__dist" d="M615 119 V138" marker-end="url(#cs-ar)"/>
             <!-- tor główny -->
-            <path class="cs__ln" d="M14 270 H54" marker-end="url(#cs-ar)"/>
-            <text class="cs__sig" x="18" y="258">u</text><text class="cs__cap" x="30" y="296">zadanie</text>
-            <circle class="cs__sum" cx="70" cy="270" r="14"/><path class="cs__x" d="M60 260 L80 280 M80 260 L60 280"/>
-            <text class="cs__sign" x="48" y="258">+</text><text class="cs__sign" x="82" y="250">+</text>
-            <path class="cs__ln" d="M84 270 H98" marker-end="url(#cs-ar)"/>
-            <g class="cs__blk" data-k="1"><rect x="100" y="240" width="120" height="60" rx="3"/><text class="cs__sym" x="160.0" y="278.0"><tspan>G</tspan><tspan class="cs__sub" dy="6">1</tspan></text><text class="cs__cap" x="160.0" y="322">wymagania</text></g>
-            <path class="cs__ln" d="M220 270 H248" marker-end="url(#cs-ar)"/>
-            <g class="cs__blk" data-k="2"><rect class="cs__stack" x="258" y="230" width="108" height="60" rx="3"/><rect class="cs__stack" x="254" y="235" width="108" height="60" rx="3"/><rect x="250" y="240" width="108" height="60" rx="3"/><text class="cs__sym" x="304" y="278"><tspan>G</tspan><tspan class="cs__sub" dy="6">2</tspan></text><text class="cs__cap" x="304" y="322">badanie systemu ×3</text></g>
-            <path class="cs__ln" d="M370 270 H398" marker-end="url(#cs-ar)"/>
-            <g class="cs__blk" data-k="3"><rect x="400" y="240" width="120" height="60" rx="3"/><text class="cs__sym" x="460.0" y="278.0"><tspan>G</tspan><tspan class="cs__sub" dy="6">3</tspan></text><text class="cs__cap" x="460.0" y="322">istniejące rozwiązania</text></g>
-            <path class="cs__ln" d="M520 270 H548" marker-end="url(#cs-ar)"/>
-            <g class="cs__blk" data-k="4"><rect x="550" y="240" width="120" height="60" rx="3"/><text class="cs__sym" x="610.0" y="278.0"><tspan>G</tspan><tspan class="cs__sub" dy="6">4</tspan></text><text class="cs__cap" x="610.0" y="322">plan</text></g>
-            <path class="cs__ln" d="M670 270 H688" marker-end="url(#cs-ar)"/>
-            <g class="cs__gate" data-k="4"><rect x="690" y="248" width="48" height="44" rx="3"/><text class="cs__sym" x="714" y="278">H</text><text class="cs__cap" x="714" y="314">akceptacja</text></g>
-            <path class="cs__ln" d="M738 270 H758" marker-end="url(#cs-ar)"/>
-            <g class="cs__blk" data-k="5"><rect x="760" y="240" width="100" height="60" rx="3"/><text class="cs__sym" x="810.0" y="278.0"><tspan>G</tspan><tspan class="cs__sub" dy="6">5</tspan></text><text class="cs__cap" x="810.0" y="322">podział</text></g>
-            <path class="cs__ln" d="M860 270 H876" marker-end="url(#cs-ar)"/>
-            <circle class="cs__sum" cx="892" cy="270" r="14"/><path class="cs__x" d="M882 260 L902 280 M902 260 L882 280"/>
-            <text class="cs__sign" x="870" y="258">+</text><text class="cs__sign" x="904" y="304">−</text>
-            <!-- sandbox z równoległymi agentami -->
-            <rect class="cs__sbx" x="930" y="150" width="128" height="242" rx="6"/>
-            <text class="cs__tag" x="938" y="386">sandbox · każdy na swojej gałęzi</text>
-            <path class="cs__ln" d="M906 270 H924 M924 190 V350"/>
-            <circle class="cs__dot" cx="924" cy="270" r="3.5"/>
-            <path class="cs__ln" d="M924 190 H942" marker-end="url(#cs-ar)"/><path class="cs__ln" d="M924 270 H942" marker-end="url(#cs-ar)"/><path class="cs__ln" d="M924 350 H942" marker-end="url(#cs-ar)"/>
-            <g class="cs__blk" data-k="6"><rect x="944" y="168" width="100" height="44" rx="3"/><text class="cs__sym cs__sym--s" x="994" y="197"><tspan>G</tspan><tspan class="cs__sub" dy="5">6a</tspan></text>
-              <rect x="944" y="248" width="100" height="44" rx="3"/><text class="cs__sym cs__sym--s" x="994" y="277"><tspan>G</tspan><tspan class="cs__sub" dy="5">6b</tspan></text>
-              <rect x="944" y="328" width="100" height="44" rx="3"/><text class="cs__sym cs__sym--s" x="994" y="357"><tspan>G</tspan><tspan class="cs__sub" dy="5">6c</tspan></text></g>
-            <path class="cs__ln" d="M1044 190 H1066 M1044 350 H1066 M1066 190 V350 M1044 270 H1066"/>
-            <circle class="cs__dot" cx="1066" cy="270" r="3.5"/>
-            <path class="cs__ln" d="M1066 270 H1082" marker-end="url(#cs-ar)"/>
-            <g class="cs__blk" data-k="7"><rect x="1084" y="240" width="100" height="60" rx="3"/><text class="cs__sym" x="1134.0" y="278.0"><tspan>G</tspan><tspan class="cs__sub" dy="6">7</tspan></text><text class="cs__cap" x="1134.0" y="322">recenzja</text></g>
-            <path class="cs__ln" d="M1184 270 H1218" marker-end="url(#cs-ar)"/>
-            <circle class="cs__dot" cx="1204" cy="270" r="3.5"/>
-            <g class="cs__gate" data-k="8"><rect x="1220" y="248" width="48" height="44" rx="3"/><text class="cs__sym" x="1244" y="278">H</text><text class="cs__cap" x="1244" y="314">akceptacja</text></g>
-            <path class="cs__ln" d="M1268 270 H1286" marker-end="url(#cs-ar)"/>
-            <g class="cs__blk" data-k="8"><rect x="1288" y="240" width="96" height="60" rx="3"/><text class="cs__sym" x="1336.0" y="278.0"><tspan>G</tspan><tspan class="cs__sub" dy="6">8</tspan></text><text class="cs__cap" x="1336.0" y="322">scalenie</text></g>
-            <path class="cs__ln" d="M1384 270 H1430" marker-end="url(#cs-ar)"/>
-            <circle class="cs__dot" cx="1404" cy="270" r="3.5"/>
-            <text class="cs__sig" x="1418" y="258">y</text><text class="cs__cap" x="1424" y="296">zmiana</text>
-            <!-- pętla wewnętrzna: uwagi recenzenta wracają przed agentów -->
-            <path id="cs-inner" class="cs__fb cs__fb--in" d="M1204 270 V440 H892 V285" marker-end="url(#cs-ar)"/>
-            <text class="cs__sig" x="1050" y="430">e</text><text class="cs__note" x="1048" y="462">uwagi recenzenta: blok, który nie przejdzie, wraca, aż testy przejdą</text>
-            <!-- sygnały biegnące po torach -->
+            <path class="cs__ln" d="M10 260 H45" marker-end="url(#cs-ar)"/>
+            <text class="cs__sig" x="14" y="248">u</text><text class="cs__cap" x="30" y="286">zadanie</text>
+            <circle class="cs__sum" cx="60" cy="260" r="13"/><path class="cs__x" d="M51 251 L69 269 M69 251 L51 269"/>
+            <text class="cs__sign" x="40" y="249">+</text><text class="cs__sign" x="73" y="239">+</text>
+            <path class="cs__ln" d="M73 260 H90" marker-end="url(#cs-ar)"/>
+            <g class="cs__blk" data-k="1"><rect x="92" y="200" width="234" height="112" rx="3"/><text class="cs__sym" x="209" y="232"><tspan>G</tspan><tspan class="cs__sub" dy="6">1</tspan></text><rect class="cs__cell" x="102" y="252" width="46" height="40" rx="2"/><text class="cs__mini" x="125" y="276">wymag.</text><path class="cs__ln cs__ln--s" d="M148 272 H157" marker-end="url(#cs-ar)"/><rect class="cs__cell" x="158" y="252" width="46" height="40" rx="2"/><text class="cs__mini" x="181" y="270">badanie</text><text class="cs__mini" x="181" y="284">×3</text><path class="cs__ln cs__ln--s" d="M204 272 H213" marker-end="url(#cs-ar)"/><rect class="cs__cell" x="214" y="252" width="46" height="40" rx="2"/><text class="cs__mini" x="237" y="270">gotowe</text><text class="cs__mini" x="237" y="284">rozw.</text><path class="cs__ln cs__ln--s" d="M260 272 H269" marker-end="url(#cs-ar)"/><rect class="cs__cell" x="270" y="252" width="46" height="40" rx="2"/><text class="cs__mini" x="293" y="276">plan</text><text class="cs__cap" x="209" y="336">badanie i plan</text></g>
+            <path class="cs__ln" d="M326 260 H340" marker-end="url(#cs-ar)"/>
+            <g class="cs__gate" data-k="1"><rect x="342" y="240" width="40" height="40" rx="3"/><text class="cs__sym" x="362" y="268">H</text><text class="cs__cap" x="362" y="304">zgoda</text></g>
+            <path class="cs__ln" d="M382 260 H398" marker-end="url(#cs-ar)"/>
+            <g class="cs__blk" data-k="2"><rect x="400" y="232" width="72" height="56" rx="3"/><text class="cs__sym" x="436" y="268"><tspan>G</tspan><tspan class="cs__sub" dy="6">2</tspan></text><text class="cs__cap" x="436" y="312">podział</text></g>
+            <path class="cs__ln" d="M472 260 H495" marker-end="url(#cs-ar)"/>
+            <circle class="cs__sum" cx="510" cy="260" r="13"/><path class="cs__x" d="M501 251 L519 269 M519 251 L501 269"/>
+            <text class="cs__sign" x="491" y="249">+</text><text class="cs__sign" x="523" y="293">−</text>
+            <!-- sandbox -->
+            <rect class="cs__sbx" x="547" y="140" width="126" height="242" rx="6"/>
+            <text class="cs__tag" x="553" y="376">sandbox · każdy na swojej gałęzi</text>
+            <path class="cs__ln" d="M523 260 H538 M538 180 V340"/>
+            <circle class="cs__dot" cx="538" cy="260" r="3.2"/>
+            <path class="cs__ln" d="M538 180 H556" marker-end="url(#cs-ar)"/><path class="cs__ln" d="M538 260 H556" marker-end="url(#cs-ar)"/><path class="cs__ln" d="M538 340 H556" marker-end="url(#cs-ar)"/>
+            <g class="cs__blk" data-k="3"><rect x="558" y="160" width="100" height="40" rx="3"/><text class="cs__sym cs__sym--s" x="608" y="187"><tspan>G</tspan><tspan class="cs__sub" dy="5">3a</tspan></text><rect x="558" y="240" width="100" height="40" rx="3"/><text class="cs__sym cs__sym--s" x="608" y="267"><tspan>G</tspan><tspan class="cs__sub" dy="5">3b</tspan></text><rect x="558" y="320" width="100" height="40" rx="3"/><text class="cs__sym cs__sym--s" x="608" y="347"><tspan>G</tspan><tspan class="cs__sub" dy="5">3c</tspan></text></g>
+            <path class="cs__ln" d="M658 180 H682 M658 340 H682 M682 180 V340 M658 260 H682"/>
+            <circle class="cs__dot" cx="682" cy="260" r="3.2"/>
+            <path class="cs__ln" d="M682 260 H698" marker-end="url(#cs-ar)"/>
+            <g class="cs__blk" data-k="4"><rect x="700" y="232" width="84" height="56" rx="3"/><text class="cs__sym" x="742" y="268"><tspan>G</tspan><tspan class="cs__sub" dy="6">4</tspan></text><text class="cs__cap" x="742" y="312">recenzja</text></g>
+            <path class="cs__ln" d="M784 260 H818" marker-end="url(#cs-ar)"/>
+            <circle class="cs__dot" cx="802" cy="260" r="3.2"/>
+            <g class="cs__gate" data-k="5"><rect x="820" y="240" width="40" height="40" rx="3"/><text class="cs__sym" x="840" y="268">H</text><text class="cs__cap" x="840" y="304">zgoda</text></g>
+            <path class="cs__ln" d="M860 260 H874" marker-end="url(#cs-ar)"/>
+            <g class="cs__blk" data-k="5"><rect x="876" y="232" width="68" height="56" rx="3"/><text class="cs__sym" x="910" y="268"><tspan>G</tspan><tspan class="cs__sub" dy="6">5</tspan></text><text class="cs__cap" x="910" y="312">scalenie</text></g>
+            <path class="cs__ln" d="M944 260 H994" marker-end="url(#cs-ar)"/>
+            <circle class="cs__dot" cx="966" cy="260" r="3.2"/>
+            <text class="cs__sig" x="978" y="248">y</text><text class="cs__cap cs__cap--r" x="998" y="286">zmiana</text>
+            <!-- pętla wewnętrzna e -->
+            <path class="cs__fb cs__fb--in" d="M802 260 V420 H510 V274" marker-end="url(#cs-ar)"/>
+            <text class="cs__sig" x="650" y="410">e</text><text class="cs__note" x="656" y="446">uwagi recenzenta: blok, który nie przejdzie, wraca, aż testy przejdą</text>
             <g class="cs__pulse" aria-hidden="true">
-              <circle r="4"><animateMotion dur="7s" repeatCount="indefinite" path="M14 270 H1430"/></circle>
-              <circle r="4" class="cs__pulse--in"><animateMotion dur="4s" begin="1.5s" repeatCount="indefinite" path="M1204 270 V440 H892 V285"/></circle>
-              <circle r="4" class="cs__pulse--out"><animateMotion dur="9s" begin="3s" repeatCount="indefinite" path="M1404 270 V64 H70 V255"/></circle>
+              <circle r="3.6"><animateMotion dur="6s" repeatCount="indefinite" path="M10 260 H994"/></circle>
+              <circle r="3.6" class="cs__pulse--in"><animateMotion dur="3.6s" begin="1.4s" repeatCount="indefinite" path="M802 260 V420 H510 V274"/></circle>
+              <circle r="3.6" class="cs__pulse--out"><animateMotion dur="8s" begin="2.6s" repeatCount="indefinite" path="M966 260 V44 H60 V245"/></circle>
             </g>
           </svg>
           </div>
           <p class="cs__hint mono" aria-hidden="true">przesuń, żeby zobaczyć cały schemat →</p>
-          <figcaption id="cs-cap" class="mono">Przykład: dodanie portalu z ofertami do JobManagera. Bloki od G<sub>1</sub> do G<sub>8</sub> są opisane niżej; H oznacza bramkę akceptacji człowieka.</figcaption>
+          <figcaption id="cs-cap" class="mono">Przykład: dodanie portalu z ofertami do JobManagera. Bloki od G<sub>1</sub> do G<sub>5</sub> są opisane niżej; H oznacza bramkę akceptacji człowieka.</figcaption>
         </figure>
+
         <ol class="flow" role="list" aria-label="Przykładowy schemat pracy: dodanie portalu z ofertami do JobManagera">
-          <li data-k="1" class="flow__step"><span class="flow__n"><i>G</i><sub>1</sub></span><b>Zbieram wymagania</b><p>Jakie pola ma dostarczać nowe źródło, jak często się aktualizuje i które filtry zasila. Zapisuję to jako warunki, które da się sprawdzić.</p><span class="flow__who mono">ja</span></li>
-          <li data-k="2" class="flow__step"><span class="flow__n"><i>G</i><sub>2</sub></span><b>Badam system</b><p>Agenci z dostępem tylko do odczytu opisują istniejące scrapery, wspólny normalizator i testy, po czym wracają z krótkimi podsumowaniami.</p><span class="flow__who mono">agenci badawczy, tylko odczyt</span></li>
-          <li data-k="3" class="flow__step"><span class="flow__n"><i>G</i><sub>3</sub></span><b>Sprawdzam, co już istnieje</b><p>Czy portal ma oficjalne API, publiczny feed albo utrzymywaną bibliotekę? Scraping jest ostatnią opcją i tylko wtedy, gdy pozwala na to regulamin portalu.</p><span class="flow__who mono">agent badawczy + ja</span></li>
-          <li data-k="4" class="flow__step flow__step--gate"><span class="flow__n"><i>G</i><sub>4</sub></span><b>Piszę plan</b><p>Moduły, kontrakty danych, pliki, które może zmieniać każda część, i sposób testowania każdej z nich. Kod powstaje dopiero po mojej akceptacji.</p><span class="flow__who mono">akceptacja człowieka</span></li>
-          <li data-k="5" class="flow__step"><span class="flow__n"><i>G</i><sub>5</sub></span><b>Dzielę na bloki</b><p>Plan zamienia się w niezależne zadania, które nigdy nie edytują tych samych plików, więc mogą iść równolegle bez konfliktów.</p><span class="flow__who mono">ja</span></li>
-          <li data-k="6" class="flow__step"><span class="flow__n"><i>G</i><sub>6</sub></span><b>Rozdzielam agentów</b><p>Jeden agent programujący na blok, każdy na własnej gałęzi, w sandboxie, z dostępem tylko do poleceń potrzebnych w jego zadaniu.</p><span class="flow__who mono">agenci programujący</span></li>
-          <li data-k="7" class="flow__step flow__step--loop"><span class="flow__n"><i>G</i><sub>7</sub></span><b>Niezależna recenzja</b><p>Osobny agent ze świeżym kontekstem porównuje każdy diff z planem i uruchamia testy. Blok, który nie przejdzie, wraca do kroku 06 z uwagami recenzenta, a pętla trwa, aż przejdzie.</p><span class="flow__who mono">agent recenzent</span></li>
-          <li data-k="8" class="flow__step flow__step--gate"><span class="flow__n"><i>G</i><sub>8</sub></span><b>Scalam i obserwuję</b><p>Czytam końcowy diff, uruchamiam go na prawdziwych danych i scalam. Przed większymi zmianami robię kopię zapasową, więc zawsze jest droga powrotu.</p><span class="flow__who mono">akceptacja człowieka</span></li>
+          <li data-k="1" class="flow__step flow__step--gate"><span class="flow__n"><i>G</i><sub>1</sub></span><b>Badanie i plan</b><p>Wymagania zapisane jako warunki, które da się sprawdzić. Agenci z dostępem tylko do odczytu opisują istniejący kod i szukają oficjalnego API, zanim cokolwiek będzie scrapowane. Plan określa moduły, kontrakty danych i pliki, które może zmieniać każda część, a kod powstaje dopiero po mojej akceptacji.</p><span class="flow__who mono">ja + agenci, tylko odczyt</span></li>
+          <li data-k="2" class="flow__step"><span class="flow__n"><i>G</i><sub>2</sub></span><b>Dzielę na bloki</b><p>Plan zamienia się w niezależne zadania, które nigdy nie edytują tych samych plików, więc mogą iść równolegle bez konfliktów.</p><span class="flow__who mono">ja</span></li>
+          <li data-k="3" class="flow__step"><span class="flow__n"><i>G</i><sub>3</sub></span><b>Rozdzielam agentów</b><p>Jeden agent programujący na blok, każdy na własnej gałęzi, w sandboxie, z dostępem tylko do poleceń potrzebnych w jego zadaniu.</p><span class="flow__who mono">agenci programujący</span></li>
+          <li data-k="4" class="flow__step flow__step--loop"><span class="flow__n"><i>G</i><sub>4</sub></span><b>Niezależna recenzja</b><p>Osobny agent ze świeżym kontekstem porównuje każdy diff z planem i uruchamia testy. Blok, który nie przejdzie, wraca do swojego agenta z uwagami recenzenta, a pętla trwa, aż przejdzie.</p><span class="flow__who mono">agent recenzent</span></li>
+          <li data-k="5" class="flow__step flow__step--gate"><span class="flow__n"><i>G</i><sub>5</sub></span><b>Scalam i obserwuję</b><p>Czytam końcowy diff, uruchamiam go na prawdziwych danych i scalam. Przed większymi zmianami robię kopię zapasową, więc zawsze jest droga powrotu.</p><span class="flow__who mono">akceptacja człowieka</span></li>
         </ol>
 
         <div class="ai__guard">
