@@ -306,8 +306,8 @@ html.js-anim .in .sem__bar i { transform: none; }
 .ai { margin-top: clamp(48px, 9vh, 96px); display: grid; grid-template-columns: minmax(0, 5fr) minmax(0, 7fr); gap: clamp(28px, 5vw, 72px); align-items: start; padding-top: clamp(32px, 6vh, 56px); border-top: 1px solid rgba(255,255,255,.08); }
 .ai h3 { font: 600 clamp(1.3rem, 1.1rem + .7vw, 1.65rem)/1.2 var(--f-main); margin: 0 0 14px; }
 .ai__intro p { color: var(--text); margin: 0; }
-.ai__intro a { color: var(--white); text-decoration: none; background: linear-gradient(var(--primary), var(--primary)) 0 100% / 100% 2px no-repeat, linear-gradient(90deg, var(--primary), var(--secondary)) 0 100% / 0 100% no-repeat; padding: 0 2px 2px; border-radius: 2px; transition: background-size .5s var(--ease), color .3s; }
-.ai__intro a:hover, .ai__intro a:focus-visible { background-size: 100% 2px, 100% 100%; }
+.ai__intro a { color: var(--white); text-decoration: none; background: linear-gradient(var(--primary), var(--primary)) 0 100% / 100% 2px no-repeat; padding: 0 2px 2px; border-radius: 2px; transition: background-size .45s var(--ease), color .3s; }
+.ai__intro a:hover, .ai__intro a:focus-visible { background-size: 100% 100%; color: #fff; }
 .ai__loop { list-style: none; margin: 0; padding: 0; display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 0 clamp(20px, 3vw, 40px); }
 .ai__loop li { padding: 18px 0 20px; border-top: 1px solid rgba(255,255,255,.1); display: grid; grid-template-columns: 28px 1fr; gap: 0 10px; }
 .ai__loop span { color: var(--primary); font-size: .78rem; padding-top: 4px; grid-row: span 2; }
@@ -353,6 +353,7 @@ html.js-anim .in .sem__bar i { transform: none; }
 .cinfo .sep { margin: 0 10px; color: var(--text); }
 .foot { display: flex; justify-content: space-between; flex-wrap: wrap; gap: 12px; margin-top: clamp(60px, 10vh, 110px); padding-block: 22px calc(60px + env(safe-area-inset-bottom, 0px)); border-top: 1px solid rgba(255,255,255,.08); color: var(--text); font-size: .9rem; }
 .foot nav { display: flex; gap: 22px; }
+.foot__note { flex-basis: 100%; order: 3; margin: 6px 0 0; font-size: .82rem; color: #7f8aa0; max-width: 46rem; }
 .foot a { text-decoration: none; }
 .foot a { position: relative; transition: color .3s; }
 .foot a::after { content: ""; position: absolute; left: 0; right: 0; bottom: -3px; height: 1px; background: var(--primary); transform: scaleX(0); transform-origin: 0 50%; transition: transform .45s var(--ease); }
@@ -767,7 +768,7 @@ html.notes .hero__stage[data-note]::after { top: 76px; }
           <div class="row"><span class="ic"><svg viewBox="0 0 24 24"><path d="M12 3v12m0 0l-4-4m4 4l4-4M4 19h16"/></svg></span><div><small>CV</small><span class="val">Sent on request</span></div></div>
         </div>
       </div>
-      <footer class="foot"><span>© 2026 Piotr Jeleniewicz</span><nav aria-label="Profiles"><a href="https://github.com/Xcape53">GitHub</a><a href="https://www.linkedin.com/in/piotr-jeleniewicz/">LinkedIn</a></nav></footer>
+      <footer class="foot"><span>© 2026 Piotr Jeleniewicz</span><nav aria-label="Profiles"><a href="https://github.com/Xcape53">GitHub</a><a href="https://www.linkedin.com/in/piotr-jeleniewicz/">LinkedIn</a></nav><p class="foot__note"><em>About the colours: the blue-to-violet gradient may look like an AI default, but it has been my palette since I designed my logo. AI tools just happened to adopt the same gradient as their go-to.</em></p></footer>
     </div>
   </section>
 </main>
