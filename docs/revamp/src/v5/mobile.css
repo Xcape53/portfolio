@@ -1,5 +1,6 @@
 /* ---------- tablet ---------- */
 @media (max-width: 1080px) {
+  .ai__rules { grid-template-columns: repeat(2, minmax(0, 1fr)); }
   .proj, .proj.rev { grid-template-columns: minmax(0, 1fr); }
   .proj.rev .ptext { order: 0; }
   .pmedia { max-width: 760px; }
@@ -39,7 +40,7 @@
   .irow__go { grid-area: go; }
   .irow:hover .irow__name { transform: none; }
   .peek { display: none; }
-  .ai__loop { grid-template-columns: minmax(0, 1fr); }
+  .ai__loop, .ai__rules { grid-template-columns: minmax(0, 1fr); }
   .stack-dl div { grid-template-columns: 100px 1fr; }
 }
 @media (max-width: 640px) {

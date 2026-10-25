@@ -372,6 +372,17 @@ html.notes .stage3d[data-note]::after, html.notes .pmedia[data-note]::after { to
 /* SeeSky: bez poświaty projektu za mapą */
 #p-seesky .pmedia::before { display: none; }
 
+/* How I build with AI: zasady pracy z agentami */
+.ai__intro p + p { margin-top: 14px; }
+.ai__rules { grid-column: 1 / -1; list-style: none; margin: clamp(28px, 5vh, 48px) 0 0; padding: 0; display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 0 clamp(20px, 3vw, 40px); }
+.ai__rules li { padding: 20px 0 24px; border-top: 1px solid rgba(255,255,255,.1); }
+.ai__rules span { display: block; color: var(--primary); font-size: .72rem; letter-spacing: .12em; text-transform: uppercase; margin-bottom: 8px; }
+.ai__rules b { display: block; font-weight: 600; margin-bottom: 6px; }
+.ai__rules p { color: var(--text); margin: 0; font-size: .95rem; }
+.ai__honest { grid-column: 1 / -1; margin: 8px 0 0; padding: 16px 18px; border-left: 2px solid var(--primary); background: rgba(44,127,254,.06); color: #c9d1de; font-size: .95rem; }
+.ai__honest a { color: var(--white); text-decoration: underline; text-decoration-color: rgba(44,127,254,.7); text-underline-offset: 3px; transition: color .3s; }
+.ai__honest a:hover, .ai__honest a:focus-visible { color: var(--primary); }
+
 /* ---------- notatki ---------- */
 :where([data-note]) { position: relative; }
 html.notes [data-note]::after { content: attr(data-tag) "  " attr(data-note); position: absolute; z-index: 35; left: 12px; top: 12px; max-width: min(360px, calc(100% - 24px));
@@ -386,6 +397,7 @@ html.notes .hero__stage[data-note]::after { top: 76px; }
 
 /* ---------- tablet ---------- */
 @media (max-width: 1080px) {
+  .ai__rules { grid-template-columns: repeat(2, minmax(0, 1fr)); }
   .proj, .proj.rev { grid-template-columns: minmax(0, 1fr); }
   .proj.rev .ptext { order: 0; }
   .pmedia { max-width: 760px; }
@@ -425,7 +437,7 @@ html.notes .hero__stage[data-note]::after { top: 76px; }
   .irow__go { grid-area: go; }
   .irow:hover .irow__name { transform: none; }
   .peek { display: none; }
-  .ai__loop { grid-template-columns: minmax(0, 1fr); }
+  .ai__loop, .ai__rules { grid-template-columns: minmax(0, 1fr); }
   .stack-dl div { grid-template-columns: 100px 1fr; }
 }
 @media (max-width: 640px) {
@@ -745,6 +757,7 @@ html.notes .hero__stage[data-note]::after { top: 76px; }
         <div class="ai__intro">
           <h3 id="ai-h">How I build with AI</h3>
           <p>I use <a href="https://claude.com/claude-code">Claude Code</a> and <a href="https://chatgpt.com/codex">Codex</a> every day for implementation. What stays with me is the part that decides whether a tool works: what to build, how it splits into modules, what data passes between them, and whether it holds up in real use. JobManager and this site were built this way.</p>
+          <p>I treat agents as fast, capable collaborators that are still fallible and easy to mislead. So the rules below are about one thing: whatever an agent gets wrong should stay small, visible and easy to undo.</p>
         </div>
         <ol class="ai__loop" role="list">
           <li><span class="mono">1</span><b>Define</b><p>The problem, who uses it and what done looks like.</p></li>
@@ -752,6 +765,15 @@ html.notes .hero__stage[data-note]::after { top: 76px; }
           <li><span class="mono">3</span><b>Direct</b><p>AI writes code against that plan, one module at a time. I review and connect it.</p></li>
           <li><span class="mono">4</span><b>Verify</b><p>Run it on real data, read the failures, fix the plan, repeat.</p></li>
         </ol>
+        <ul class="ai__rules" role="list">
+          <li><span class="mono">simplest first</span><b>An agent only where it pays off</b><p>Before reaching for an agent I ask whether a script or a single model call would do. Fixed processes stay ordinary, testable code.</p></li>
+          <li><span class="mono">checks, not promises</span><b>The agent proposes, tests decide</b><p>Every task comes with a check the agent can run itself: tests, a build or a screenshot. I review small diffs on a branch, often in a fresh session, and I don't merge code I can't explain.</p></li>
+          <li><span class="mono">least privilege</span><b>Small permissions, reversible steps</b><p>Agents work on a branch, never push to the live branch on their own, and a backup comes before any larger change. Secrets never go into prompts or repo files.</p></li>
+          <li><span class="mono">untrusted input</span><b>Web pages are data, not instructions</b><p>Prompt injection has no complete fix, so content from pages, issues and tool descriptions is treated as untrusted. I check that packages an AI suggests really exist and install skills and MCP servers only from known sources.</p></li>
+          <li><span class="mono">data and law</span><b>Approved tools only</b><p>Personal data and an employer's code belong only in tools the company has approved; in prompts I use synthetic data. I keep the GDPR, the EU AI Act and the OWASP Top 10 for LLM and agentic apps in mind as a checklist, not a slogan.</p></li>
+          <li><span class="mono">ownership</span><b>I answer for every merged line</b><p>"The agent wrote it" is not an excuse. AI speeds me up on what I understand and is a risk on what I don't, so I use it to explain and compare, then verify the important parts myself.</p></li>
+        </ul>
+        <p class="ai__honest">I haven't run agents in a company's production environment yet. These are the habits I bring so that I can do it safely, based on <a href="https://www.anthropic.com/engineering/building-effective-agents">Building effective agents</a>, <a href="https://www.anthropic.com/engineering/claude-code-best-practices">Claude Code best practices</a> and the <a href="https://genai.owasp.org/">OWASP GenAI Security Project</a>.</p>
       </div>
     </div>
   </section>
