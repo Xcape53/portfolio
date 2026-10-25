@@ -58,7 +58,12 @@
       if (i === act) return; act = i;
       rows.forEach((r, k) => r.classList.toggle("on", k === i)); media.forEach((m, k) => m.classList.toggle("on", k === i));
       const on = media[i].querySelector("img.on"); if (cap && on) cap.textContent = on.dataset.cap || "";
+      fitLm();
     };
+    // ramka przyjmuje proporcje aktualnego zdjęcia (płynna zmiana wysokości), więc nic nie jest kadrowane
+    const fitLm = () => { const m = media[act], im = m && m.querySelector("img.on"); if (!im || !im.naturalWidth) return; m.style.height = (m.clientWidth * im.naturalHeight / im.naturalWidth).toFixed(1) + "px"; };
+    media.forEach((m) => m.querySelectorAll("img").forEach((im) => im.addEventListener("load", fitLm)));
+    addEventListener("resize", fitLm);
     rows.forEach((r, k) => r.addEventListener("pointerenter", () => { hoverAct = k; hoverT = T; }));
     setAct(0); watch(layersEl);
     onTick((t) => {
@@ -68,7 +73,7 @@
       setAct(fine && hoverAct >= 0 && t - hoverT < 5 ? hoverAct : best);
       if (!RM && t - slideT > 5.5) {
         slideT = t; const imgs = [...media[act].querySelectorAll("img")]; if (imgs.length < 2) return;
-        const k = imgs.findIndex((im) => im.classList.contains("on")); imgs[k].classList.remove("on"); const n = imgs[(k + 1) % imgs.length]; n.classList.add("on"); if (cap) cap.textContent = n.dataset.cap || "";
+        const k = imgs.findIndex((im) => im.classList.contains("on")); imgs[k].classList.remove("on"); const n = imgs[(k + 1) % imgs.length]; n.classList.add("on"); if (cap) cap.textContent = n.dataset.cap || ""; fitLm();
       }
     });
   }
@@ -247,9 +252,16 @@
     lb.innerHTML = b.dataset.video ? '<video muted loop playsinline autoplay controls src="' + VIDS[b.dataset.video] + '"></video>' : '<img alt="" src="' + b.dataset.full + '">';
     const v = lb.querySelector("video"); if (v) v.play().catch(() => {}); lb.classList.add("on");
   }));
-  const closeLb = () => { lb.classList.remove("on"); const v = lb.querySelector("video"); if (v) v.pause(); };
+  const closeLb = () => { lb.classList.remove("on", "zoomed"); const v = lb.querySelector("video"); if (v) v.pause(); };
   lb.addEventListener("click", (e) => { if (e.target === lb) closeLb(); });
   addEventListener("keydown", (e) => { if (e.key === "Escape") closeLb(); });
+  // zdjęcia warstw: kliknięcie otwiera pełny rozmiar
+  document.querySelectorAll(".lm img, .layer__shot img").forEach((im) => im.addEventListener("click", () => {
+    lb.innerHTML = '<img alt="" src="' + im.src + '">'; lb.classList.add("on");
+  }));
+  // lupa w podglądzie: kliknięcie w zdjęcie przybliża je w miejscu kursora, ruch myszy przesuwa przybliżenie
+  lb.addEventListener("click", (e) => { const im = e.target.closest("img"); if (!im) return; im.classList.toggle("zoom"); lb.classList.toggle("zoomed", im.classList.contains("zoom")); });
+  lb.addEventListener("pointermove", (e) => { const im = lb.querySelector("img.zoom"); if (!im) return; const r = im.getBoundingClientRect(); im.style.transformOrigin = ((e.clientX - r.left) / r.width * 100).toFixed(1) + "% " + ((e.clientY - r.top) / r.height * 100).toFixed(1) + "%"; });
 
   // ---------- indeks: podgląd przy kursorze (na dotyku miniatury w wierszach) ----------
   const peek = $("#peek");

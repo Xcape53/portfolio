@@ -138,10 +138,10 @@ html.js-anim .reveal.in { opacity: 1; transform: none; }
 /* ---------- od układu do kodu: warstwy ---------- */
 .layers { display: grid; grid-template-columns: minmax(0, 6fr) minmax(0, 6fr); gap: clamp(32px, 5vw, 80px); align-items: start; }
 .layers__media { position: sticky; top: 16vh; }
-.lm { position: relative; aspect-ratio: 4 / 3; border-radius: 12px; overflow: hidden; background: #050a17; outline: 1px solid rgba(255,255,255,.08); display: none; }
+.lm { position: relative; aspect-ratio: 4 / 3; transition: height .7s var(--ease); border-radius: 12px; overflow: hidden; background: #050a17; outline: 1px solid rgba(255,255,255,.08); display: none; }
 .lm.on { display: block; }
 /* całe zdjęcie, bez kadrowania: wolne miejsce wypełnia ciemne tło ramki */
-.lm img { position: absolute; inset: 0; width: 100%; height: 100%; object-fit: contain; opacity: 0; transform: scale(1.02); transition: opacity .9s var(--ease), transform 3.2s var(--ease); }
+.lm img { position: absolute; inset: 0; width: 100%; height: 100%; object-fit: cover; cursor: zoom-in; opacity: 0; transform: scale(1.02); transition: opacity .9s var(--ease), transform 3.2s var(--ease); }
 .lm img.on { opacity: 1; transform: none; }
 .lm-cap { margin: 12px 2px 0; color: var(--text); min-height: 1.2em; }
 .layers__list { list-style: none; margin: 0; padding: 0; }
@@ -383,6 +383,15 @@ html.notes .stage3d[data-note]::after, html.notes .pmedia[data-note]::after { to
 .ai__honest { grid-column: 1 / -1; margin: 8px 0 0; padding: 16px 18px; border-left: 2px solid var(--primary); background: rgba(44,127,254,.06); color: #c9d1de; font-size: .95rem; }
 .ai__honest a { color: var(--white); text-decoration: underline; text-decoration-color: rgba(44,127,254,.7); text-underline-offset: 3px; transition: color .3s; }
 .ai__honest a:hover, .ai__honest a:focus-visible { color: var(--primary); }
+
+/* klikalne zdjęcia warstw i lupa w podglądzie */
+.layers__media { pointer-events: auto; }
+.lm.on { aspect-ratio: auto; }
+.layer__shot img { cursor: zoom-in; }
+.lm img:not(.on) { pointer-events: none; }
+.lb img { cursor: zoom-in; transition: transform .35s var(--ease); }
+.lb img.zoom { transform: scale(2.4); cursor: zoom-out; }
+.lb.zoomed { overflow: hidden; }
 
 /* ---------- notatki ---------- */
 :where([data-note]) { position: relative; }
@@ -1070,7 +1079,12 @@ html.notes .hero__stage[data-note]::after { top: 76px; }
       if (i === act) return; act = i;
       rows.forEach((r, k) => r.classList.toggle("on", k === i)); media.forEach((m, k) => m.classList.toggle("on", k === i));
       const on = media[i].querySelector("img.on"); if (cap && on) cap.textContent = on.dataset.cap || "";
+      fitLm();
     };
+    // ramka przyjmuje proporcje aktualnego zdjęcia (płynna zmiana wysokości), więc nic nie jest kadrowane
+    const fitLm = () => { const m = media[act], im = m && m.querySelector("img.on"); if (!im || !im.naturalWidth) return; m.style.height = (m.clientWidth * im.naturalHeight / im.naturalWidth).toFixed(1) + "px"; };
+    media.forEach((m) => m.querySelectorAll("img").forEach((im) => im.addEventListener("load", fitLm)));
+    addEventListener("resize", fitLm);
     rows.forEach((r, k) => r.addEventListener("pointerenter", () => { hoverAct = k; hoverT = T; }));
     setAct(0); watch(layersEl);
     onTick((t) => {
@@ -1080,7 +1094,7 @@ html.notes .hero__stage[data-note]::after { top: 76px; }
       setAct(fine && hoverAct >= 0 && t - hoverT < 5 ? hoverAct : best);
       if (!RM && t - slideT > 5.5) {
         slideT = t; const imgs = [...media[act].querySelectorAll("img")]; if (imgs.length < 2) return;
-        const k = imgs.findIndex((im) => im.classList.contains("on")); imgs[k].classList.remove("on"); const n = imgs[(k + 1) % imgs.length]; n.classList.add("on"); if (cap) cap.textContent = n.dataset.cap || "";
+        const k = imgs.findIndex((im) => im.classList.contains("on")); imgs[k].classList.remove("on"); const n = imgs[(k + 1) % imgs.length]; n.classList.add("on"); if (cap) cap.textContent = n.dataset.cap || ""; fitLm();
       }
     });
   }
@@ -1259,9 +1273,16 @@ html.notes .hero__stage[data-note]::after { top: 76px; }
     lb.innerHTML = b.dataset.video ? '<video muted loop playsinline autoplay controls src="' + VIDS[b.dataset.video] + '"></video>' : '<img alt="" src="' + b.dataset.full + '">';
     const v = lb.querySelector("video"); if (v) v.play().catch(() => {}); lb.classList.add("on");
   }));
-  const closeLb = () => { lb.classList.remove("on"); const v = lb.querySelector("video"); if (v) v.pause(); };
+  const closeLb = () => { lb.classList.remove("on", "zoomed"); const v = lb.querySelector("video"); if (v) v.pause(); };
   lb.addEventListener("click", (e) => { if (e.target === lb) closeLb(); });
   addEventListener("keydown", (e) => { if (e.key === "Escape") closeLb(); });
+  // zdjęcia warstw: kliknięcie otwiera pełny rozmiar
+  document.querySelectorAll(".lm img, .layer__shot img").forEach((im) => im.addEventListener("click", () => {
+    lb.innerHTML = '<img alt="" src="' + im.src + '">'; lb.classList.add("on");
+  }));
+  // lupa w podglądzie: kliknięcie w zdjęcie przybliża je w miejscu kursora, ruch myszy przesuwa przybliżenie
+  lb.addEventListener("click", (e) => { const im = e.target.closest("img"); if (!im) return; im.classList.toggle("zoom"); lb.classList.toggle("zoomed", im.classList.contains("zoom")); });
+  lb.addEventListener("pointermove", (e) => { const im = lb.querySelector("img.zoom"); if (!im) return; const r = im.getBoundingClientRect(); im.style.transformOrigin = ((e.clientX - r.left) / r.width * 100).toFixed(1) + "% " + ((e.clientY - r.top) / r.height * 100).toFixed(1) + "%"; });
 
   // ---------- indeks: podgląd przy kursorze (na dotyku miniatury w wierszach) ----------
   const peek = $("#peek");
