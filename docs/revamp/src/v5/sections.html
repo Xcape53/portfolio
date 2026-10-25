@@ -251,24 +251,27 @@
       <div class="ai reveal" aria-labelledby="ai-h">
         <div class="ai__intro">
           <h3 id="ai-h">How I build with AI</h3>
-          <p>I use <a href="https://claude.com/claude-code">Claude Code</a> and <a href="https://chatgpt.com/codex">Codex</a> every day for implementation. What stays with me is the part that decides whether a tool works: what to build, how it splits into modules, what data passes between them, and whether it holds up in real use. JobManager and this site were built this way.</p>
-          <p>I treat agents as fast, capable collaborators that are still fallible and easy to mislead. So the rules below are about one thing: whatever an agent gets wrong should stay small, visible and easy to undo.</p>
+          <p>I use <a href="https://claude.com/claude-code">Claude Code</a> and <a href="https://chatgpt.com/codex">Codex</a> every day. The models write most of the code. I decide what gets built, how it splits into parts, and what has to be true before anything is merged. JobManager and this site were built this way.</p>
+          <p>For anything bigger than a quick fix I follow the workflow below. The example is a real kind of task: adding one more job portal to JobManager.</p>
         </div>
-        <ol class="ai__loop" role="list">
-          <li><span class="mono">1</span><b>Define</b><p>The problem, who uses it and what done looks like.</p></li>
-          <li><span class="mono">2</span><b>Decompose</b><p>Modules, data contracts and interfaces, written down before code.</p></li>
-          <li><span class="mono">3</span><b>Direct</b><p>AI writes code against that plan, one module at a time. I review and connect it.</p></li>
-          <li><span class="mono">4</span><b>Verify</b><p>Run it on real data, read the failures, fix the plan, repeat.</p></li>
+
+        <ol class="flow" role="list" aria-label="Example workflow: adding a job portal to JobManager">
+          <li class="flow__step"><span class="flow__n mono">01</span><b>Gather requirements</b><p>Which fields the new source must deliver, how often it updates, which filters it feeds. I write these down as checks that can pass or fail.</p><span class="flow__who mono">me</span></li>
+          <li class="flow__step"><span class="flow__n mono">02</span><b>Study the system</b><p>Read-only agents map the existing scrapers, the shared normaliser and the tests, then report back in short summaries.</p><span class="flow__who mono">research agents, read-only</span></li>
+          <li class="flow__step"><span class="flow__n mono">03</span><b>Check what already exists</b><p>Is there an official API, a public feed or a maintained library? Scraping comes last, after the portal's terms allow it.</p><span class="flow__who mono">research agent + me</span></li>
+          <li class="flow__step flow__step--gate"><span class="flow__n mono">04</span><b>Write the plan</b><p>Modules, data contracts, the files each part may touch and how each part is tested. No code is written until I approve it.</p><span class="flow__who mono">human approval</span></li>
+          <li class="flow__step"><span class="flow__n mono">05</span><b>Split into blocks</b><p>The plan becomes independent tasks that never edit the same files, so they can run in parallel without conflicts.</p><span class="flow__who mono">me</span></li>
+          <li class="flow__step"><span class="flow__n mono">06</span><b>Dispatch agents</b><p>One coding agent per block, each on its own branch, in a sandbox, allowed only the commands its task needs.</p><span class="flow__who mono">coding agents</span></li>
+          <li class="flow__step flow__step--loop"><span class="flow__n mono">07</span><b>Independent review</b><p>A separate agent with a fresh context compares each diff with the plan and runs the tests. A block that fails goes back to step 06 with the reviewer's notes, and the loop repeats until it passes.</p><span class="flow__who mono">reviewer agent</span><svg class="flow__back" viewBox="0 0 100 40" preserveAspectRatio="none" aria-hidden="true"><path d="M100 38 C100 4, 0 4, 0 34"/></svg></li>
+          <li class="flow__step flow__step--gate"><span class="flow__n mono">08</span><b>Merge and watch</b><p>I read the final diff, run it on real data and merge it. Larger changes get a backup first, so there is always a way back.</p><span class="flow__who mono">human approval</span></li>
         </ol>
-        <ul class="ai__rules" role="list">
-          <li><span class="mono">simplest first</span><b>An agent only where it pays off</b><p>Before reaching for an agent I ask whether a script or a single model call would do. Fixed processes stay ordinary, testable code.</p></li>
-          <li><span class="mono">checks, not promises</span><b>The agent proposes, tests decide</b><p>Every task comes with a check the agent can run itself: tests, a build or a screenshot. I review small diffs on a branch, often in a fresh session, and I don't merge code I can't explain.</p></li>
-          <li><span class="mono">least privilege</span><b>Small permissions, reversible steps</b><p>Agents work on a branch, never push to the live branch on their own, and a backup comes before any larger change. Secrets never go into prompts or repo files.</p></li>
-          <li><span class="mono">untrusted input</span><b>Web pages are data, not instructions</b><p>Prompt injection has no complete fix, so content from pages, issues and tool descriptions is treated as untrusted. I check that packages an AI suggests really exist and install skills and MCP servers only from known sources.</p></li>
-          <li><span class="mono">data and law</span><b>Approved tools only</b><p>Personal data and an employer's code belong only in tools the company has approved; in prompts I use synthetic data. I keep the GDPR, the EU AI Act and the OWASP Top 10 for LLM and agentic apps in mind as a checklist, not a slogan.</p></li>
-          <li><span class="mono">ownership</span><b>I answer for every merged line</b><p>"The agent wrote it" is not an excuse. AI speeds me up on what I understand and is a risk on what I don't, so I use it to explain and compare, then verify the important parts myself.</p></li>
-        </ul>
-        <p class="ai__honest">I haven't run agents in a company's production environment yet. These are the habits I bring so that I can do it safely, based on <a href="https://www.anthropic.com/engineering/building-effective-agents">Building effective agents</a>, <a href="https://www.anthropic.com/engineering/claude-code-best-practices">Claude Code best practices</a> and the <a href="https://genai.owasp.org/">OWASP GenAI Security Project</a>.</p>
+
+        <div class="ai__guard">
+          <h4>Where it can go wrong</h4>
+          <p>Agents make mistakes, and they can be misled. Prompt injection has no complete fix yet, so I treat web pages, issues and tool output as untrusted data. Secrets stay out of prompts and repo files, I check that a package an AI suggests actually exists before installing it, and I only add skills or MCP servers whose source I have read.</p>
+          <p>At a company, personal data and the employer's code would go only into tools the company has approved. GDPR applies to anything sent to a model provider, the EU AI Act adds its own duties, and the OWASP Top 10 for LLM and agentic applications is the checklist I review against. Whoever typed a line, I am responsible for it once I merge it.</p>
+        </div>
+        <p class="ai__honest">I haven't run agents in a company's production environment yet. This is how I work on my own projects, based on <a href="https://www.anthropic.com/engineering/building-effective-agents">Building effective agents</a>, <a href="https://www.anthropic.com/engineering/claude-code-best-practices">Claude Code best practices</a> and the <a href="https://genai.owasp.org/">OWASP GenAI Security Project</a>.</p>
       </div>
     </div>
   </section>

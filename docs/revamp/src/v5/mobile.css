@@ -1,6 +1,9 @@
 /* ---------- tablet ---------- */
 @media (max-width: 1080px) {
-  .ai__rules { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+  .flow { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+  .flow__step:not(:nth-child(4n))::after { display: none; }
+  .flow__step:nth-child(odd)::after { display: block; }
+  .flow__back, .flow__step:nth-child(6)::before { display: none; }
   .proj, .proj.rev { grid-template-columns: minmax(0, 1fr); }
   .proj.rev .ptext { order: 0; }
   .pmedia { max-width: 760px; }
@@ -40,7 +43,9 @@
   .irow__go { grid-area: go; }
   .irow:hover .irow__name { transform: none; }
   .peek { display: none; }
-  .ai__loop, .ai__rules { grid-template-columns: minmax(0, 1fr); }
+  .flow, .ai__guard { grid-template-columns: minmax(0, 1fr); gap: 22px; }
+  .flow__step::after, .flow__step:nth-child(odd)::after { display: block; top: auto; right: auto; left: 27px; bottom: -23px; width: 2px; height: 22px; background: linear-gradient(180deg, rgba(44,127,254,.25), var(--primary)); }
+  .flow__step:last-child::after { display: none; }
   .stack-dl div { grid-template-columns: 100px 1fr; }
 }
 @media (max-width: 640px) {
