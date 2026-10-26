@@ -163,7 +163,6 @@ PL = [
     ('<span class="irow__st">University project</span>', '<span class="irow__st">Projekt na studia</span>'),
     ('<span class="irow__name">Florist website</span>', '<span class="irow__name">Strona kwiaciarni</span>'),
     ('A website for a local florist: a real client project built by a small team.', 'Strona dla lokalnej kwiaciarni: prawdziwy projekt dla klienta, zrobiony w małym zespole.'),
-    ('<span class="irow__st">In development</span>', '<span class="irow__st">W budowie</span>'),
 
     # ---------- o mnie ----------
     ('<p class="k">About me</p><h2 id="me-h">Piotr Jeleniewicz</h2>', '<p class="k">O mnie</p><h2 id="me-h">Piotr Jeleniewicz</h2>'),
