@@ -474,6 +474,13 @@ html.js-anim .ai.in .flow__step:nth-child(8) { transition-delay: 0.64s; }
 .flow__step b { order: 1; }
 .flow__step .flow__who { order: 2; margin: 2px 0 12px; }
 .flow__step p { order: 3; margin: 0; }
+/* ramka tylko wokół schematu; przypis pod nią, wyśrodkowany, zwykłą czcionką */
+.cs { padding: 0; border: 0; background: none; }
+.cs__scroll { padding: clamp(18px, 2.4vw, 30px) clamp(14px, 2vw, 26px); border: 1px solid rgba(255,255,255,.08); border-radius: 14px; background: radial-gradient(120% 140% at 50% 0%, rgba(20,34,74,.45), rgba(6,10,22,.85) 70%); }
+.cs figcaption { margin: 12px 0 0; text-align: center; font: 400 .82rem/1.5 var(--f-main); color: #7f8aa0; }
+.ai__guard { display: block; }
+.ai__guard p { max-width: 62rem; }
+.ai__guard h4 { margin-bottom: 10px; }
 
 /* ---------- notatki ---------- */
 :where([data-note]) { position: relative; }
@@ -858,7 +865,8 @@ html.notes .hero__stage[data-note]::after { top: 76px; }
         <div class="ai__intro">
           <h3 id="ai-h">Jak buduję z AI</h3>
           <p>Codziennie pracuję z <a href="https://claude.com/claude-code">Claude Code</a> i <a href="https://chatgpt.com/codex">Codexem</a>. Piszą sporą część kodu, ale to ja decyduję, co powstaje i jak dzieli się na części, a każdy diff czytam przed scaleniem, więc umiem wyjaśnić wszystko, co trafia do repozytorium. Tak powstał JobManager i ta strona.</p>
-          <p>Przy własnych projektach zwykle wystarcza jeden agent i mój przegląd. Poniżej jest schemat, którego użyłbym w zespole, gdzie błąd kosztuje więcej. Przykładowe zadanie to dodanie kolejnego portalu z ofertami do JobManagera.</p>
+          <p>Przy własnych projektach zwykle wystarcza jeden agent i mój przegląd. Przy większych zadaniach korzystam z CodeG, który zbiera moje subskrypcje Claude Code, Codexa i OpenCode w jednym miejscu i pozwala im pracować razem. Każdy model mam opisany według tego, jak ciężkie zadania udźwignie, a najmocniejszy dzieli pracę i lżejsze części oddaje tańszym modelom.</p>
+          <p>Poniżej jest schemat, którego użyłbym w zespole, gdzie błąd kosztuje więcej. Przykładowe zadanie to dodanie kolejnego portalu z ofertami do JobManagera.</p>
         </div>
 
         <figure class="cs" aria-labelledby="cs-cap">
@@ -915,21 +923,20 @@ html.notes .hero__stage[data-note]::after { top: 76px; }
           </svg>
           </div>
           <p class="cs__hint mono" aria-hidden="true">przesuń, żeby zobaczyć cały schemat →</p>
-          <figcaption id="cs-cap" class="mono">Przykład: dodanie portalu z ofertami do JobManagera. Bloki od G<sub>1</sub> do G<sub>5</sub> są opisane niżej; A oznacza bramkę akceptacji człowieka.</figcaption>
+          <figcaption id="cs-cap">A oznacza bramkę akceptacji człowieka. Bloki od G<sub>1</sub> do G<sub>5</sub> są opisane niżej.</figcaption>
         </figure>
 
         <ol class="flow" role="list" aria-label="Przykładowy schemat pracy: dodanie portalu z ofertami do JobManagera">
-          <li data-k="1" class="flow__step flow__step--gate"><span class="flow__n"><i>G</i><sub>1</sub></span><b>Badanie i plan</b><p>Wymagania zapisane jako warunki, które da się sprawdzić. Agenci z dostępem tylko do odczytu opisują istniejący kod i szukają oficjalnego API, zanim cokolwiek będzie scrapowane. Plan określa moduły, kontrakty danych i pliki, które może zmieniać każda część, a kod powstaje dopiero po mojej akceptacji.</p><span class="flow__who mono">ja + agenci, tylko odczyt</span></li>
-          <li data-k="2" class="flow__step"><span class="flow__n"><i>G</i><sub>2</sub></span><b>Dzielę na bloki</b><p>Plan zamienia się w niezależne zadania, które nigdy nie edytują tych samych plików, więc mogą iść równolegle bez konfliktów.</p><span class="flow__who mono">ja</span></li>
-          <li data-k="3" class="flow__step"><span class="flow__n"><i>G</i><sub>3</sub></span><b>Rozdzielam agentów</b><p>Jeden agent programujący na blok, każdy na własnej gałęzi, w sandboxie, z dostępem tylko do poleceń potrzebnych w jego zadaniu.</p><span class="flow__who mono">agenci programujący</span></li>
+          <li data-k="1" class="flow__step flow__step--gate"><span class="flow__n"><i>G</i><sub>1</sub></span><b>Badanie i plan</b><p>Wymagania zamieniam w warunki, które da się sprawdzić. Agenci z dostępem tylko do odczytu opisują istniejący kod i najpierw szukają oficjalnego API, a plan wymienia moduły i pliki, które może zmieniać każda część. Nic nie jest kodowane przed moją akceptacją.</p><span class="flow__who mono">ja + agenci, tylko odczyt</span></li>
+          <li data-k="2" class="flow__step"><span class="flow__n"><i>G</i><sub>2</sub></span><b>Dzielę na bloki</b><p>Plan zamienia się w niezależne bloki z jasno określonym wejściem i wyjściem. Żadne dwa bloki nie edytują tego samego pliku, więc mogą iść równolegle i scalić się bez konfliktów, a blok, który się nie uda, można powtórzyć bez ruszania reszty.</p><span class="flow__who mono">ja</span></li>
+          <li data-k="3" class="flow__step"><span class="flow__n"><i>G</i><sub>3</sub></span><b>Rozdzielam agentów</b><p>Każdy blok dostaje własnego agenta programującego na osobnej gałęzi, w sandboxie. Agent może uruchamiać tylko polecenia potrzebne w jego zadaniu i widzi tylko pliki wymienione w planie, więc nawet zagubiony albo zmanipulowany agent nie wyjdzie poza swój blok.</p><span class="flow__who mono">agenci programujący</span></li>
           <li data-k="4" class="flow__step flow__step--loop"><span class="flow__n"><i>G</i><sub>4</sub></span><b>Niezależna recenzja</b><p>Osobny agent ze świeżym kontekstem porównuje każdy diff z planem i uruchamia testy. Blok, który nie przejdzie, wraca do swojego agenta z uwagami recenzenta, a pętla trwa, aż przejdzie.</p><span class="flow__who mono">agent recenzent</span></li>
-          <li data-k="5" class="flow__step flow__step--gate"><span class="flow__n"><i>G</i><sub>5</sub></span><b>Scalam i obserwuję</b><p>Czytam końcowy diff, uruchamiam go na prawdziwych danych i scalam. Przed większymi zmianami robię kopię zapasową, więc zawsze jest droga powrotu.</p><span class="flow__who mono">akceptacja człowieka</span></li>
+          <li data-k="5" class="flow__step flow__step--gate"><span class="flow__n"><i>G</i><sub>5</sub></span><b>Scalam i obserwuję</b><p>Czytam końcowy diff, uruchamiam go na prawdziwych danych i scalam. Przed większymi zmianami robię kopię zapasową, więc zawsze jest droga powrotu, a to, co później zgłoszą użytkownicy, wraca do G<sub>1</sub> jako nowe wymaganie.</p><span class="flow__who mono">akceptacja człowieka</span></li>
         </ol>
 
         <div class="ai__guard">
           <h4>Gdzie coś może pójść źle</h4>
-          <p>Agent staje się groźny, gdy jednocześnie czyta niezaufane treści, ma dostęp do prywatnych danych i może coś wysłać na zewnątrz. Prompt injection zamienia takie połączenie w wyciek, więc w tym schemacie żaden agent nie dostaje wszystkich trzech: dane z zewnątrz przechodzą najpierw przez zabezpieczenia, a agenci programujący sięgają tylko po to, czego potrzebuje ich blok.</p>
-          <p>Mniej widoczne ryzyko to kod, który wygląda dobrze. Model oceniający własny diff zwykle go akceptuje, dlatego recenzja odbywa się w świeżym kontekście, względem spisanego planu. Jeden zielony test niewiele dowodzi: zadanie, które agent rozwiązuje w 75% prób, przechodzi trzy razy z rzędu tylko w około 42%. Nazwy pakietów też trzeba sprawdzać, bo w badaniu z 2025 roku mniej więcej co piąty pakiet polecany przez modele nie istniał, a takie nazwy może zarejestrować każdy.</p>
+          <p>Agent staje się groźny, gdy jednocześnie czyta niezaufane treści, ma dostęp do prywatnych danych i może coś wysłać na zewnątrz, bo prompt injection zamienia takie połączenie w wyciek; dlatego dane z zewnątrz najpierw przechodzą przez zabezpieczenia, a każdy agent programujący sięga tylko do swojego bloku. Mniej widoczne ryzyko to kod, który wygląda dobrze. Model oceniający własny diff zwykle go akceptuje, więc recenzja odbywa się w świeżym kontekście, względem planu, a jeden zielony test niewiele dowodzi: zadanie, które agent rozwiązuje w 75% prób, przechodzi trzy razy z rzędu tylko w około 42%. Nazwy pakietów też trzeba sprawdzać, bo w badaniu z 2025 roku mniej więcej co piąty pakiet polecany przez modele nie istniał.</p>
         </div>
         <p class="ai__honest">Nie wdrażałem jeszcze agentów w produkcyjnym środowisku firmy. Taki sposób pracy chcę tam wnieść, opierając się na <a href="https://www.anthropic.com/engineering/building-effective-agents">Building effective agents</a>, <a href="https://www.anthropic.com/engineering/claude-code-best-practices">Claude Code best practices</a> i <a href="https://genai.owasp.org/">OWASP GenAI Security Project</a>.</p>
       </div>

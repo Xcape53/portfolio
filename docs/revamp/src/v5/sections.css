@@ -378,3 +378,10 @@ html.js-anim .ai.in .flow__step:nth-child(8) { transition-delay: 0.64s; }
 .flow__step b { order: 1; }
 .flow__step .flow__who { order: 2; margin: 2px 0 12px; }
 .flow__step p { order: 3; margin: 0; }
+/* ramka tylko wokół schematu; przypis pod nią, wyśrodkowany, zwykłą czcionką */
+.cs { padding: 0; border: 0; background: none; }
+.cs__scroll { padding: clamp(18px, 2.4vw, 30px) clamp(14px, 2vw, 26px); border: 1px solid rgba(255,255,255,.08); border-radius: 14px; background: radial-gradient(120% 140% at 50% 0%, rgba(20,34,74,.45), rgba(6,10,22,.85) 70%); }
+.cs figcaption { margin: 12px 0 0; text-align: center; font: 400 .82rem/1.5 var(--f-main); color: #7f8aa0; }
+.ai__guard { display: block; }
+.ai__guard p { max-width: 62rem; }
+.ai__guard h4 { margin-bottom: 10px; }

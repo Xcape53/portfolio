@@ -474,6 +474,13 @@ html.js-anim .ai.in .flow__step:nth-child(8) { transition-delay: 0.64s; }
 .flow__step b { order: 1; }
 .flow__step .flow__who { order: 2; margin: 2px 0 12px; }
 .flow__step p { order: 3; margin: 0; }
+/* ramka tylko wokół schematu; przypis pod nią, wyśrodkowany, zwykłą czcionką */
+.cs { padding: 0; border: 0; background: none; }
+.cs__scroll { padding: clamp(18px, 2.4vw, 30px) clamp(14px, 2vw, 26px); border: 1px solid rgba(255,255,255,.08); border-radius: 14px; background: radial-gradient(120% 140% at 50% 0%, rgba(20,34,74,.45), rgba(6,10,22,.85) 70%); }
+.cs figcaption { margin: 12px 0 0; text-align: center; font: 400 .82rem/1.5 var(--f-main); color: #7f8aa0; }
+.ai__guard { display: block; }
+.ai__guard p { max-width: 62rem; }
+.ai__guard h4 { margin-bottom: 10px; }
 
 /* ---------- notatki ---------- */
 :where([data-note]) { position: relative; }
@@ -858,7 +865,8 @@ html.notes .hero__stage[data-note]::after { top: 76px; }
         <div class="ai__intro">
           <h3 id="ai-h">How I build with AI</h3>
           <p>I use <a href="https://claude.com/claude-code">Claude Code</a> and <a href="https://chatgpt.com/codex">Codex</a> every day. They write a lot of the code; I decide what gets built and how it splits into parts, and I read every diff before it goes in, so I can explain anything I merge. JobManager and this site were built this way.</p>
-          <p>On my own projects one agent and my own review are usually enough. Below is the workflow I would use on a team, where a mistake costs more. The example task is adding one more job portal to JobManager.</p>
+          <p>On my own projects one agent and my own review are usually enough. For bigger jobs I use CodeG, which keeps my Claude Code, Codex and OpenCode subscriptions in one place and lets them work together. I have rated each model by how heavy a task it can handle, and the strongest one splits the work and hands the lighter parts to the cheaper models.</p>
+          <p>Below is the workflow I would use on a team, where a mistake costs more. The example task is adding one more job portal to JobManager.</p>
         </div>
 
         <figure class="cs" aria-labelledby="cs-cap">
@@ -915,21 +923,20 @@ html.notes .hero__stage[data-note]::after { top: 76px; }
           </svg>
           </div>
           <p class="cs__hint mono" aria-hidden="true">swipe to follow the diagram →</p>
-          <figcaption id="cs-cap" class="mono">Example: adding a job portal to JobManager. Blocks G<sub>1</sub> to G<sub>5</sub> are described below; A marks a human approval gate.</figcaption>
+          <figcaption id="cs-cap">A marks a human approval gate. Blocks G<sub>1</sub> to G<sub>5</sub> are described below.</figcaption>
         </figure>
 
         <ol class="flow" role="list" aria-label="Example workflow: adding a job portal to JobManager">
-          <li data-k="1" class="flow__step flow__step--gate"><span class="flow__n"><i>G</i><sub>1</sub></span><b>Research and plan</b><p>Requirements written as checks that can pass or fail. Read-only agents map the existing code and look for an official API before anything gets scraped. The plan names modules, data contracts and the files each part may touch, and no code is written until I approve it.</p><span class="flow__who mono">me + read-only agents</span></li>
-          <li data-k="2" class="flow__step"><span class="flow__n"><i>G</i><sub>2</sub></span><b>Split into blocks</b><p>The plan becomes independent tasks that never edit the same files, so they can run in parallel without conflicts.</p><span class="flow__who mono">me</span></li>
-          <li data-k="3" class="flow__step"><span class="flow__n"><i>G</i><sub>3</sub></span><b>Dispatch agents</b><p>One coding agent per block, each on its own branch, in a sandbox, allowed only the commands its task needs.</p><span class="flow__who mono">coding agents</span></li>
+          <li data-k="1" class="flow__step flow__step--gate"><span class="flow__n"><i>G</i><sub>1</sub></span><b>Research and plan</b><p>Requirements become checks that can pass or fail. Read-only agents map the existing code and look for an official API first, and the plan lists the modules and the files each part may touch. Nothing gets coded until I approve it.</p><span class="flow__who mono">me + read-only agents</span></li>
+          <li data-k="2" class="flow__step"><span class="flow__n"><i>G</i><sub>2</sub></span><b>Split into blocks</b><p>The plan becomes independent blocks with clear inputs and outputs. No two blocks edit the same file, so they can run in parallel and merge without conflicts, and a failing block can be redone without touching the rest.</p><span class="flow__who mono">me</span></li>
+          <li data-k="3" class="flow__step"><span class="flow__n"><i>G</i><sub>3</sub></span><b>Dispatch agents</b><p>Each block gets its own coding agent on its own branch, inside a sandbox. The agent can run only the commands its task needs and sees only the files listed in the plan, so a confused or misled agent cannot reach past its block.</p><span class="flow__who mono">coding agents</span></li>
           <li data-k="4" class="flow__step flow__step--loop"><span class="flow__n"><i>G</i><sub>4</sub></span><b>Independent review</b><p>A separate agent with a fresh context compares each diff with the plan and runs the tests. A block that fails goes back to its agent with the reviewer's notes, and the loop repeats until it passes.</p><span class="flow__who mono">reviewer agent</span></li>
-          <li data-k="5" class="flow__step flow__step--gate"><span class="flow__n"><i>G</i><sub>5</sub></span><b>Merge and watch</b><p>I read the final diff, run it on real data and merge it. Larger changes get a backup first, so there is always a way back.</p><span class="flow__who mono">human approval</span></li>
+          <li data-k="5" class="flow__step flow__step--gate"><span class="flow__n"><i>G</i><sub>5</sub></span><b>Merge and watch</b><p>I read the final diff, run it on real data and merge it. Larger changes get a backup first, so there is always a way back, and whatever users report afterwards returns to G<sub>1</sub> as a new requirement.</p><span class="flow__who mono">human approval</span></li>
         </ol>
 
         <div class="ai__guard">
           <h4>Where it can go wrong</h4>
-          <p>An agent becomes dangerous when it can read untrusted content, reach private data and send something out, all at once. Prompt injection turns that mix into a leak, so in this setup no single agent gets all three: outside data passes guardrails first, and coding agents only reach what their block needs.</p>
-          <p>The quieter risk is code that looks right. A model reviewing its own diff tends to approve it, so review runs in a fresh context against the written plan. One green run proves little: a task an agent solves 75% of the time passes three runs in a row only about 42% of the time. Package names need a check too, because in a 2025 study about a fifth of the packages models recommended did not exist, and anyone can register those names.</p>
+          <p>An agent becomes dangerous when it can read untrusted content, reach private data and send something out at the same time, because prompt injection turns that mix into a leak; that is why outside data passes guardrails first and each coding agent reaches only its own block. The quieter risk is code that looks right. A model reviewing its own diff tends to approve it, so review runs in a fresh context against the plan, and one green run proves little: a task an agent solves 75% of the time passes three runs in a row only about 42% of the time. Package names need a check as well, since in a 2025 study about a fifth of the packages models recommended did not exist.</p>
         </div>
         <p class="ai__honest">I haven't run agents in a company's production environment yet. This is the setup I would bring there, based on <a href="https://www.anthropic.com/engineering/building-effective-agents">Building effective agents</a>, <a href="https://www.anthropic.com/engineering/claude-code-best-practices">Claude Code best practices</a> and the <a href="https://genai.owasp.org/">OWASP GenAI Security Project</a>.</p>
       </div>
