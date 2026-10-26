@@ -394,7 +394,8 @@ html.notes .stage3d[data-note]::after, html.notes .pmedia[data-note]::after { to
 .flow__step p { color: var(--text); font-size: .9rem; line-height: 1.5; margin: 0 0 14px; }
 .flow__who { margin-top: auto; align-self: flex-start; font-size: .68rem; color: #a9b6cc; border: 1px solid rgba(255,255,255,.12); border-radius: 999px; padding: 4px 10px; }
 .flow__step--gate { border-color: rgba(100,46,253,.55); }
-.flow__step--gate .flow__who { color: #e3dbff; border-color: rgba(100,46,253,.7); background: rgba(100,46,253,.18); }
+/* fiolet tylko dla akceptacji człowieka, jak bramki A na schemacie */
+.flow__who--h { color: #e3dbff; border-color: rgba(100,46,253,.7); background: rgba(100,46,253,.18); }
 .flow__step--loop { border-color: rgba(44,127,254,.5); }
 html.js-anim .flow__step { opacity: 0; transform: translateY(14px); transition: opacity .6s var(--ease), transform .6s var(--ease); }
 html.js-anim .ai.in .flow__step { opacity: 1; transform: none; }
@@ -485,6 +486,7 @@ html.js-anim .ai.in .flow__step:nth-child(8) { transition-delay: 0.64s; }
 /* Codeg: kolory trzech kropek z logo w podkreśleniu, granat z logo przy najechaniu */
 .ai__intro a[href*="codeg"] { background: linear-gradient(90deg, #ff4081 0 33.3%, #ffeb3b 33.3% 66.6%, #29b6f6 66.6%) 0 100% / 100% 2px no-repeat, linear-gradient(#1a1a2e, #1a1a2e) 0 100% / 100% 0 no-repeat; }
 .ai__intro a[href*="codeg"]:hover, .ai__intro a[href*="codeg"]:focus-visible { background-size: 100% 2px, 100% 100%; }
+.flow__step .flow__who + .flow__who { margin-top: -6px; }
 
 /* ---------- notatki ---------- */
 :where([data-note]) { position: relative; }
@@ -931,11 +933,11 @@ html.notes .hero__stage[data-note]::after { top: 76px; }
         </figure>
 
         <ol class="flow" role="list" aria-label="Schemat pracy w zespole: pięć etapów od zadania do scalonej zmiany">
-          <li data-k="1" class="flow__step flow__step--gate"><span class="flow__n"><i>G</i><sub>1</sub></span><b>Badanie i plan</b><p>Każde wymaganie dostaje test, który albo przechodzi, albo nie. Agenci z dostępem tylko do odczytu opisują istniejący kod i szukają czegoś, co już rozwiązuje problem, na przykład oficjalnego API albo utrzymywanej biblioteki. Plan wymienia moduły i pliki, które może zmieniać każda część, a kodowanie zaczyna się dopiero po jego akceptacji.</p><span class="flow__who mono">ja + agenci, tylko odczyt</span></li>
-          <li data-k="2" class="flow__step"><span class="flow__n"><i>G</i><sub>2</sub></span><b>Dzielę na bloki</b><p>Plan zamienia się w niezależne bloki z jasno określonym wejściem i wyjściem. Żadne dwa bloki nie edytują tego samego pliku, więc mogą iść równolegle i scalić się bez konfliktów, a blok, który się nie uda, można powtórzyć bez ruszania reszty.</p><span class="flow__who mono">ja</span></li>
+          <li data-k="1" class="flow__step flow__step--gate"><span class="flow__n"><i>G</i><sub>1</sub></span><b>Badanie i plan</b><p>Wymagania zapisuje się jako testy akceptacyjne. Agenci z dostępem tylko do odczytu analizują istniejący kod i sprawdzają gotowe rozwiązania, takie jak API czy biblioteki. Wynikiem jest plan z modułami, interfejsami i plikami, które może zmieniać każda część, zatwierdzany przed napisaniem kodu.</p><span class="flow__who mono">agenci, tylko odczyt</span><span class="flow__who flow__who--h mono">akceptacja człowieka</span></li>
+          <li data-k="2" class="flow__step"><span class="flow__n"><i>G</i><sub>2</sub></span><b>Dzielę na bloki</b><p>Plan zamienia się w niezależne bloki z jasno określonym wejściem i wyjściem. Żadne dwa bloki nie edytują tego samego pliku, więc mogą iść równolegle i scalić się bez konfliktów, a blok, który się nie uda, można powtórzyć bez ruszania reszty.</p><span class="flow__who mono">główny agent</span></li>
           <li data-k="3" class="flow__step"><span class="flow__n"><i>G</i><sub>3</sub></span><b>Rozdzielam agentów</b><p>Każdy blok dostaje własnego agenta programującego na osobnej gałęzi, w sandboxie. Agent może uruchamiać tylko polecenia potrzebne w jego zadaniu i widzi tylko pliki wymienione w planie, więc nawet zagubiony albo zmanipulowany agent nie wyjdzie poza swój blok.</p><span class="flow__who mono">agenci programujący</span></li>
           <li data-k="4" class="flow__step flow__step--loop"><span class="flow__n"><i>G</i><sub>4</sub></span><b>Niezależna recenzja</b><p>Inny, równie mocny model sprawdza każdy diff w świeżym kontekście, porównuje go z planem i uruchamia testy. Blok, który nie przejdzie, wraca do swojego agenta z uwagami recenzenta, a pętla trwa, aż przejdzie.</p><span class="flow__who mono">agent recenzent</span></li>
-          <li data-k="5" class="flow__step flow__step--gate"><span class="flow__n"><i>G</i><sub>5</sub></span><b>Scalam i obserwuję</b><p>Zmiana działa najpierw na danych zastępczych, potem na prawdziwych, a scalana jest dopiero wtedy, gdy da się wyjaśnić, jak działa. Przed większymi zmianami powstaje kopia zapasowa, więc zawsze jest droga powrotu, a to, co później zgłoszą użytkownicy, wraca do G<sub>1</sub> jako nowe wymaganie.</p><span class="flow__who mono">akceptacja człowieka</span></li>
+          <li data-k="5" class="flow__step flow__step--gate"><span class="flow__n"><i>G</i><sub>5</sub></span><b>Scalam i obserwuję</b><p>Zmiana działa najpierw na danych zastępczych, potem na prawdziwych, a scalana jest dopiero wtedy, gdy da się wyjaśnić, jak działa. Przed większymi zmianami powstaje kopia zapasowa, więc zawsze jest droga powrotu, a to, co później zgłoszą użytkownicy, wraca do G<sub>1</sub> jako nowe wymaganie.</p><span class="flow__who flow__who--h mono">akceptacja człowieka</span></li>
         </ol>
 
         <div class="ai__guard">
