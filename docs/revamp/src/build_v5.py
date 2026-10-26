@@ -61,7 +61,8 @@ import glob
 RESP_ALL = {pathlib.Path(f).stem: pathlib.Path(f) for f in glob.glob(str(here.parents[2] / "images" / "responsive" / "*.webp"))}
 IM = {"labinc": resp / "labinc-720.webp", "passmgr": resp / "passmgr-1-720.webp", "inventory": resp / "inventoryGen-720.webp", "axi": resp / "plain_axi4_lite-480.webp",
       "basys": resp / "basys3-fpga-board-480.webp", "cnc": resp / "cnc-eti-logo-480.webp", "jobm": img / "jobm-analysis-1600.webp", "yapper": img / "yapper-720.webp",
-      "seeskyPoster": img / "seesky-poster.webp", "turfPoster": img / "turf-poster.webp", "invPoster": img / "inv-poster.webp"}
+      "seeskyPoster": img / "seesky-poster.webp", "turfPoster": img / "turf-poster.webp", "invPoster": img / "inv-poster.webp",
+      "florist-480": img / "florist-480.webp", "florist-720": img / "florist-720.webp"}
 VI = {"seesky": vid / "seesky.webm", "turf": vid / "turf.webm", "inv": vid / "inv.webm", "seeskyTracking": vid / "seesky-tracking.webm", "factory": vid / "factory.webm", "factoryMp4": vid / "factory.mp4"}
 IM.update({"factoryPoster": img / "factory-poster.webp", "seesky": img / "seesky-720.webp", "seeskyTrackingPoster": img / "seesky-tracking-poster.webp"})
 for k in set(__import__("re").findall(r"%%IMG_([\w-]+)%%", s)):
