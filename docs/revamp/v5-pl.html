@@ -506,6 +506,7 @@ html.notes .hero__stage[data-note]::after { top: 76px; }
 /* ---------- tablet ---------- */
 @media (max-width: 1080px) {
   .flow { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+  .flow__step:last-child:nth-child(odd) { grid-column: 1 / -1; }   /* G5 nie zostaje sam w lewej kolumnie */
   .proj, .proj.rev { grid-template-columns: minmax(0, 1fr); }
   .proj.rev .ptext { order: 0; }
   .pmedia { max-width: 760px; }
@@ -945,7 +946,7 @@ html.notes .hero__stage[data-note]::after { top: 76px; }
 
         <div class="ai__guard">
           <h4>Gdzie coś może pójść źle</h4>
-          <p>Agent staje się groźny, gdy jednocześnie czyta niezaufane treści, ma dostęp do prywatnych danych i może coś wysłać na zewnątrz, bo prompt injection zamienia takie połączenie w wyciek; dlatego dane z zewnątrz najpierw przechodzą przez zabezpieczenia, a każdy agent programujący sięga tylko do swojego bloku. Mniej widoczne ryzyko to kod, który wygląda dobrze. Model oceniający własny diff zwykle go akceptuje, więc recenzja odbywa się w świeżym kontekście, względem planu, a jeden zielony test niewiele dowodzi: zadanie, które agent rozwiązuje w 75% prób, przechodzi trzy razy z rzędu tylko w około 42%. Nazwy pakietów też trzeba sprawdzać, bo w badaniu z 2025 roku mniej więcej co piąty pakiet polecany przez modele nie istniał.</p>
+          <p>Agent staje się groźny, gdy jednocześnie czyta niezaufane treści, ma dostęp do prywatnych danych i może coś wysłać na zewnątrz, bo prompt injection zamienia takie połączenie w wyciek; dlatego dane z zewnątrz najpierw przechodzą przez zabezpieczenia, a każdy agent programujący sięga tylko do swojego bloku. Mniej widoczne ryzyko to wynik, który wygląda dobrze. Model oceniający własną pracę zwykle ją akceptuje, więc recenzja odbywa się w świeżym kontekście, względem planu. Jedno udane uruchomienie też niewiele dowodzi, bo agenci nie są deterministyczni: zadanie, które udaje się trzy razy na cztery, przechodzi trzy razy z rzędu w mniej niż połowie przypadków. Modele podsuwają też pakiety, linki i API, które są nieaktualne albo w ogóle nie istnieją, dlatego każdą nową zależność i każdy odnośnik sprawdza się u źródła, zanim trafi do kodu.</p>
         </div>
         <p class="ai__honest">Nie wdrażałem jeszcze agentów w produkcyjnym środowisku firmy. Taki sposób pracy chcę tam wnieść, opierając się na <a href="https://www.anthropic.com/engineering/building-effective-agents">Building effective agents</a>, <a href="https://www.anthropic.com/engineering/claude-code-best-practices">Claude Code best practices</a> i <a href="https://genai.owasp.org/">OWASP GenAI Security Project</a>.</p>
       </div>
