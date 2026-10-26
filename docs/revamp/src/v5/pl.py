@@ -217,8 +217,8 @@ PL = [
     ('The agents are boxed in mainly because of prompt injection: a leak becomes possible when the same agent reads untrusted content, can reach private data and can send data out (the <a href="https://simonwillison.net/2025/Jun/16/the-lethal-trifecta/">lethal trifecta</a>). A model rates its own code too highly, so a different model reviews it, and one green test run is not enough (pass<sup>k</sup>, not pass@1). Every new dependency is checked at its source, because models invent package names and attackers register them.',
      'Agenci są tak mocno ograniczeni głównie z powodu prompt injection: wyciek grozi, gdy ten sam agent czyta niezaufane treści, ma dostęp do prywatnych danych i może coś wysłać na zewnątrz (<a href="https://simonwillison.net/2025/Jun/16/the-lethal-trifecta/">lethal trifecta</a>). Model za wysoko ocenia własny kod, więc sprawdza go inny model, a jeden zielony przebieg testów nie wystarcza (pass<sup>k</sup>, nie pass@1). Każdą nową zależność sprawdza się u źródła, bo modele zmyślają nazwy pakietów, a atakujący je rejestrują.'),
     ('<h4>Where it can go wrong</h4>', '<h4>Gdzie coś może pójść źle</h4>'),
-    ("I haven't run agents in a company's production environment yet. Based on what I know from",
-     'Nie wdrażałem jeszcze agentów w produkcyjnym środowisku firmy. Na podstawie wiedzy z'),
+    ("I haven't run agents in a company's production environment yet. Based on my own knowledge, drawing on",
+     'Nie wdrażałem jeszcze agentów w produkcyjnym środowisku firmy. Na podstawie mojej wiedzy opartej na'),
     ('Claude Code best practices</a> and the <a href="https://genai.owasp.org/">OWASP GenAI Security Project</a>, I would propose a similar setup there.', 'Claude Code best practices</a> i <a href="https://genai.owasp.org/">OWASP GenAI Security Project</a> zaproponowałbym tam podobne rozwiązanie.'),
 
     # ---------- kontakt ----------
