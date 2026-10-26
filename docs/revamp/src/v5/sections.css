@@ -394,3 +394,5 @@ html.js-anim .ai.in .flow__step:nth-child(8) { transition-delay: 0.64s; }
 /* jedna pigułka: część agentów szara, doklejone "+ me" w fiolecie akceptacji */
 .flow__step .flow__who:has(.flow__me) { padding-right: 0; overflow: hidden; }
 .flow__me { display: inline-block; margin: -4px 0 -4px 8px; padding: 4px 10px 4px 8px; color: #e3dbff; background: rgba(100,46,253,.3); border-left: 1px solid rgba(100,46,253,.7); }
+
+.ai__guard sup { line-height: 0; }   /* pass^k nie rozpycha interlinii */
