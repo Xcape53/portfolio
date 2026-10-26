@@ -1,0 +1,66 @@
+[
+ {
+  "name": "portfolio",
+  "url": "https://github.com/Xcape53/portfolio",
+  "pushed": "2026-10-26",
+  "language": "HTML",
+  "archived": false,
+  "description": "Personal portfolio with software, API integration, automation and electronics projects. English and Polish versions.",
+  "readme": "Personal portfolio for Piotr Jeleniewicz, an electronics and telecommunications student and software developer based in Gdynia, Poland.",
+  "hide": true
+ },
+ {
+  "name": "TurfMatchMaking",
+  "url": "https://github.com/Xcape53/TurfMatchMaking",
+  "pushed": "2026-10-26",
+  "language": "JavaScript",
+  "archived": false,
+  "description": "Configurable Krunker lobby finder with live validation and server hunting",
+  "readme": "A HIGHLY configurable Krunker game finder userscript.Pick your rules once, press one key, and you are set.",
+  "summary_en": "A Krunker lobby finder. You set your rules once, press one key and it finds a matching server.",
+  "summary_pl": "Wyszukiwarka lobby w Krunkerze. Raz ustawiasz zasady, naciskasz jeden klawisz i skrypt znajduje pasujący serwer."
+ },
+ {
+  "name": "Xcape53",
+  "url": "https://github.com/Xcape53/Xcape53",
+  "pushed": "2026-10-26",
+  "language": "Python",
+  "archived": false,
+  "description": "Profile README for Piotr Jeleniewicz - software development, API integration and automation.",
+  "readme": "I develop Python and JavaScript applications, integrate services through APIs and build automation tools. I am interested in system design and software that connects with devices.",
+  "hide": true
+ },
+ {
+  "name": "SeeSky-tracking",
+  "url": "https://github.com/Xcape53/SeeSky-tracking",
+  "pushed": "2026-10-01",
+  "language": "Python",
+  "archived": false,
+  "description": "Radio telescope software with a Python REST API, an Express dashboard and an interactive sky map.",
+  "readme": "SeeSky Tracking is a control and observation interface for an amateur radio telescope on an altitude-azimuth mount. It combines astronomical coordinate calculations, a REST API, an observation queue, and a browser-based control panel.",
+  "summary_en": "Control and observation software for an amateur radio telescope on an alt-az mount, with a Python REST API and an Express dashboard.",
+  "summary_pl": "Oprogramowanie do sterowania amatorskim radioteleskopem na montażu azymutalnym i do obserwacji, z REST API w Pythonie i panelem w Expressie."
+ },
+ {
+  "name": "Yapper",
+  "url": "https://github.com/Xcape53/Yapper",
+  "pushed": "2026-10-01",
+  "language": "Python",
+  "archived": false,
+  "description": "Windows speech-to-text app with two push-to-talk channels and online or offline transcription engines.",
+  "readme": "Yapper is a Windows speech-to-text application with two independent push-to-talk channels. Each channel has its own microphone, shortcut, and transcription language. The recognition engine is selected for the whole application.",
+  "summary_en": "Windows dictation with two push-to-talk channels, each with its own microphone, shortcut and language.",
+  "summary_pl": "Dyktowanie w Windowsie z dwoma kanałami push-to-talk. Każdy ma własny mikrofon, skrót i język."
+ },
+ {
+  "name": "LabInc",
+  "url": "https://github.com/Xcape53/LabInc",
+  "pushed": "2026-07-13",
+  "language": "Java",
+  "archived": false,
+  "description": "Java incremental game about building and upgrading a chemical production network.",
+  "readme": "LabInc is a Java incremental game about building a chemical production network. The player starts with basic extraction, reinvests revenue in upgrades, and unlocks increasingly advanced factories and elements.",
+  "summary_en": "A Java incremental game about building and upgrading a chemical production network.",
+  "summary_pl": "Gra inkrementalna w Javie, w której budujesz i rozbudowujesz sieć produkcji chemicznej."
+ }
+]

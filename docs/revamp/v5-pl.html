@@ -492,6 +492,10 @@ html.js-anim .ai.in .flow__step:nth-child(8) { transition-delay: 0.64s; }
 .flow__me { display: inline-block; margin: -4px 0 -4px 8px; padding: 4px 10px 4px 8px; color: #e3dbff; background: rgba(100,46,253,.3); border-left: 1px solid rgba(100,46,253,.7); }
 
 .ai__guard sup { line-height: 0; }   /* pass^k nie rozpycha interlinii */
+.now__src { margin: -6px 0 10px; color: var(--muted, #8a8f98); font-size: .72rem; }
+.now__when { display: block; margin-top: 4px; color: var(--muted, #8a8f98); font-size: .72rem; }
+.me__now .lines a { color: inherit; text-decoration: none; }
+.me__now .lines a:hover b { color: var(--primary); }
 
 /* ---------- notatki ---------- */
 :where([data-note]) { position: relative; }
@@ -853,8 +857,8 @@ html.notes .hero__stage[data-note]::after { top: 76px; }
       <div class="head reveal"><p class="k">O mnie</p><h2 id="me-h">Piotr Jeleniewicz</h2></div>
       <div class="me">
         <div class="me__bio reveal">
-          <p class="lead">Jestem na ostatnim semestrze Elektroniki i Telekomunikacji na Politechnice Gdańskiej. Piszę aplikacje i narzędzia do automatyzacji: integracje z API, przepływy danych i kod, który łączy moduły w całość.</p>
-          <p>Problem rozkładam jak drzewo: od korzenia przez kategorie i podkategorie po powiązania między nimi, aż każdy liść da się zbudować i przetestować. Tak samo podchodzę do własnej pracy: jeśli coś robię trzeci raz, piszę do tego narzędzie.</p>
+          <p class="lead">Jestem na ostatnim semestrze Elektroniki i Telekomunikacji na Politechnice Gdańskiej. Buduję aplikacje i narzędzia do automatyzacji.</p>
+          <p>Problem rozkładam jak drzewo: od korzenia przez kategorie i podkategorie po powiązania między nimi, aż każdy liść da się zbudować i przetestować. Tak samo podchodzę do własnej pracy, więc jeśli robię coś po raz enty, piszę do tego narzędzie.</p>
           <p>Poza kodem interesuję się geografią, lubię miksować muzykę i chodzę na siłownię. Testuję też narzędzia AI do rozdzielania ścieżek audio i uczę się robić wizualizacje architektoniczne w ComfyUI.</p>
           <dl class="stack-dl">
             <div><dt class="mono">Kod</dt><dd>Python, JavaScript, C/C++, Java, REST APIs</dd></div>
@@ -864,12 +868,8 @@ html.notes .hero__stage[data-note]::after { top: 76px; }
         </div>
         <aside class="panel me__now reveal" aria-labelledby="now-h">
           <h3 id="now-h">Czym się teraz zajmuję</h3>
-          <ul class="lines">
-            <li><b>Praca inżynierska.</b> Uczę agentów DQN grać w Mario i ViZDoom, zapisuję metryki i porównuję eksperymenty.</li>
-            <li><b>SimLE / SeeSky.</b> Kieruję pracami nad oprogramowaniem radioteleskopu.</li>
-            <li><b>Własne narzędzia.</b> JobManager, Yapper i Turf Matchmaking. Używam ich codziennie, więc ciągle je poprawiam.</li>
-            <li><b>Korepetycje.</b> Uczę licealistów matematyki, rysuję schematy i dobieram analogie do ucznia.</li>
-          </ul>
+          <p class="now__src mono">Według ostatnich pushy na GitHubie</p>
+          <!--now--><ul class="lines"><li><a href="https://github.com/Xcape53/TurfMatchMaking"><b>TurfMatchMaking.</b></a> Wyszukiwarka lobby w Krunkerze. Raz ustawiasz zasady, naciskasz jeden klawisz i skrypt znajduje pasujący serwer. <span class="now__when mono">26.10.2026</span></li><li><a href="https://github.com/Xcape53/SeeSky-tracking"><b>SeeSky-tracking.</b></a> Oprogramowanie do sterowania amatorskim radioteleskopem na montażu azymutalnym i do obserwacji, z REST API w Pythonie i panelem w Expressie. <span class="now__when mono">01.10.2026</span></li><li><a href="https://github.com/Xcape53/Yapper"><b>Yapper.</b></a> Dyktowanie w Windowsie z dwoma kanałami push-to-talk. Każdy ma własny mikrofon, skrót i język. <span class="now__when mono">01.10.2026</span></li><li><a href="https://github.com/Xcape53/LabInc"><b>LabInc.</b></a> Gra inkrementalna w Javie, w której budujesz i rozbudowujesz sieć produkcji chemicznej. <span class="now__when mono">13.07.2026</span></li></ul><!--/now-->
         </aside>
       </div>
 
