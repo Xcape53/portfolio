@@ -303,7 +303,8 @@ html.js-anim .reveal.in { opacity: 1; transform: none; }
 .ai__intro p { color: var(--text); margin: 0; }
 /* podświetlenie w kolorach narzędzi: Claude Code pomarańczowy, Codex ciemnoszary */
 .ai__intro a[href*="claude.com"] { --hl: #d97757; }
-.ai__intro a[href*="codex"] { --hl: #4a4a50; }
+.ai__intro a[href*="codex"] { --hl: #34343a; }
+.ai__intro a[href*="opencode"] { --hl: #8a8a93; }
 .ai__intro a { color: var(--white); text-decoration: none; background: linear-gradient(var(--hl, var(--primary)), var(--hl, var(--primary))) 0 100% / 100% 2px no-repeat; padding: 0 2px 2px; border-radius: 2px; transition: background-size .45s var(--ease), color .3s; }
 .ai__intro a:hover, .ai__intro a:focus-visible { background-size: 100% 100%; color: #fff; }
 
@@ -481,6 +482,9 @@ html.js-anim .ai.in .flow__step:nth-child(8) { transition-delay: 0.64s; }
 .ai__guard { display: block; }
 .ai__guard p { max-width: 62rem; }
 .ai__guard h4 { margin-bottom: 10px; }
+/* Codeg: kolory trzech kropek z logo w podkreśleniu, granat z logo przy najechaniu */
+.ai__intro a[href*="codeg"] { background: linear-gradient(90deg, #ff4081 0 33.3%, #ffeb3b 33.3% 66.6%, #29b6f6 66.6%) 0 100% / 100% 2px no-repeat, linear-gradient(#1a1a2e, #1a1a2e) 0 100% / 100% 0 no-repeat; }
+.ai__intro a[href*="codeg"]:hover, .ai__intro a[href*="codeg"]:focus-visible { background-size: 100% 2px, 100% 100%; }
 
 /* ---------- notatki ---------- */
 :where([data-note]) { position: relative; }
@@ -864,7 +868,7 @@ html.notes .hero__stage[data-note]::after { top: 76px; }
       <div class="ai reveal" aria-labelledby="ai-h">
         <div class="ai__intro">
           <h3 id="ai-h">Jak buduję z AI</h3>
-          <p>Codziennie pracuję z <a href="https://claude.com/claude-code">Claude Code</a> i <a href="https://chatgpt.com/codex">Codexem</a>, które piszą sporą część kodu. Pracę jednego modelu sprawdza inny, równie mocny, od innej firmy: świeży kontekst pomaga, ale model wytrenowany inaczej także inaczej rozumuje i wyłapuje inne błędy. Gdy coś musi działać na pewno, każę mocniejszemu modelowi wytłumaczyć mi cały plik, aż rozumiem, co robi i dlaczego. Całość spina CodeG: trzyma moje subskrypcje Claude Code, Codexa i OpenCode w jednym miejscu, a główny agent przydziela zadania zależnie od tego, jak mocny i jak szybki jest każdy model.</p>
+          <p>Codziennie pracuję z <a href="https://claude.com/claude-code">Claude Code</a> i <a href="https://chatgpt.com/codex">Codexem</a>, które piszą sporą część kodu. Pracę jednego modelu sprawdza inny, równie mocny, od innej firmy: świeży kontekst pomaga, ale model wytrenowany inaczej także inaczej rozumuje i wyłapuje inne błędy. Gdy coś musi działać na pewno, każę mocniejszemu modelowi wytłumaczyć mi cały plik, aż rozumiem, co robi i dlaczego. Wszystko spina <a href="https://docs.codeg.app">Codeg</a>: trzyma moje subskrypcje Claude Code, Codexa i <a href="https://opencode.ai">OpenCode</a> w jednym miejscu, a główny agent przydziela zadania zależnie od tego, jak mocny i jak szybki jest każdy model.</p>
           <p>W firmie najważniejsze są dane. Wrażliwe dane zostają w sandboxie i, zależnie od tego, jak są wrażliwe, w ogóle nie trafiają do OpenAI ani innego dostawcy modeli. Agenci pracują na danych zastępczych o tej samej strukturze, a prawdziwe dane trafiają do docelowego systemu hurtowo dopiero wtedy, gdy zmiana przejdzie testy.</p>
           <p>Poniżej jest schemat, którego użyłbym w zespole, gdzie błąd kosztuje więcej. Przykładowe zadanie to dodanie kolejnego portalu z ofertami do JobManagera.</p>
         </div>
@@ -927,11 +931,11 @@ html.notes .hero__stage[data-note]::after { top: 76px; }
         </figure>
 
         <ol class="flow" role="list" aria-label="Przykładowy schemat pracy: dodanie portalu z ofertami do JobManagera">
-          <li data-k="1" class="flow__step flow__step--gate"><span class="flow__n"><i>G</i><sub>1</sub></span><b>Badanie i plan</b><p>Wymagania zamieniam w warunki, które da się sprawdzić. Agenci z dostępem tylko do odczytu opisują istniejący kod i najpierw szukają oficjalnego API, a plan wymienia moduły i pliki, które może zmieniać każda część. Nic nie jest kodowane przed moją akceptacją.</p><span class="flow__who mono">ja + agenci, tylko odczyt</span></li>
+          <li data-k="1" class="flow__step flow__step--gate"><span class="flow__n"><i>G</i><sub>1</sub></span><b>Badanie i plan</b><p>Każde wymaganie dostaje test, który albo przechodzi, albo nie. Agenci z dostępem tylko do odczytu opisują istniejący kod i szukają oficjalnego API, zanim cokolwiek zostanie scrapowane. Plan wymienia moduły i pliki, które może zmieniać każda część, a kodowanie zaczyna się dopiero po jego akceptacji.</p><span class="flow__who mono">ja + agenci, tylko odczyt</span></li>
           <li data-k="2" class="flow__step"><span class="flow__n"><i>G</i><sub>2</sub></span><b>Dzielę na bloki</b><p>Plan zamienia się w niezależne bloki z jasno określonym wejściem i wyjściem. Żadne dwa bloki nie edytują tego samego pliku, więc mogą iść równolegle i scalić się bez konfliktów, a blok, który się nie uda, można powtórzyć bez ruszania reszty.</p><span class="flow__who mono">ja</span></li>
           <li data-k="3" class="flow__step"><span class="flow__n"><i>G</i><sub>3</sub></span><b>Rozdzielam agentów</b><p>Każdy blok dostaje własnego agenta programującego na osobnej gałęzi, w sandboxie. Agent może uruchamiać tylko polecenia potrzebne w jego zadaniu i widzi tylko pliki wymienione w planie, więc nawet zagubiony albo zmanipulowany agent nie wyjdzie poza swój blok.</p><span class="flow__who mono">agenci programujący</span></li>
           <li data-k="4" class="flow__step flow__step--loop"><span class="flow__n"><i>G</i><sub>4</sub></span><b>Niezależna recenzja</b><p>Inny, równie mocny model sprawdza każdy diff w świeżym kontekście, porównuje go z planem i uruchamia testy. Blok, który nie przejdzie, wraca do swojego agenta z uwagami recenzenta, a pętla trwa, aż przejdzie.</p><span class="flow__who mono">agent recenzent</span></li>
-          <li data-k="5" class="flow__step flow__step--gate"><span class="flow__n"><i>G</i><sub>5</sub></span><b>Scalam i obserwuję</b><p>Zmiana działa najpierw na danych zastępczych, potem na prawdziwych, a scalam ją, gdy umiem wyjaśnić, jak działa. Przed większymi zmianami robię kopię zapasową, więc zawsze jest droga powrotu, a to, co później zgłoszą użytkownicy, wraca do G<sub>1</sub> jako nowe wymaganie.</p><span class="flow__who mono">akceptacja człowieka</span></li>
+          <li data-k="5" class="flow__step flow__step--gate"><span class="flow__n"><i>G</i><sub>5</sub></span><b>Scalam i obserwuję</b><p>Zmiana działa najpierw na danych zastępczych, potem na prawdziwych, a scalana jest dopiero wtedy, gdy da się wyjaśnić, jak działa. Przed większymi zmianami powstaje kopia zapasowa, więc zawsze jest droga powrotu, a to, co później zgłoszą użytkownicy, wraca do G<sub>1</sub> jako nowe wymaganie.</p><span class="flow__who mono">akceptacja człowieka</span></li>
         </ol>
 
         <div class="ai__guard">
