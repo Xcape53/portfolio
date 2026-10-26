@@ -474,7 +474,6 @@ html.js-anim .ai.in .flow__step:nth-child(8) { transition-delay: 0.64s; }
 .flow__step b { order: 1; }
 .flow__step .flow__who { order: 2; margin: 2px 0 12px; }
 .flow__step p { order: 3; margin: 0; }
-.ai__guard p { grid-column: 1 / -1; max-width: 52rem; }
 
 /* ---------- notatki ---------- */
 :where([data-note]) { position: relative; }
@@ -929,7 +928,8 @@ html.notes .hero__stage[data-note]::after { top: 76px; }
 
         <div class="ai__guard">
           <h4>Gdzie coś może pójść źle</h4>
-          <p>Agenci się mylą, a tekst, który czytają, może nimi pokierować, więc trzymam się kilku stałych zasad. Sekrety nie trafiają do promptów ani plików w repozytorium. Zanim zainstaluję pakiet zaproponowany przez AI, sprawdzam, czy naprawdę istnieje, a skille i serwery MCP dodaję tylko wtedy, gdy przeczytałem ich źródło. W firmie jej kod i wszelkie dane osobowe trafiałyby tylko do narzędzi, które firma zatwierdziła.</p>
+          <p>Agent staje się groźny, gdy jednocześnie czyta niezaufane treści, ma dostęp do prywatnych danych i może coś wysłać na zewnątrz. Prompt injection zamienia takie połączenie w wyciek, więc w tym schemacie żaden agent nie dostaje wszystkich trzech: dane z zewnątrz przechodzą najpierw przez zabezpieczenia, a agenci programujący sięgają tylko po to, czego potrzebuje ich blok.</p>
+          <p>Mniej widoczne ryzyko to kod, który wygląda dobrze. Model oceniający własny diff zwykle go akceptuje, dlatego recenzja odbywa się w świeżym kontekście, względem spisanego planu. Jeden zielony test niewiele dowodzi: zadanie, które agent rozwiązuje w 75% prób, przechodzi trzy razy z rzędu tylko w około 42%. Nazwy pakietów też trzeba sprawdzać, bo w badaniu z 2025 roku mniej więcej co piąty pakiet polecany przez modele nie istniał, a takie nazwy może zarejestrować każdy.</p>
         </div>
         <p class="ai__honest">Nie wdrażałem jeszcze agentów w produkcyjnym środowisku firmy. Taki sposób pracy chcę tam wnieść, opierając się na <a href="https://www.anthropic.com/engineering/building-effective-agents">Building effective agents</a>, <a href="https://www.anthropic.com/engineering/claude-code-best-practices">Claude Code best practices</a> i <a href="https://genai.owasp.org/">OWASP GenAI Security Project</a>.</p>
       </div>

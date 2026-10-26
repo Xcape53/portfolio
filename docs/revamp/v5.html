@@ -474,7 +474,6 @@ html.js-anim .ai.in .flow__step:nth-child(8) { transition-delay: 0.64s; }
 .flow__step b { order: 1; }
 .flow__step .flow__who { order: 2; margin: 2px 0 12px; }
 .flow__step p { order: 3; margin: 0; }
-.ai__guard p { grid-column: 1 / -1; max-width: 52rem; }
 
 /* ---------- notatki ---------- */
 :where([data-note]) { position: relative; }
@@ -929,7 +928,8 @@ html.notes .hero__stage[data-note]::after { top: 76px; }
 
         <div class="ai__guard">
           <h4>Where it can go wrong</h4>
-          <p>Agents make mistakes, and text they read can steer them, so a few habits are fixed. Secrets never go into prompts or repo files. I check that a package an AI suggests really exists before installing it, and I only add skills or MCP servers whose source I have read. At a company, its code and any personal data would go only into tools the company has approved.</p>
+          <p>An agent becomes dangerous when it can read untrusted content, reach private data and send something out, all at once. Prompt injection turns that mix into a leak, so in this setup no single agent gets all three: outside data passes guardrails first, and coding agents only reach what their block needs.</p>
+          <p>The quieter risk is code that looks right. A model reviewing its own diff tends to approve it, so review runs in a fresh context against the written plan. One green run proves little: a task an agent solves 75% of the time passes three runs in a row only about 42% of the time. Package names need a check too, because in a 2025 study about a fifth of the packages models recommended did not exist, and anyone can register those names.</p>
         </div>
         <p class="ai__honest">I haven't run agents in a company's production environment yet. This is the setup I would bring there, based on <a href="https://www.anthropic.com/engineering/building-effective-agents">Building effective agents</a>, <a href="https://www.anthropic.com/engineering/claude-code-best-practices">Claude Code best practices</a> and the <a href="https://genai.owasp.org/">OWASP GenAI Security Project</a>.</p>
       </div>
