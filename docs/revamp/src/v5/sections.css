@@ -391,3 +391,6 @@ html.js-anim .ai.in .flow__step:nth-child(8) { transition-delay: 0.64s; }
 .ai__intro a[href*="codeg"] { background: linear-gradient(90deg, #ff4081 0 33.3%, #ffeb3b 33.3% 66.6%, #29b6f6 66.6%) 0 100% / 100% 2px no-repeat, linear-gradient(#1a1a2e, #1a1a2e) 0 100% / 100% 0 no-repeat; }
 .ai__intro a[href*="codeg"]:hover, .ai__intro a[href*="codeg"]:focus-visible { background-size: 100% 2px, 100% 100%; }
 .flow__step .flow__who + .flow__who { margin-top: -6px; }
+/* jedna pigułka: część agentów szara, doklejone "+ me" w fiolecie akceptacji */
+.flow__step .flow__who:has(.flow__me) { padding-right: 0; overflow: hidden; }
+.flow__me { display: inline-block; margin: -4px 0 -4px 8px; padding: 4px 10px 4px 8px; color: #e3dbff; background: rgba(100,46,253,.3); border-left: 1px solid rgba(100,46,253,.7); }
