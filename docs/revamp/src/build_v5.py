@@ -78,7 +78,7 @@ left = re.findall(r"%%[A-Z]+_\w+%%", s); assert not left, left
 assert not any(c in s for c in "–—"), "dash"
 # "Czym się teraz zajmuję": ostatnio pushowane repozytoria z v5/github.json (fetch_github.py)
 import json
-def now_list(lang, n=4):
+def now_list(lang, n=2):
     rows = [r for r in json.loads(part("github.json")) if not r.get("hide")][:n]
     li = []
     for r in rows:
