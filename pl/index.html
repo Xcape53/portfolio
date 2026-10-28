@@ -1190,14 +1190,20 @@ html.notes .hero__stage[data-note]::after { top: 76px; }
     const CAMZ = 11.5, FOVH = 2 * CAMZ * Math.tan(17 * Math.PI / 180);
     let cx = RM ? N : 1, W = 0, H = 0, narrow = false, last = 0, mBy = 1.95, mGs = 0.31;
     const EXT = Math.max(...tgt.map((p) => Math.max(Math.abs(p[0]), Math.abs(p[1]))));
-    // telefon: symbol mieści się między menu a imieniem, z marginesem (wcześniej stała pozycja nachodziła na oba)
+    // telefon: symbol w pierwotnej wielkości (jak przy hero = wysokość ekranu), z marginesem pod menu;
+    // jeśli nie mieści się nad tekstem, hero rośnie i cała treść zjeżdża w dół (zamiast zmniejszać symbol)
     const fitMobile = () => {
-      const ht = document.getElementById("htext"); if (!ht || !H) return;
-      const ppu = H / FOVH, top = 78, bot = ht.getBoundingClientRect().top - cv.getBoundingClientRect().top - 28;
-      mGs = Math.min(0.31, Math.max(20, (bot - top) / 2) / (EXT * 1.2 * ppu));
-      mBy = (H / 2 - (top + bot) / 2) / ppu;
+      const ht = document.getElementById("htext"), hero = cv.closest(".hero"), stage = cv.closest(".hero__stage"); if (!ht || !hero || !stage || !H) return;
+      const half = EXT * 1.2 * 0.31 * innerHeight / FOVH, top = 84, gap = 32;
+      const pad = parseFloat(getComputedStyle(ht.parentElement).paddingBottom) || 0;
+      const need = Math.ceil(top + 2 * half + gap + ht.offsetHeight + pad);
+      // tekst jest przypięty do sceny (sticky, wysokość ekranu), więc rośnie i hero, i scena
+      hero.style.minHeight = stage.style.height = need > innerHeight ? need + "px" : "";
+      const ppu = H / FOVH;
+      mGs = half / (EXT * 1.2 * ppu);
+      mBy = (H / 2 - (top + half)) / ppu;
     };
-    const size = () => { W = cv.clientWidth; H = cv.clientHeight; fit(cv, W, H); narrow = W < 900; if (narrow) fitMobile(); };
+    const size = () => { W = cv.clientWidth; H = cv.clientHeight; fit(cv, W, H); narrow = W < 900; if (narrow) fitMobile(); else { const h = cv.closest(".hero"), st = cv.closest(".hero__stage"); if (h) h.style.minHeight = ""; if (st) st.style.height = ""; } };
     addEventListener("resize", size); addEventListener("load", size); size();
     const rot = (p, rx, ry, rz) => {
       let [x, y, z] = p, c = Math.cos(rz), s = Math.sin(rz); [x, y] = [x * c - y * s, x * s + y * c];
