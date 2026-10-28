@@ -1606,17 +1606,17 @@ html.notes .hero__stage[data-note]::after { top: 76px; }
   // amt narasta i zanika w czasie, kolejne harmoniczne (3, 5, 7) dochodzą po kolei, pozycja kursora jest wygładzona
   document.querySelectorAll("[data-osc]").forEach((osc) => {
     const oc = osc.getContext("2d"); watch(osc);
-    let mx = null, cx = null, amt = 0, last = 0, sq = true;
+    let mx = null, cx = null, amt = 0, last = 0;
     osc.parentElement.addEventListener("pointermove", (e) => { mx = e.clientX - osc.getBoundingClientRect().left; });
     osc.parentElement.addEventListener("pointerleave", () => { mx = null; });
-    osc.parentElement.addEventListener("click", () => { if (!fine) sq = !sq; });   // na dotyku: stuknięcie przełącza sinus / szereg Fouriera
     onTick((t) => {
       if (!isOn(osc)) { last = t; return; }
       const dt = Math.min(0.05, t - last); last = t;
       const w = osc.clientWidth, h = osc.clientHeight; fit(osc, w, h);
-      let goal = mx;
-      if (!fine) goal = sq ? w / 2 : null;   // na dotyku: cała fala jako szereg Fouriera
-      if (goal !== null) { cx = cx === null ? goal : lerp(cx, goal, 1 - Math.exp(-dt * 11)); amt = Math.min(1, amt + dt / 0.55); }
+      if (!fine) {   // na dotyku: przy dole i górze ekranu sinus, na środku ekranu pełny szereg Fouriera
+        const r = osc.getBoundingClientRect(), v = (r.top + r.height / 2) / innerHeight;
+        amt = clamp(1 - Math.abs(v - 0.5) / 0.4, 0, 1); cx = w / 2;
+      } else if (mx !== null) { cx = cx === null ? mx : lerp(cx, mx, 1 - Math.exp(-dt * 11)); amt = Math.min(1, amt + dt / 0.55); }
       else amt = Math.max(0, amt - dt / 0.8);
       const A = smooth(amt), wh = [0, 1, 2].map((k) => smooth(A * 3.4 - k * 0.8));   // wagi harmonicznych 3, 5, 7
       oc.setTransform(DPR, 0, 0, DPR, 0, 0); oc.clearRect(0, 0, w, h);
