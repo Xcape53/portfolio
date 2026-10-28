@@ -1,0 +1,945 @@
+<title>Odbiornik 1420</title>
+<meta name="claude:viewport-fit-sides" content="cover">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Archivo:wdth,wght@62..125,200..900&family=Host+Grotesk:wght@300..700&family=Martian+Mono:wght@400;500&display=swap">
+<style>
+/* Koncept "Odbiornik": strona to tor sygnalowy radioteleskopu. Scroll = sygnal plynie od anteny do wyjscia.
+   Jeden wyglad (noc nad Gdynia), sekcja datasheet jako jedyna zmiana tla (wydruk karty katalogowej). */
+:root {
+  --ground: #06080b;      /* niebo w nocy */
+  --ink: #e8ebee;         /* tekst */
+  --muted: #8d96a3;       /* tekst drugorzedny, AA na ground */
+  --line: rgba(232,235,238,.13);
+  --trace: #5aa9ff;       /* slad oscyloskopu */
+  --lock: #ffd25e;        /* szczyt widma, uzywany rzadko: lock, focus */
+  --paper: #f2f3f1;       /* karta katalogowa */
+  --paper-ink: #0b0d10;
+  --paper-muted: #5a616b;
+  --paper-line: rgba(11,13,16,.16);
+  --bg: var(--ground);
+  --fg: var(--ink);
+  --fg2: var(--muted);
+  --rule: var(--line);
+  --f-display: "Archivo", "Arial Narrow", system-ui, sans-serif;
+  --f-text: "Host Grotesk", ui-sans-serif, system-ui, sans-serif;
+  --f-mono: "Martian Mono", ui-monospace, "SFMono-Regular", Menlo, monospace;
+  --t-mega: clamp(3rem, 1rem + 10.4vw, 12rem);
+  --t-xl: clamp(2.4rem, 1.2rem + 5vw, 6rem);
+  --t-l: clamp(1.6rem, 1.2rem + 1.8vw, 2.8rem);
+  --t-m: clamp(1.15rem, 1.05rem + .5vw, 1.5rem);
+  --t-body: clamp(1rem, .96rem + .2vw, 1.125rem);
+  --gut: max(16px, 2.2vw);
+  --ease: cubic-bezier(.16, 1, .3, 1);
+  color-scheme: dark;
+}
+html.paper { --bg: var(--paper); --fg: var(--paper-ink); --fg2: var(--paper-muted); --rule: var(--paper-line); }
+* { box-sizing: border-box; }
+html, body { background: var(--bg); color: var(--fg); transition: background-color .8s var(--ease), color .8s var(--ease); }
+body { font: 400 var(--t-body)/1.55 var(--f-text); margin: 0; overflow-x: clip;
+  padding-left: max(0px, env(safe-area-inset-left, 0px)); padding-right: max(0px, env(safe-area-inset-right, 0px)); }
+::selection { background: var(--lock); color: #0b0d10; }
+a { color: inherit; }
+:focus-visible { outline: 2px solid var(--lock); outline-offset: 3px; }
+.wrap { padding-left: max(var(--gut), env(safe-area-inset-left, 0px)); padding-right: max(var(--gut), env(safe-area-inset-right, 0px)); }
+.mono { font-family: var(--f-mono); font-size: .72rem; letter-spacing: .02em; font-variant-numeric: tabular-nums; }
+.skip { position: absolute; left: -999px; top: 8px; z-index: 100; background: var(--lock); color: #0b0d10; padding: 8px 12px; }
+.skip:focus { left: 12px; }
+
+/* ---------- ramka: cztery rogi ---------- */
+.frame { position: fixed; inset: 0; pointer-events: none; z-index: 40; }
+.frame > * { position: absolute; pointer-events: auto; }
+.f-tl { top: calc(18px + env(safe-area-inset-top, 0px)); left: max(var(--gut), env(safe-area-inset-left, 0px)); }
+.f-tr { top: calc(18px + env(safe-area-inset-top, 0px)); right: max(var(--gut), env(safe-area-inset-right, 0px)); }
+.f-tl, .f-tr { transition: translate .6s var(--ease); }
+html.frame-away .f-tl, html.frame-away .f-tr { translate: 0 -260%; }
+.f-bl, .f-br { mix-blend-mode: difference; --fg: #e8ebee; --fg2: #9aa3af; color: #e8ebee; }
+.f-bl { bottom: calc(16px + env(safe-area-inset-bottom, 0px)); left: max(var(--gut), env(safe-area-inset-left, 0px)); color: var(--fg2); }
+.f-br { bottom: calc(16px + env(safe-area-inset-bottom, 0px)); right: max(var(--gut), env(safe-area-inset-right, 0px)); text-align: right; }
+.brand { font: 600 .95rem/1 var(--f-display); font-stretch: 112%; text-decoration: none; letter-spacing: -.01em; }
+.nav { display: flex; gap: clamp(12px, 2vw, 28px); font-size: .9rem; }
+.nav a { text-decoration: none; position: relative; display: inline-block; overflow: hidden; padding-block: 2px; }
+.nav a span { display: block; transition: transform .45s var(--ease); }
+.nav a span::after { content: attr(data-t); position: absolute; left: 0; top: 100%; color: var(--lock); }
+.nav a:hover span, .nav a:focus-visible span { transform: translateY(-100%); }
+.nav .lang { color: var(--fg2); }
+.readout { display: grid; gap: 2px; justify-items: end; }
+.readout b { font-weight: 500; color: var(--fg); }
+.lockdot { display: inline-block; width: 7px; height: 7px; border-radius: 50%; background: var(--lock); margin-right: 6px; vertical-align: 1px; box-shadow: 0 0 10px var(--lock); }
+.readout .stage { color: var(--fg2); }
+
+/* ---------- loader: przemiatanie czestotliwosci ---------- */
+.loader { position: fixed; inset: 0; z-index: 60; background: var(--ground); display: grid; place-items: center;
+  transition: clip-path 1s var(--ease); clip-path: inset(0 0 0 0); }
+.loader.out { clip-path: inset(0 0 100% 0); }
+.loader canvas { width: min(720px, 86vw); height: 140px; }
+.loader .lc { position: absolute; right: max(var(--gut), env(safe-area-inset-right, 0px)); bottom: calc(16px + env(safe-area-inset-bottom, 0px)); text-align: right; }
+.loader .lc b { font: 500 clamp(1.4rem, 1rem + 2vw, 2.4rem)/1 var(--f-mono); font-variant-numeric: tabular-nums; display: block; color: var(--ink); }
+.loader .lc span { color: var(--muted); }
+
+/* ---------- hero: antena ---------- */
+.hero { position: relative; height: 200svh; }
+.hero__stage { position: sticky; top: 0; height: 100svh; overflow: clip; }
+.stars, .dish { position: absolute; inset: 0; width: 100%; height: 100%; display: block; }
+.hero__copy { position: absolute; inset: 0; display: grid; grid-template-rows: 1fr auto; padding-top: calc(96px + env(safe-area-inset-top, 0px)); padding-bottom: calc(64px + env(safe-area-inset-bottom, 0px)); pointer-events: none; }
+.hero__thesis { max-width: 31rem; align-self: start; pointer-events: auto; }
+.hero__thesis p { margin: 0 0 1rem; font-size: var(--t-m); line-height: 1.35; text-wrap: balance; }
+.hero__thesis .sub { font-size: var(--t-body); color: var(--fg2); max-width: 27rem; }
+.cta { display: flex; gap: 12px; flex-wrap: wrap; margin-top: 1.4rem; }
+.btn { font: inherit; background: transparent; color: inherit; cursor: pointer; position: relative; overflow: hidden; display: inline-flex; align-items: center; gap: 10px; padding: 13px 20px; border: 1px solid var(--rule);
+  border-radius: 2px; text-decoration: none; font-size: .95rem; isolation: isolate; transition: color .4s var(--ease), border-color .4s var(--ease); }
+.btn::before { content: ""; position: absolute; inset: 0; background: var(--fg); z-index: -1; transform: scaleY(0); transform-origin: 50% 100%; transition: transform .5s var(--ease); }
+.btn:hover, .btn:focus-visible { color: var(--bg); border-color: var(--fg); }
+.btn:hover::before, .btn:focus-visible::before { transform: scaleY(1); }
+.btn:active { transform: scale(.97); }
+.btn--solid { background: var(--fg); color: var(--bg); border-color: var(--fg); }
+.btn--solid::before { background: var(--lock); }
+.btn--solid:hover, .btn--solid:focus-visible { color: #0b0d10; border-color: var(--lock); }
+.name { margin: 0; font: 800 var(--t-mega)/.84 var(--f-display); letter-spacing: -.035em; font-stretch: 100%;
+  margin-left: -.05em; text-transform: uppercase; will-change: transform; }
+.name span { display: block; }
+.name .l2 { font-weight: 300; }
+
+/* ---------- tor sygnalowy ---------- */
+.chain { position: relative; display: grid; grid-template-columns: minmax(0, 5fr) minmax(0, 7fr); }
+.chain__steps { position: relative; z-index: 2; }
+.step { min-height: 100svh; display: grid; align-content: center; padding-block: 12vh; max-width: 34rem; }
+.step .idx { color: var(--lock); margin-bottom: 1.2rem; }
+.step h2 { font: 700 var(--t-xl)/.92 var(--f-display); letter-spacing: -.03em; margin: 0 0 1.2rem; font-stretch: 88%; text-wrap: balance; }
+.step p { margin: 0 0 1.2rem; color: var(--fg2); max-width: 30rem; }
+.step p strong { color: var(--fg); font-weight: 500; }
+.tools { display: flex; flex-wrap: wrap; gap: 6px 14px; color: var(--fg); padding: 0; margin: 0; list-style: none; }
+.chain__stage { position: sticky; top: 0; height: 100svh; display: grid; grid-template-rows: 1fr auto; padding-block: 80px 56px; }
+.board { position: relative; min-height: 0; }
+.board canvas { position: absolute; inset: 0; width: 100%; height: 100%; display: block; }
+.scope { position: relative; height: 150px; border-top: 1px solid var(--rule); }
+.scope canvas { width: 100%; height: 100%; display: block; }
+.scope .hud { position: absolute; left: 0; right: 0; top: 8px; display: flex; justify-content: space-between; color: var(--fg2); pointer-events: none; }
+
+/* ---------- prace: indeks z podgladem ---------- */
+.work { padding-block: 22vh 12vh; position: relative; }
+.sec-head { display: grid; grid-template-columns: minmax(0, 5fr) minmax(0, 7fr); gap: var(--gut); align-items: end; margin-bottom: 6vh; }
+.sec-head h2 { font: 700 var(--t-xl)/.9 var(--f-display); letter-spacing: -.03em; margin: 0; font-stretch: 88%; }
+.sec-head p { margin: 0; color: var(--fg2); max-width: 34rem; }
+.index { list-style: none; margin: 0; padding: 0; border-top: 1px solid var(--rule); }
+.row { border-bottom: 1px solid var(--rule); }
+.row a { display: grid; grid-template-columns: minmax(0, 5fr) minmax(0, 4fr) minmax(0, 3fr); gap: var(--gut); align-items: baseline; padding: 22px 0; text-decoration: none; }
+.row .t { font: 600 var(--t-l)/1 var(--f-display); letter-spacing: -.02em; display: inline-block; transition: transform .5s var(--ease), font-stretch .5s var(--ease); font-stretch: 92%; }
+.row .d { color: var(--fg2); }
+.row .s { text-align: right; color: var(--fg2); }
+.row .s i { font-style: normal; color: var(--fg); }
+.row a:hover .t, .row a:focus-visible .t { transform: translateX(.35em); font-stretch: 112%; }
+.row .thumb { display: none; }
+.preview { position: fixed; left: 0; top: 0; width: min(440px, 34vw); aspect-ratio: 16 / 10; z-index: 30; pointer-events: none; opacity: 0;
+  transition: opacity .3s var(--ease); background: #000; outline: 1px solid var(--line); }
+.preview.on { opacity: 1; }
+.preview canvas { width: 100%; height: 100%; display: block; }
+.preview .rec { position: absolute; left: 10px; bottom: 8px; color: #e8ebee; text-shadow: 0 1px 2px #000; }
+.preview .rec::before { content: ""; display: inline-block; width: 6px; height: 6px; border-radius: 50%; background: #ff5a4f; margin-right: 6px; vertical-align: 1px; }
+
+/* ---------- SeeSky: wyrozniony case ---------- */
+.feature { position: relative; padding-block: 8vh 16vh; }
+.feature__grid { display: grid; grid-template-columns: repeat(12, minmax(0, 1fr)); gap: var(--gut); align-items: start; }
+.feature__media { grid-column: 1 / span 8; position: relative; aspect-ratio: 16 / 9; max-width: 100%; overflow: hidden; background: #02040a; outline: 1px solid var(--line); }
+.feature__media canvas { width: 100%; height: 100%; display: block; }
+.feature__media .axis { position: absolute; left: 0; right: 0; bottom: 0; display: flex; justify-content: space-between; padding: 8px 12px; color: #c9d2de; background: linear-gradient(transparent, rgba(0,0,0,.6)); }
+.feature__media .tc { position: absolute; right: 12px; top: 10px; color: #c9d2de; }
+.feature__text { grid-column: 9 / span 4; padding-top: 14vh; }
+.feature__text .k { color: var(--lock); margin-bottom: 1rem; }
+.feature__text h3 { font: 700 var(--t-l)/1 var(--f-display); letter-spacing: -.02em; margin: 0 0 1rem; }
+.feature__text p { color: var(--fg2); margin: 0 0 1rem; }
+.feature__text .tools { margin-top: 1.4rem; }
+
+/* ---------- datasheet ---------- */
+.ds { padding-block: 16vh; position: relative; }
+.ds__top { display: flex; justify-content: space-between; gap: 16px; flex-wrap: wrap; border-bottom: 2px solid var(--fg); padding-bottom: 10px; margin-bottom: 4vh; }
+.ds__top h2 { font: 800 var(--t-xl)/.9 var(--f-display); letter-spacing: -.03em; margin: 0; font-stretch: 75%; }
+.ds__top .meta { text-align: right; color: var(--fg2); align-self: end; }
+.ds__grid { display: grid; grid-template-columns: minmax(0, 6fr) minmax(0, 6fr); gap: calc(var(--gut) * 2); }
+.ds h3 { font: 600 .82rem/1 var(--f-mono); text-transform: uppercase; letter-spacing: .06em; margin: 0 0 12px; }
+.ds p { margin: 0 0 1rem; max-width: 36rem; }
+.pinout { width: 100%; height: auto; display: block; margin-bottom: 18px; }
+.pinout text { font-family: var(--f-mono); font-size: 11px; fill: currentColor; }
+.pinout .pin rect { fill: none; stroke: currentColor; }
+.pinout .pin { cursor: default; }
+.pinout .pin.hot rect { fill: var(--trace); stroke: var(--trace); }
+.pinout .pin.hot text.lbl { fill: var(--trace); font-weight: 500; }
+.pindesc { min-height: 3.2em; color: var(--fg2); border-left: 2px solid var(--trace); padding-left: 12px; }
+.tbl-wrap { overflow-x: auto; margin-bottom: 28px; }
+table { border-collapse: collapse; width: 100%; font-size: .9rem; }
+th, td { text-align: left; padding: 8px 10px 8px 0; border-bottom: 1px solid var(--rule); vertical-align: top; }
+th { font: 500 .7rem/1.2 var(--f-mono); text-transform: uppercase; letter-spacing: .05em; color: var(--fg2); }
+td.n { font-family: var(--f-mono); font-size: .78rem; white-space: nowrap; font-variant-numeric: tabular-nums; }
+.app { width: 100%; height: auto; display: block; }
+.app text { font-family: var(--f-mono); font-size: 11px; fill: currentColor; }
+.app .box { fill: none; stroke: currentColor; }
+.app .me { fill: var(--fg); }
+.app .me-t { fill: var(--bg); }
+
+/* ---------- kontakt ---------- */
+.contact { position: relative; padding-block: 10vh 18vh; }
+.osc { width: 100%; height: 120px; display: block; margin-bottom: 8vh; }
+.talk { font: 800 var(--t-mega)/.84 var(--f-display); letter-spacing: -.04em; text-transform: uppercase; margin: 0 0 5vh -.05em; font-stretch: 112%;
+  color: transparent; -webkit-text-stroke: 1.5px var(--ink); transition: color .6s var(--ease); }
+.talk:hover { color: var(--trace); -webkit-text-stroke-color: var(--trace); }
+.contact__row { display: grid; grid-template-columns: minmax(0, 5fr) minmax(0, 7fr); gap: var(--gut); align-items: end; }
+.mail { font: 500 var(--t-l)/1.1 var(--f-display); letter-spacing: -.02em; user-select: all; word-break: break-all; }
+.copy { margin-top: 14px; }
+.foot { display: flex; justify-content: space-between; flex-wrap: wrap; gap: 12px; margin-top: 12vh; padding-top: 14px; border-top: 1px solid var(--rule); color: var(--fg2); }
+.foot a { text-decoration: none; }
+.foot a:hover { color: var(--fg); }
+
+/* ---------- notatki projektowe (warstwa wizualizacji) ---------- */
+:where([data-note]) { position: relative; }
+html.notes .hero__stage[data-note]::after { top: 72px; }
+html.notes [data-note]::after { content: attr(data-tag) "  " attr(data-note); position: absolute; z-index: 35; left: 12px; top: 12px; max-width: min(340px, calc(100% - 24px));
+  font: 500 11.5px/1.45 var(--f-text); color: #0b0d10; background: var(--lock); padding: 8px 10px; white-space: pre-line; pointer-events: none;
+  box-shadow: 0 6px 24px rgba(0,0,0,.35); }
+html.notes [data-note] { outline: 1px dashed rgba(255,210,94,.55); outline-offset: -1px; }
+html.notes [data-note-pos="br"]::after { left: auto; top: auto; right: 12px; bottom: 12px; }
+html.notes [data-note-pos="tr"]::after { left: auto; right: 12px; }
+html.notes [data-note-pos="bl"]::after { top: auto; bottom: 12px; }
+.notes-toggle { position: fixed; left: 50%; transform: translateX(-50%); bottom: calc(14px + env(safe-area-inset-bottom, 0px)); z-index: 50;
+  font: 500 12px/1 var(--f-text); background: var(--lock); color: #0b0d10; border: 0; padding: 10px 14px; border-radius: 999px; cursor: pointer; }
+.notes-toggle[aria-pressed="false"] { background: #1a1e24; color: #e8ebee; outline: 1px solid var(--line); }
+
+/* ---------- telefon ---------- */
+@media (max-width: 860px) {
+  .nav { gap: 12px; font-size: .82rem; }
+  .nav .hide-s { display: none; }
+  .f-bl { display: none; }
+  .hero { height: 170svh; }
+  .hero__copy { padding-top: calc(80px + env(safe-area-inset-top, 0px)); }
+  .chain { grid-template-columns: minmax(0, 1fr); }
+  .chain__stage { grid-row: 1; height: 52svh; padding-block: 64px 0; z-index: 3; background: var(--bg); }
+  .chain__steps { grid-row: 2; z-index: 1; }
+  .step { min-height: 80svh; padding-block: 6vh; }
+  .sec-head, .contact__row, .ds__grid { grid-template-columns: minmax(0, 1fr); }
+  .row a { grid-template-columns: minmax(0, 1fr); gap: 6px; }
+  .row .s { text-align: left; }
+  .feature__media, .feature__text { grid-column: 1 / -1; }
+  .feature__text { padding-top: 0; }
+  .scope { height: 110px; }
+}
+@media (hover: none) {
+  .row .thumb { display: block; width: 100%; max-width: 100%; aspect-ratio: 16 / 10; object-fit: cover; margin-top: 12px; outline: 1px solid var(--line); }
+  .preview { display: none; }
+}
+@media (prefers-reduced-motion: reduce) {
+  .loader { display: none; }
+  .hero { height: auto; }
+  .hero__stage { position: relative; }
+  * { transition-duration: .01ms !important; }
+}
+</style>
+
+<a class="skip" href="#main">Skip to content</a>
+
+<div class="loader" id="loader" aria-hidden="true">
+  <canvas id="sweep"></canvas>
+  <div class="lc mono"><span>Tuning</span><b id="lfreq">0000.000 MHz</b></div>
+</div>
+
+<header class="frame">
+  <a class="f-tl brand" href="#top">Piotr Jeleniewicz</a>
+  <nav class="f-tr nav" aria-label="Main">
+    <a href="#work"><span data-t="Work">Work</span></a>
+    <a href="#datasheet" class="hide-s"><span data-t="Datasheet">Datasheet</span></a>
+    <a href="#cv"><span data-t="CV">CV</span></a>
+    <a href="#contact"><span data-t="Contact">Contact</span></a>
+    <a href="#pl" class="lang"><span data-t="PL">PL</span></a>
+  </nav>
+  <div class="f-bl mono" id="coords">54.518°N 18.530°E · Gdynia · <span id="clock">--:--</span></div>
+  <div class="f-br mono readout" data-note-pos="br" aria-live="off">
+    <span><span class="lockdot"></span><b id="rfreq">1420.405 MHz</b></span>
+    <span class="stage">SNR <span id="snr">3.0</span> dB · <span id="rstage">antenna</span></span>
+  </div>
+</header>
+
+<main id="main">
+  <!-- HERO: antena -->
+  <section class="hero" id="top" aria-label="Intro">
+    <div class="hero__stage" data-tag="3D + PARALAKSA" data-note="Model czaszy radioteleskopu w Three.js. W spoczynku czasza powoli śledzi niebo i reaguje na kursor, a scroll obraca ją w stronę widza i kamera wjeżdża w ognisko. Gwiazdy (3 warstwy), tekst i model jadą z różnymi prędkościami.&#10;Docelowo: model GLB z Blendera albo generowany w kodzie (0 KB do pobrania)." data-note-pos="tr">
+      <canvas class="stars" id="stars" aria-hidden="true"></canvas>
+      <canvas class="dish" id="dish" aria-hidden="true"></canvas>
+      <div class="hero__copy wrap">
+        <div class="hero__thesis" id="thesis">
+          <p>Electronics and telecom engineer in the making. I write the software that sits between hardware, data and APIs.</p>
+          <p class="sub">Final semester at Gdańsk University of Technology. Lead software developer of the SeeSky radio telescope at SimLE.</p>
+          <div class="cta">
+            <a class="btn btn--solid" href="#work">See the work</a>
+            <a class="btn" href="#cv">Request CV</a>
+          </div>
+        </div>
+        <h1 class="name" id="name" aria-label="Piotr Jeleniewicz">
+          <span class="l1" data-scramble>Piotr</span>
+          <span class="l2" data-scramble>Jeleniewicz</span>
+        </h1>
+      </div>
+    </div>
+  </section>
+
+  <!-- TOR SYGNALOWY -->
+  <section class="chain wrap" id="chain" aria-label="From circuits to code">
+    <div class="chain__steps">
+      <article class="step" data-step="0">
+        <div class="idx mono">01 / 04 · Antenna</div>
+        <h2>The signal starts in hardware</h2>
+        <p>Everything I build begins with something physical: a dish pointed at the sky, a board on the bench, a measurement that has to be right before any code runs.</p>
+        <p><strong>SeeSky</strong> is a 21 cm hydrogen-line radio telescope built by the SimLE student club. I lead its software.</p>
+      </article>
+      <article class="step" data-step="1">
+        <div class="idx mono">02 / 04 · Front end</div>
+        <h2>Measure, simulate, lay out</h2>
+        <p>Lab measurements, circuit simulation and PCB design. I check a circuit in simulation before it touches copper.</p>
+        <ul class="tools mono"><li>LTspice</li><li>Micro-Cap</li><li>KiCad</li><li>EAGLE</li></ul>
+      </article>
+      <article class="step" data-step="2">
+        <div class="idx mono">03 / 04 · FPGA</div>
+        <h2>Logic you can clock</h2>
+        <p>Digital design on a Basys 3 board, AXI4-Lite simulations in Vivado and standard-cell IC layout from coursework in Computer Electronic Systems.</p>
+        <ul class="tools mono"><li>Vivado</li><li>Basys 3</li><li>AXI4-Lite</li><li>C / C++</li></ul>
+      </article>
+      <article class="step" data-step="3">
+        <div class="idx mono">04 / 04 · Software</div>
+        <h2>Then it becomes a tool people use</h2>
+        <p>Python and JavaScript for tooling, API integration and data processing. Java and C++ from projects and OOP coursework. Docker, Git and Linux in every workflow.</p>
+        <ul class="tools mono"><li>Python</li><li>JavaScript</li><li>REST APIs</li><li>Docker</li><li>Git</li><li>Linux</li></ul>
+      </article>
+    </div>
+    <div class="chain__stage" aria-hidden="true">
+      <div class="board" data-tag="3D + SCROLL" data-note="Jedna płytka PCB przez 4 rozdziały. Sygnał płynie ścieżką od złącza RF przez LNA, filtr, ADC i FPGA do USB w miarę scrollowania, kamera przelatuje nad kolejnymi układami.&#10;Docelowo: prawdziwy model Basys 3 (STEP od Digilent) albo Twoja płytka z KiCada (kicad-cli pcb export glb)." data-note-pos="tr">
+        <canvas id="pcb"></canvas>
+      </div>
+      <div class="scope" data-tag="CANVAS" data-note="Twój oscyloskop zostaje i pokazuje kolejne etapy toru: szum z anteny, czysty sinus po filtrze, próbki w FPGA, bity na wyjściu." data-note-pos="bl">
+        <div class="hud mono"><span id="sc-l">CH1 RF IN</span><span id="sc-r">200 mV/div · 5 µs/div</span></div>
+        <canvas id="scope"></canvas>
+      </div>
+    </div>
+  </section>
+
+  <!-- PRACE -->
+  <section class="work wrap" id="work" aria-labelledby="work-h">
+    <div class="sec-head">
+      <h2 id="work-h">Selected work</h2>
+      <p>Tools I use every day, a game I shipped and the software of a radio telescope. Each project gets its own page with a screen recording, the problem it solves and what I would change.</p>
+    </div>
+    <ol class="index" id="index" data-tag="HOVER + WIDEO" data-note="Najazd na wiersz: podgląd odsłania się jak wodospad widma (najpierw fałszywy kolor, potem obraz), a potem leci krótka pętla wideo 8-12 s (AV1 + H.264, bez dźwięku). Tu zamiast wideo są Twoje zrzuty ekranu.&#10;Na telefonie: miniatury w wierszach, wideo startuje, gdy wiersz jest na ekranie." data-note-pos="tr">
+      <li class="row"><a href="#p-jobmanager" data-img="jobagg"><span class="t">JobManager</span><span class="d">Job listings from several portals, Gemini research, alerts</span><span class="s mono"><i>In use</i> · Python</span><img class="thumb" alt="JobManager listing table" src="%%IMG_jobagg%%"></a></li>
+      <li class="row"><a href="#p-seesky" data-img="sky"><span class="t">SeeSky Control Panel</span><span class="d">Operating interface and sky map for a radio telescope</span><span class="s mono"><i>Lead dev</i> · Flask</span></a></li>
+      <li class="row"><a href="#p-labinc" data-img="labinc"><span class="t">LabInc: Chemical Tycoon</span><span class="d">Incremental game, economy simulation, Swing UI</span><span class="s mono"><i>Shipped</i> · Java</span><img class="thumb" alt="LabInc game screen" src="%%IMG_labinc%%"></a></li>
+      <li class="row"><a href="#p-yapper" data-img="voice"><span class="t">Yapper</span><span class="d">Push-to-talk dictation, online and offline engines</span><span class="s mono"><i>Daily use</i> · PyQt6</span></a></li>
+      <li class="row"><a href="#p-passmgr" data-img="passmgr"><span class="t">Password Manager</span><span class="d">Credential vault for Windows and Linux, team project</span><span class="s mono"><i>Prototype</i> · Desktop</span><img class="thumb" alt="Password manager vault" src="%%IMG_passmgr%%"></a></li>
+      <li class="row"><a href="#p-inventory" data-img="inventory"><span class="t">Inventory Generator</span><span class="d">Minecraft-style inventory builder with item search</span><span class="s mono"><i>Live demo</i> · JS</span><img class="thumb" alt="Inventory generator" src="%%IMG_inventory%%"></a></li>
+    </ol>
+  </section>
+
+  <!-- SEESKY -->
+  <section class="feature wrap" id="p-seesky" aria-labelledby="ss-h">
+    <div class="feature__grid">
+      <div class="feature__media" id="fmedia" data-tag="WIDEO + PARALAKSA" data-note="Tu będzie nagranie panelu SeeSky (mapa nieba, sterowanie). Jako zaślepka: żywy spektrogram linii wodoru 1420.405 MHz, czyli to, co teleskop ma obserwować. Kadr jedzie wolniej niż tekst obok (paralaksa).&#10;Opcja: wideo przewijane scrollem (sekwencja klatek na canvasie)." data-note-pos="tr">
+        <canvas id="wf"></canvas>
+        <div class="tc mono" id="tc">REC 00:00:00</div>
+        <div class="axis mono"><span>1419.4</span><span>1420.4 MHz · H I</span><span>1421.4</span></div>
+      </div>
+      <div class="feature__text" id="ftext">
+        <div class="k mono">Case study · SimLE</div>
+        <h3 id="ss-h">SeeSky radio telescope</h3>
+        <p>An operating interface for a student radio telescope: frontend, backend and an interactive sky visualisation. The next stage connects the real hardware and an SDR receiver.</p>
+        <p>I lead the software team. The panel already runs as a demo with simulated data.</p>
+        <ul class="tools mono"><li>Flask</li><li>Astropy</li><li>d3-celestial</li></ul>
+        <div class="cta"><a class="btn" href="#p-seesky">Read the case</a></div>
+      </div>
+    </div>
+  </section>
+
+  <!-- DATASHEET -->
+  <section class="ds wrap" id="datasheet" aria-labelledby="ds-h" data-tag="TREŚĆ" data-note="Sekcja O mnie jako karta katalogowa układu PJ-2027: piny to umiejętności (najedź na pin), tabela to twarde fakty, historia rewizji to edukacja i doświadczenie. Tło płynnie przechodzi w papier.">
+    <div class="ds__top">
+      <h2 id="ds-h">PJ-2027</h2>
+      <div class="meta mono">Integration engineer, entry level<br>Datasheet · Rev 7 (semester 7 of 7)</div>
+    </div>
+    <div class="ds__grid">
+      <div>
+        <h3>Pin configuration</h3>
+        <svg class="pinout" id="pinout" viewBox="0 0 560 360" role="img" aria-label="Pinout diagram where each pin is a skill"></svg>
+        <div class="pindesc" id="pindesc">Point at a pin to read what it does.</div>
+      </div>
+      <div>
+        <h3>Characteristics</h3>
+        <div class="tbl-wrap">
+          <table>
+            <thead><tr><th>Parameter</th><th>Value</th><th>Conditions</th></tr></thead>
+            <tbody>
+              <tr><td>Field</td><td>Electronics and Telecommunications</td><td>Computer Electronic Systems</td></tr>
+              <tr><td>Progress</td><td class="n">6 / 7 semesters</td><td>final semester running</td></tr>
+              <tr><td>Expected graduation</td><td class="n">02.2027</td><td>Gdańsk University of Technology</td></tr>
+              <tr><td>Looking for</td><td>Paid internship or first role</td><td>part-time, remote or hybrid</td></tr>
+              <tr><td>Location</td><td class="n">Gdynia, PL</td><td>54.518°N 18.530°E</td></tr>
+            </tbody>
+          </table>
+        </div>
+        <h3>Revision history</h3>
+        <div class="tbl-wrap">
+          <table>
+            <thead><tr><th>Date</th><th>Change</th></tr></thead>
+            <tbody>
+              <tr><td class="n">now</td><td>Thesis: training DQN agents in Mario and ViZDoom. SeeSky software lead.</td></tr>
+              <tr><td class="n">2024.09</td><td>ASSECO, Telecommunications and Media. Windows Server 2019 setup, REST endpoint for AD CS over DCOM.</td></tr>
+              <tr><td class="n">2023</td><td>Gdańsk University of Technology, Electronics and Telecommunications.</td></tr>
+              <tr><td class="n">2019</td><td>III High School in Sopot, mathematics and IT profile.</td></tr>
+            </tbody>
+          </table>
+        </div>
+        <h3>Typical application</h3>
+        <svg class="app" viewBox="0 0 520 120" role="img" aria-label="Block diagram: your team, PJ-2027, APIs, hardware and data">
+          <rect class="box" x="1" y="40" width="120" height="40"></rect><text x="61" y="64" text-anchor="middle">YOUR TEAM</text>
+          <line x1="121" y1="60" x2="200" y2="60" stroke="currentColor"></line>
+          <rect class="me" x="200" y="30" width="120" height="60"></rect><text class="me-t" x="260" y="64" text-anchor="middle">PJ-2027</text>
+          <line x1="320" y1="60" x2="380" y2="60" stroke="currentColor"></line>
+          <line x1="380" y1="20" x2="380" y2="100" stroke="currentColor"></line>
+          <line x1="380" y1="20" x2="398" y2="20" stroke="currentColor"></line><text x="404" y="24">APIs</text>
+          <line x1="380" y1="60" x2="398" y2="60" stroke="currentColor"></line><text x="404" y="64">HARDWARE</text>
+          <line x1="380" y1="100" x2="398" y2="100" stroke="currentColor"></line><text x="404" y="104">DATA</text>
+        </svg>
+      </div>
+    </div>
+  </section>
+
+  <!-- KONTAKT -->
+  <section class="contact wrap" id="contact" aria-labelledby="talk">
+    <div data-tag="INTERAKCJA" data-note="Twój obecny podpis zostaje: kursor zamienia sinus w szereg Fouriera fali prostokątnej w miejscu, gdzie jest mysz." data-note-pos="tr">
+      <canvas class="osc" id="osc" aria-hidden="true"></canvas>
+    </div>
+    <h2 class="talk" id="talk">Let's talk</h2>
+    <div class="contact__row" id="cv">
+      <div>
+        <div class="mail" id="mail">jeleniewicz@op.pl</div>
+        <button class="btn copy" id="copy" type="button">Copy address</button>
+      </div>
+      <p style="margin:0;color:var(--fg2);max-width:34rem">Open to a paid internship or a first part-time role in software development and system integration. I answer within a day. The CV is sent on request.</p>
+    </div>
+    <div class="foot mono">
+      <span>© 2026 Piotr Jeleniewicz · Gdynia</span>
+      <span><a href="https://github.com/Xcape53">GitHub</a> · <a href="https://www.linkedin.com/">LinkedIn</a></span>
+      <span>Static site, hand-built, no trackers</span>
+    </div>
+  </section>
+</main>
+
+<button class="notes-toggle" id="notes" type="button" aria-pressed="true">Notatki projektowe: wł.</button>
+
+<script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.5/gsap.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.5/ScrollTrigger.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/lenis@1.1.13/dist/lenis.min.js"></script>
+<script>
+(() => {
+  "use strict";
+  const IMGS = { jobagg: "%%IMG_jobagg%%", labinc: "%%IMG_labinc%%", passmgr: "%%IMG_passmgr%%", inventory: "%%IMG_inventory%%" };
+  const RM = matchMedia("(prefers-reduced-motion: reduce)").matches;
+  const root = document.documentElement;
+  const $ = (s) => document.querySelector(s);
+  const clamp = (v, a, b) => Math.min(b, Math.max(a, v));
+  const lerp = (a, b, t) => a + (b - a) * t;
+  const DPR = Math.min(window.devicePixelRatio || 1, 2);
+  root.classList.add("notes");
+
+  // ---------- notatki ----------
+  const nt = $("#notes");
+  nt.addEventListener("click", () => {
+    const on = root.classList.toggle("notes");
+    nt.setAttribute("aria-pressed", String(on));
+    nt.textContent = "Notatki projektowe: " + (on ? "wł." : "wył.");
+  });
+
+  // ---------- zegar Gdyni ----------
+  const clk = $("#clock");
+  const tick = () => { try { clk.textContent = new Intl.DateTimeFormat("en-GB", { timeZone: "Europe/Warsaw", hour: "2-digit", minute: "2-digit" }).format(new Date()); } catch (e) {} };
+  tick(); setInterval(tick, 30000);
+
+  // ---------- jeden zegar: gsap.ticker ----------
+  const hasGsap = !!window.gsap;
+  if (hasGsap && window.ScrollTrigger) gsap.registerPlugin(ScrollTrigger);
+  const loops = [];
+  const onTick = (fn) => loops.push(fn);
+  let T = 0;
+  const run = (t) => { T = t; for (const f of loops) f(t); };
+  if (hasGsap) gsap.ticker.add(run); else { const r = (ms) => { run(ms / 1000); requestAnimationFrame(r); }; requestAnimationFrame(r); }
+
+  // Lenis + ScrollTrigger wg oficjalnej recepty
+  if (!RM && window.Lenis && hasGsap) {
+    try {
+      const lenis = new Lenis({ lerp: 0.1 });
+      lenis.on("scroll", ScrollTrigger.update);
+      gsap.ticker.add((t) => lenis.raf(t * 1000));
+      gsap.ticker.lagSmoothing(0);
+      document.querySelectorAll('a[href^="#"]').forEach((a) => a.addEventListener("click", (e) => {
+        const el = document.querySelector(a.getAttribute("href"));
+        if (el) { e.preventDefault(); lenis.scrollTo(el, { offset: 0 }); }
+      }));
+    } catch (e) {}
+  }
+
+  const visible = new Map();
+  const io = new IntersectionObserver((es) => es.forEach((e) => visible.set(e.target, e.isIntersecting)), { rootMargin: "100px" });
+  const watch = (el) => { if (el) { visible.set(el, true); io.observe(el); } };
+  const isOn = (el) => visible.get(el) !== false;
+
+  // pointer znormalizowany -1..1
+  const ptr = { x: 0, y: 0, sx: 0, sy: 0, px: -1, py: -1 };
+  addEventListener("pointermove", (e) => { ptr.x = e.clientX / innerWidth * 2 - 1; ptr.y = e.clientY / innerHeight * 2 - 1; ptr.px = e.clientX; ptr.py = e.clientY; }, { passive: true });
+
+  function fit(cv, w, h) {
+    const W = Math.round(w * DPR), H = Math.round(h * DPR);
+    if (cv.width !== W || cv.height !== H) { cv.width = W; cv.height = H; }
+  }
+
+  // ---------- globalny sterownik: postep strony -> SNR ----------
+  const snrEl = $("#snr"), stEl = $("#rstage");
+  let stageName = "antenna";
+  const setReadout = () => {
+    const h = document.documentElement.scrollHeight - innerHeight;
+    const p = h > 0 ? clamp(scrollY / h, 0, 1) : 0;
+    const snr = 3 + 27 * Math.pow(p, .6) + Math.sin(T * 1.3) * .2;
+    snrEl.textContent = snr.toFixed(1);
+  };
+  onTick(setReadout);
+  const setStage = (s) => { if (s !== stageName) { stageName = s; stEl.textContent = s; } };
+
+  // ---------- gwiazdy (3 warstwy paralaksy) ----------
+  const stars = $("#stars"), sctx = stars.getContext("2d");
+  const layers = [0.15, 0.35, 0.7].map((sp, li) => ({ sp, pts: Array.from({ length: [260, 120, 50][li] }, () => ({ x: Math.random(), y: Math.random() * 1.6, r: [0.5, 0.8, 1.3][li] * (0.6 + Math.random() * 0.8), a: 0.3 + Math.random() * 0.7, f: Math.random() * 6 })) }));
+  const heroStage = $(".hero__stage"); watch(heroStage);
+  let heroP = 0;
+  function drawStars(t) {
+    if (!isOn(heroStage)) return;
+    const w = stars.clientWidth, h = stars.clientHeight; fit(stars, w, h);
+    sctx.setTransform(DPR, 0, 0, DPR, 0, 0); sctx.clearRect(0, 0, w, h);
+    // slaba poswiata horyzontu
+    const g = sctx.createLinearGradient(0, h, 0, h * 0.4); g.addColorStop(0, "rgba(40,70,120,.22)"); g.addColorStop(1, "rgba(6,8,11,0)");
+    sctx.fillStyle = g; sctx.fillRect(0, 0, w, h);
+    for (const L of layers) {
+      const oy = heroP * h * L.sp * 1.2, ox = ptr.sx * 14 * L.sp;
+      for (const s of L.pts) {
+        const y = ((s.y * h - oy) % (h * 1.6) + h * 1.6) % (h * 1.6);
+        if (y > h) continue;
+        const tw = RM ? 1 : 0.75 + 0.25 * Math.sin(t * 1.7 + s.f);
+        sctx.globalAlpha = s.a * tw; sctx.fillStyle = "#dfe7f2";
+        sctx.beginPath(); sctx.arc(s.x * w + ox, y, s.r, 0, 6.283); sctx.fill();
+      }
+    }
+    sctx.globalAlpha = 1;
+  }
+  onTick((t) => { ptr.sx = lerp(ptr.sx, ptr.x, 0.06); ptr.sy = lerp(ptr.sy, ptr.y, 0.06); drawStars(t); });
+
+  // ---------- Three.js: czasza ----------
+  const hasGL = !!window.THREE && (() => { try { const c = document.createElement("canvas"); return !!(c.getContext("webgl") || c.getContext("experimental-webgl")); } catch (e) { return false; } })();
+
+  function cyl(a, b, r, mat) {
+    const d = new THREE.Vector3().subVectors(b, a), len = d.length();
+    const m = new THREE.Mesh(new THREE.CylinderGeometry(r, r, len, 8), mat);
+    m.position.copy(a).addScaledVector(d, 0.5);
+    m.quaternion.setFromUnitVectors(new THREE.Vector3(0, 1, 0), d.normalize());
+    return m;
+  }
+
+  let dishScene = null;
+  if (hasGL) {
+    const cv = $("#dish");
+    const renderer = new THREE.WebGLRenderer({ canvas: cv, antialias: true, alpha: true });
+    renderer.setPixelRatio(DPR); renderer.outputEncoding = THREE.sRGBEncoding;
+    const scene = new THREE.Scene();
+    const cam = new THREE.PerspectiveCamera(32, 1, 0.1, 100);
+    scene.add(new THREE.HemisphereLight(0x9fb6d8, 0x0a0c10, 0.55));
+    const key = new THREE.DirectionalLight(0xcfe0ff, 0.75); key.position.set(-5, 7, 6); scene.add(key);
+    const rim = new THREE.DirectionalLight(0xffd25e, 0.55); rim.position.set(6, 2, -5); scene.add(rim);
+
+    const metal = new THREE.MeshStandardMaterial({ color: 0x9aa4b1, metalness: 0.55, roughness: 0.55, side: THREE.DoubleSide });
+    const dark = new THREE.MeshStandardMaterial({ color: 0x3a414b, metalness: 0.6, roughness: 0.5 });
+    const R = 2.2, F = 1.35;
+    const prof = []; for (let i = 0; i <= 28; i++) { const r = R * i / 28; prof.push(new THREE.Vector2(r, r * r / (4 * F))); }
+    const dish = new THREE.Mesh(new THREE.LatheGeometry(prof, 72), metal);
+    const seams = new THREE.LineSegments(new THREE.EdgesGeometry(new THREE.LatheGeometry(prof.filter((_, i) => i % 4 === 0), 24), 1),
+      new THREE.LineBasicMaterial({ color: 0x55657a, transparent: true, opacity: 0.55 }));
+    seams.scale.setScalar(1.004); seams.position.y = 0.004;
+    const rimY = R * R / (4 * F);
+    const feed = new THREE.Group();
+    const horn = new THREE.Mesh(new THREE.CylinderGeometry(0.1, 0.17, 0.34, 16), dark); horn.position.y = F; feed.add(horn);
+    const lna = new THREE.Mesh(new THREE.BoxGeometry(0.16, 0.16, 0.16), dark); lna.position.y = F + 0.25; feed.add(lna);
+    for (let k = 0; k < 4; k++) { const a = k * Math.PI / 2 + Math.PI / 4; feed.add(cyl(new THREE.Vector3(Math.cos(a) * R * 0.92, rimY * 0.85, Math.sin(a) * R * 0.92), new THREE.Vector3(0, F + 0.12, 0), 0.018, dark)); }
+    const hub = new THREE.Mesh(new THREE.CylinderGeometry(0.32, 0.42, 0.4, 20), dark); hub.position.y = -0.18;
+    // kratownica z tylu
+    const truss = new THREE.Group();
+    for (let k = 0; k < 12; k++) { const a = k * Math.PI / 6; truss.add(cyl(new THREE.Vector3(0, -0.3, 0), new THREE.Vector3(Math.cos(a) * R * 0.75, (R * 0.75) ** 2 / (4 * F) - 0.04, Math.sin(a) * R * 0.75), 0.014, dark)); }
+    const reflector = new THREE.Group(); reflector.add(dish, seams, feed, hub, truss);
+    const elev = new THREE.Group(); elev.add(reflector); elev.position.y = 0.2;
+    const az = new THREE.Group(); az.add(elev);
+    const ped = new THREE.Mesh(new THREE.CylinderGeometry(0.22, 0.34, 2.4, 20), dark); ped.position.y = -1.1; az.add(ped);
+    const yoke = new THREE.Mesh(new THREE.BoxGeometry(0.9, 0.22, 0.5), dark); yoke.position.y = 0.0; az.add(yoke);
+    const base = new THREE.Mesh(new THREE.CylinderGeometry(0.9, 1.0, 0.18, 32), dark); base.position.y = -2.3; az.add(base);
+    const ant = new THREE.Group(); ant.add(az); scene.add(ant);
+
+    function size() {
+      const w = cv.clientWidth, h = cv.clientHeight; renderer.setSize(w, h, false);
+      cam.aspect = w / h; cam.updateProjectionMatrix();
+      const narrow = w < 860; ant.position.x = narrow ? 0.4 : 1.9; ant.position.y = narrow ? -0.9 : 0.1; ant.scale.setScalar(narrow ? 0.6 : 1);
+    }
+    addEventListener("resize", size); size();
+    dishScene = { render(t) {
+      const p = heroP;
+      // sledzenie nieba w spoczynku + kursor + scroll
+      const idle = RM ? 0 : t;
+      az.rotation.y = -0.55 + Math.sin(idle * 0.11) * 0.22 + ptr.sx * 0.18 + p * 0.55;
+      elev.rotation.x = lerp(0.95, 0.12, p) + Math.sin(idle * 0.07) * 0.05 - ptr.sy * 0.08;
+      cam.position.set(lerp(0, 1.2, p), lerp(0.6, 0.9, p), lerp(10.5, 5.2, p));
+      cam.lookAt(lerp(0.4, 1.6, p), lerp(0.2, 0.6, p), 0);
+      renderer.render(scene, cam);
+    } };
+    onTick((t) => { if (isOn(heroStage)) dishScene.render(t); });
+  }
+
+  // hero: postep scrolla + paralaksa tekstu
+  const heroEl = $(".hero"), nameEl = $("#name"), thesis = $("#thesis");
+  onTick(() => {
+    const r = heroEl.getBoundingClientRect(); const span = r.height - innerHeight;
+    heroP = span > 0 ? clamp(-r.top / span, 0, 1) : 0;
+    if (!RM) {
+      nameEl.style.transform = "translate3d(0," + (-heroP * 38) + "vh,0)";
+      thesis.style.transform = "translate3d(0," + (-heroP * 16) + "vh,0)";
+      thesis.style.opacity = String(1 - clamp(heroP * 1.6, 0, 1));
+    }
+    if (heroP < 0.98) setStage("antenna");
+  });
+
+  // ---------- intro: scramble + szerokosc kroju ----------
+  function scramble(el, dur) {
+    const fin = el.textContent, gl = "01<>/\\[]=+*#~";
+    const t0 = performance.now();
+    return new Promise((res) => {
+      const f = () => {
+        const p = clamp((performance.now() - t0) / dur, 0, 1), n = Math.floor(p * fin.length);
+        el.textContent = fin.slice(0, n) + [...fin.slice(n)].map(() => gl[(Math.random() * gl.length) | 0]).join("");
+        if (p < 1) requestAnimationFrame(f); else { el.textContent = fin; res(); }
+      };
+      f();
+    });
+  }
+  function intro() {
+    if (RM) return;
+    document.querySelectorAll("[data-scramble]").forEach((el, i) => setTimeout(() => scramble(el, 900), i * 140));
+    if (hasGsap) gsap.fromTo(nameEl, { fontStretch: "62%" }, { fontStretch: "100%", duration: 1.6, ease: "expo.out" });
+  }
+
+  // ---------- loader: przemiatanie do linii wodoru ----------
+  const loader = $("#loader");
+  (function runLoader() {
+    if (RM) { loader.remove(); intro(); return; }
+    const cv = $("#sweep"), c = cv.getContext("2d"), lf = $("#lfreq");
+    const t0 = performance.now(), D = 1700, TARGET = 1420.405;
+    const f = () => {
+      const p = clamp((performance.now() - t0) / D, 0, 1), e = 1 - Math.pow(1 - p, 3);
+      lf.textContent = (TARGET * e).toFixed(3).padStart(8, "0") + " MHz";
+      const w = cv.clientWidth, h = cv.clientHeight; fit(cv, w, h);
+      c.setTransform(DPR, 0, 0, DPR, 0, 0); c.clearRect(0, 0, w, h);
+      c.strokeStyle = "rgba(232,235,238,.12)"; c.beginPath(); c.moveTo(0, h - 0.5); c.lineTo(w, h - 0.5); c.stroke();
+      c.strokeStyle = "#5aa9ff"; c.lineWidth = 1.2; c.beginPath();
+      for (let x = 0; x <= w; x += 2) {
+        const u = x / w, peak = Math.exp(-((u - 0.5) ** 2) / 0.0006) * e * e;
+        const y = h - 18 - Math.random() * 10 * (1 - e * 0.5) - peak * (h - 40);
+        x ? c.lineTo(x, y) : c.moveTo(x, y);
+      }
+      c.stroke();
+      if (p < 1) requestAnimationFrame(f); else { setTimeout(() => { loader.classList.add("out"); intro(); setTimeout(() => loader.remove(), 1000); }, 180); }
+    };
+    f();
+  })();
+
+  // ---------- tor sygnalowy: PCB w Three.js ----------
+  const chain = $("#chain"), boardBox = $(".board"); watch(boardBox);
+  let chainC = 0; // 0..3 ciagle
+  if (hasGL) {
+    const cv = $("#pcb");
+    const renderer = new THREE.WebGLRenderer({ canvas: cv, antialias: true, alpha: true });
+    renderer.setPixelRatio(DPR); renderer.outputEncoding = THREE.sRGBEncoding;
+    const scene = new THREE.Scene();
+    const cam = new THREE.PerspectiveCamera(30, 1, 0.1, 100);
+    scene.add(new THREE.HemisphereLight(0xbcd0ea, 0x080a0d, 0.7));
+    const k1 = new THREE.DirectionalLight(0xffffff, 0.9); k1.position.set(-3, 8, 5); scene.add(k1);
+    const k2 = new THREE.DirectionalLight(0xffd25e, 0.3); k2.position.set(6, 3, -4); scene.add(k2);
+
+    // tekstura sitodruku i miedzi
+    const tc = document.createElement("canvas"); tc.width = 1400; tc.height = 840; const x = tc.getContext("2d");
+    x.fillStyle = "#0e2a20"; x.fillRect(0, 0, 1400, 840);
+    const P = (bx, bz) => [(bx + 3.5) / 7 * 1400, (bz + 2.1) / 4.2 * 840];
+    x.strokeStyle = "rgba(196,160,92,.35)"; x.lineWidth = 3;
+    for (let i = 0; i < 22; i++) { const [ax, ay] = P(0.6 + (i % 11) * 0.13, i < 11 ? -0.75 : 0.75); x.beginPath(); x.moveTo(ax, ay); x.lineTo(ax, ay + (i < 11 ? -120 : 120) * (0.4 + (i % 4) * 0.2)); x.lineTo(ax + 60 + i * 9, ay + (i < 11 ? -200 : 200) * (0.5 + (i % 3) * 0.15)); x.stroke(); }
+    for (let i = 0; i < 14; i++) { const y0 = 120 + i * 44; x.beginPath(); x.moveTo(60, y0); x.lineTo(300 + (i % 5) * 30, y0); x.lineTo(360 + (i % 5) * 30, y0 + 30); x.stroke(); }
+    x.fillStyle = "rgba(240,240,232,.82)"; x.font = "600 22px monospace";
+    [["J1 RF IN", -3.45, -0.55], ["U1 LNA", -2.45, -0.55], ["FL1 1.42G", -1.65, -0.6], ["U2 ADC", -0.55, -0.55], ["U3 XC7A35T", 0.65, -0.95], ["J4 USB", 2.85, -1.75], ["PJ-2027 REV 7", 1.7, 1.75], ["PMOD JA", -1.3, 1.45]].forEach(([s, bx, bz]) => { const [px, py] = P(bx, bz); x.fillText(s, px, py); });
+    x.strokeStyle = "rgba(240,240,232,.5)"; x.lineWidth = 2; x.strokeRect(14, 14, 1372, 812);
+    const tex = new THREE.CanvasTexture(tc); tex.encoding = THREE.sRGBEncoding; tex.anisotropy = 4;
+    const side = new THREE.MeshStandardMaterial({ color: 0x0b2119, roughness: 0.7 });
+    const top = new THREE.MeshStandardMaterial({ map: tex, roughness: 0.55, metalness: 0.05 });
+    const pcb = new THREE.Mesh(new THREE.BoxGeometry(7, 0.12, 4.2), [side, side, top, side, side, side]);
+    scene.add(pcb);
+
+    const mk = (color, metal) => new THREE.MeshStandardMaterial({ color, metalness: metal, roughness: 0.4, emissive: 0xffd25e, emissiveIntensity: 0 });
+    const parts = [[], [], [], []];
+    const add = (geo, mat, px, py, pz, st) => { const m = new THREE.Mesh(geo, mat); m.position.set(px, py, pz); scene.add(m); if (st != null) parts[st].push(mat); return m; };
+    const gold = mk(0xc9a45c, 0.9), blk1 = mk(0x15171a, 0.2), can = mk(0xb9c0c8, 0.85), blk2 = mk(0x15171a, 0.2), fpga = mk(0x111316, 0.25), usb = mk(0xc4cad1, 0.85);
+    const sma = add(new THREE.CylinderGeometry(0.16, 0.16, 0.6, 20), gold, -3.45, 0.22, 0, 0); sma.rotation.z = Math.PI / 2;
+    add(new THREE.BoxGeometry(0.36, 0.36, 0.36), gold, -3.2, 0.22, 0, 0);
+    add(new THREE.BoxGeometry(0.42, 0.1, 0.42), blk1, -2.2, 0.11, 0, 1);
+    add(new THREE.BoxGeometry(0.8, 0.22, 0.55), can, -1.3, 0.17, 0, 1);
+    add(new THREE.BoxGeometry(0.62, 0.1, 0.62), blk2, -0.2, 0.11, 0.15, 2);
+    add(new THREE.BoxGeometry(1.45, 0.14, 1.45), fpga, 1.3, 0.13, 0, 2);
+    add(new THREE.BoxGeometry(0.7, 0.32, 0.55), usb, 3.2, 0.22, -1.15, 3);
+    const pas = new THREE.MeshStandardMaterial({ color: 0x8a7a62, roughness: 0.6 }), pasB = new THREE.MeshStandardMaterial({ color: 0x1b1d20, roughness: 0.5 });
+    for (let i = 0; i < 46; i++) { const px = -3 + Math.random() * 6.4, pz = -1.8 + Math.random() * 3.6; if (Math.abs(pz) < 0.45 && px < 2.2) continue; if (Math.abs(px - 1.3) < 0.9 && Math.abs(pz) < 0.9) continue; add(new THREE.BoxGeometry(0.1, 0.045, 0.06), i % 3 ? pas : pasB, px, 0.09, pz); }
+    const pinGeo = new THREE.BoxGeometry(0.06, 0.28, 0.06), pinM = new THREE.MeshStandardMaterial({ color: 0xc9a45c, metalness: 0.9, roughness: 0.35 });
+    for (let i = 0; i < 12; i++) for (let r = 0; r < 2; r++) add(pinGeo, pinM, -2.2 + i * 0.14, 0.2, 1.75 + r * 0.14);
+
+    // sciezka sygnalu
+    const way = [[-3.15, 0], [-2.2, 0], [-1.3, 0], [-0.6, 0], [-0.2, 0.15], [0.5, 0.15], [1.3, 0], [2.45, 0], [2.45, -1.15], [3.0, -1.15]].map(([a, b]) => new THREE.Vector3(a, 0.075, b));
+    const curve = new THREE.CatmullRomCurve3(way, false, "catmullrom", 0.05);
+    const N = 400, pts = curve.getSpacedPoints(N);
+    const lg = new THREE.BufferGeometry().setFromPoints(pts);
+    const trace = new THREE.Line(lg, new THREE.LineBasicMaterial({ color: 0x5aa9ff })); scene.add(trace);
+    const ghost = new THREE.Line(lg.clone(), new THREE.LineBasicMaterial({ color: 0x5aa9ff, transparent: true, opacity: 0.18 })); scene.add(ghost);
+    const head = new THREE.Mesh(new THREE.SphereGeometry(0.07, 16, 12), new THREE.MeshBasicMaterial({ color: 0xffd25e })); scene.add(head);
+    const headGlow = new THREE.PointLight(0xffd25e, 1.2, 1.6); scene.add(headGlow);
+    // wyjscie: pakiety danych z USB
+    const pk = []; for (let i = 0; i < 6; i++) { const m = new THREE.Mesh(new THREE.BoxGeometry(0.12, 0.05, 0.05), new THREE.MeshBasicMaterial({ color: 0x5aa9ff, transparent: true, opacity: 0 })); scene.add(m); pk.push(m); }
+
+    const K = [
+      { p: [-6.4, 3.4, 4.6], l: [-2.6, 0, 0] },
+      { p: [-2.4, 4.0, 4.9], l: [-1.5, 0, 0] },
+      { p: [1.0, 6.0, 3.9], l: [0.8, 0, 0.05] },
+      { p: [6.2, 4.0, 4.6], l: [2.4, 0, -0.5] },
+    ];
+    const v = new THREE.Vector3(), lk = new THREE.Vector3();
+    function size() { const w = cv.clientWidth, h = cv.clientHeight; if (!w || !h) return; renderer.setSize(w, h, false); cam.aspect = w / h; cam.fov = w < 600 ? 40 : 30; cam.updateProjectionMatrix(); }
+    addEventListener("resize", size); size();
+    let lastW = 0;
+    onTick((t) => {
+      if (!isOn(boardBox)) return;
+      if (cv.clientWidth !== lastW) { lastW = cv.clientWidth; size(); }
+      const c = clamp(chainC, 0, 3), i0 = Math.min(2, Math.floor(c)), f = c - i0, e = f * f * (3 - 2 * f);
+      const A = K[i0], B = K[i0 + 1];
+      const idle = RM ? 0 : t;
+      v.set(lerp(A.p[0], B.p[0], e) + Math.sin(idle * 0.3) * 0.15 + ptr.sx * 0.3, lerp(A.p[1], B.p[1], e) - ptr.sy * 0.2, lerp(A.p[2], B.p[2], e));
+      lk.set(lerp(A.l[0], B.l[0], e), 0, lerp(A.l[2], B.l[2], e));
+      cam.position.copy(v); cam.lookAt(lk);
+      const prog = clamp(c / 3 * 0.92 + 0.08, 0, 1), n = Math.max(2, Math.floor(prog * N));
+      trace.geometry.setDrawRange(0, n);
+      head.position.copy(pts[Math.min(N, n)]); headGlow.position.copy(head.position).y += 0.2;
+      for (let s = 0; s < 4; s++) { const on = 1 - clamp(Math.abs(c - s), 0, 1); for (const m of parts[s]) m.emissiveIntensity = on * 0.35; }
+      const outOn = clamp(c - 2.4, 0, 0.6) / 0.6;
+      pk.forEach((m, i) => { const ph = ((idle * 0.5 + i / 6) % 1); m.position.set(3.55 + ph * 1.4, 0.22, -1.15); m.material.opacity = outOn * (1 - ph); });
+      renderer.render(scene, cam);
+    });
+  }
+
+  // postep rozdzialow
+  const stageNames = ["antenna", "front end", "FPGA", "software"];
+  const scL = $("#sc-l"), scR = $("#sc-r");
+  const scopeLbl = [["CH1 RF IN", "50 mV/div · 2 µs/div"], ["CH1 FILTERED", "200 mV/div · 5 µs/div"], ["CH2 SAMPLES", "12 bit · 100 MS/s"], ["CH3 USB DATA", "1 = 3.3 V · 8N1"]];
+  let lastStep = -1;
+  onTick(() => {
+    const r = chain.getBoundingClientRect(); const span = r.height - innerHeight;
+    const p = span > 0 ? clamp(-r.top / span, 0, 1) : 0;
+    chainC = p * 3;
+    const s = Math.round(chainC);
+    if (r.top < innerHeight * 0.5 && r.bottom > innerHeight * 0.5) setStage(stageNames[s]);
+    if (s !== lastStep) { lastStep = s; scL.textContent = scopeLbl[s][0]; scR.textContent = scopeLbl[s][1]; }
+  });
+
+  // ---------- oscyloskop ----------
+  const scope = $("#scope"), oc = scope.getContext("2d"); watch(scope);
+  function drawScope(t) {
+    if (!isOn(scope)) return;
+    const w = scope.clientWidth, h = scope.clientHeight; fit(scope, w, h);
+    oc.setTransform(DPR, 0, 0, DPR, 0, 0); oc.clearRect(0, 0, w, h);
+    oc.strokeStyle = "rgba(141,150,163,.18)"; oc.lineWidth = 1;
+    for (let i = 1; i < 10; i++) { oc.beginPath(); oc.moveTo(i * w / 10, 26); oc.lineTo(i * w / 10, h); oc.stroke(); }
+    for (let i = 1; i < 4; i++) { oc.beginPath(); oc.moveTo(0, 26 + i * (h - 26) / 4); oc.lineTo(w, 26 + i * (h - 26) / 4); oc.stroke(); }
+    const c = clamp(chainC, 0, 3), ph = RM ? 0 : t * 2.2, mid = 26 + (h - 26) / 2, A = (h - 26) * 0.34;
+    const wts = [0, 1, 2, 3].map((s) => Math.max(0, 1 - Math.abs(c - s)));
+    oc.strokeStyle = "#5aa9ff"; oc.lineWidth = 1.6; oc.shadowColor = "#5aa9ff"; oc.shadowBlur = 8; oc.beginPath();
+    const bits = [1, 0, 1, 1, 0, 0, 1, 0, 1, 1, 1, 0, 0, 1, 0, 1];
+    for (let X = 0; X <= w; X += 2) {
+      const u = X / w, a = u * Math.PI * 2 * 4 + ph;
+      const y0 = Math.sin(a) * 0.35 + (Math.random() * 2 - 1) * 0.65;
+      const y1 = Math.sin(a) + (Math.random() * 2 - 1) * 0.04;
+      const q = Math.floor(u * 64) / 64 * Math.PI * 2 * 4 + ph; const y2 = Math.round(Math.sin(q) * 4) / 4;
+      const b = bits[(Math.floor(u * 16 + ph * 0.6) % 16 + 16) % 16]; const y3 = b ? 0.8 : -0.8;
+      const y = y0 * wts[0] + y1 * wts[1] + y2 * wts[2] + y3 * wts[3];
+      const Y = mid - y * A;
+      X ? oc.lineTo(X, Y) : oc.moveTo(X, Y);
+    }
+    oc.stroke(); oc.shadowBlur = 0;
+  }
+  onTick(drawScope);
+
+  // ---------- indeks prac: podglad "wodospad" ----------
+  const pv = document.createElement("div"); pv.className = "preview"; pv.setAttribute("aria-hidden", "true");
+  pv.innerHTML = '<canvas></canvas><div class="rec mono">LOOP 00:08 · video here</div>'; document.body.appendChild(pv);
+  const pc = pv.querySelector("canvas"), px = pc.getContext("2d");
+  const RAMP = [[8, 20, 58], [31, 79, 216], [34, 195, 230], [245, 230, 99], [255, 255, 255]];
+  const ramp = (v) => { v = clamp(v, 0, 0.999) * 4; const i = Math.floor(v), f = v - i, a = RAMP[i], b = RAMP[i + 1]; return [lerp(a[0], b[0], f), lerp(a[1], b[1], f), lerp(a[2], b[2], f)]; };
+  const cache = {};
+  function prep(key) {
+    if (cache[key]) return cache[key];
+    const o = { ready: false }; cache[key] = o;
+    if (key === "sky" || key === "voice") { o.proc = key; o.ready = true; return o; }
+    const im = new Image(); im.onload = () => {
+      const W = 440, H = 275, a = document.createElement("canvas"); a.width = W; a.height = H; const ac = a.getContext("2d");
+      const s = Math.max(W / im.width, H / im.height); ac.drawImage(im, (W - im.width * s) / 2, 0, im.width * s, im.height * s);
+      const b = document.createElement("canvas"); b.width = W; b.height = H; const bc = b.getContext("2d");
+      const d = ac.getImageData(0, 0, W, H), dd = d.data;
+      for (let i = 0; i < dd.length; i += 4) { const l = (dd[i] * 0.3 + dd[i + 1] * 0.59 + dd[i + 2] * 0.11) / 255; const [r, g, bb] = ramp(l); dd[i] = r; dd[i + 1] = g; dd[i + 2] = bb; }
+      bc.putImageData(d, 0, 0); o.true = a; o.fc = b; o.ready = true;
+    }; im.src = IMGS[key]; return o;
+  }
+  let cur = null, revealT0 = 0, pvx = 0, pvy = 0;
+  document.querySelectorAll("#index a").forEach((a) => {
+    const key = a.dataset.img; prep(key);
+    const on = () => { cur = prep(key); revealT0 = performance.now(); pv.classList.add("on"); };
+    a.addEventListener("pointerenter", on); a.addEventListener("focus", () => { const r = a.getBoundingClientRect(); ptr.px = r.right - 220; ptr.py = r.top + r.height / 2; on(); });
+    a.addEventListener("pointerleave", () => pv.classList.remove("on")); a.addEventListener("blur", () => pv.classList.remove("on"));
+  });
+  const skyRow = new Uint8ClampedArray(440 * 4);
+  onTick((t) => {
+    if (!pv.classList.contains("on") || !cur || !cur.ready) return;
+    pvx = lerp(pvx, ptr.px + 28, 0.18); pvy = lerp(pvy, ptr.py - 140, 0.18);
+    const pw = pv.offsetWidth, ph = pv.offsetHeight;
+    pv.style.transform = "translate3d(" + clamp(pvx, 8, innerWidth - pw - 8) + "px," + clamp(pvy, 8, innerHeight - ph - 8) + "px,0)";
+    fit(pc, 440, 275); const W = pc.width, H = pc.height;
+    px.setTransform(W / 440, 0, 0, H / 275, 0, 0);
+    const p = RM ? 1 : clamp((performance.now() - revealT0) / 700, 0, 1), yl = p * 275;
+    if (cur.proc === "sky") { px.drawImage(wf, 0, 0, 440, 275); return; }
+    if (cur.proc === "voice") { drawVoice(t); return; }
+    px.fillStyle = "#000"; px.fillRect(0, 0, 440, 275);
+    px.drawImage(cur.fc, 0, 0);
+    px.save(); px.beginPath(); px.rect(0, 0, 440, Math.max(0, yl - 26)); px.clip(); px.drawImage(cur.true, 0, 0); px.restore();
+    if (p < 1) { px.fillStyle = "rgba(255,210,94,.9)"; px.fillRect(0, yl, 440, 1.5); px.fillStyle = "rgba(0,0,0,.55)"; px.fillRect(0, yl + 2, 440, 275 - yl); }
+    else { const sl = (t * 40) % 275; px.fillStyle = "rgba(255,255,255,.05)"; px.fillRect(0, sl, 440, 2); }
+  });
+
+  // ---------- spektrogram linii wodoru (zaslepka wideo SeeSky) ----------
+  function hiRow(w, t, buf) {
+    const drift = Math.sin(t * 0.15) * 0.008 + Math.sin(t * 0.041) * 0.005;
+    for (let x = 0; x < w; x++) {
+      const u = x / w - 0.5 - drift;
+      let v = 0.04 + Math.random() * 0.17 + Math.exp(-u * u / 0.0009) * 0.62 + Math.exp(-((u + 0.09) ** 2) / 0.0004) * 0.18;
+      if (Math.random() < 0.002) v += 0.5; // zaklocenia RFI
+      const [r, g, b] = ramp(v); buf[x * 4] = r; buf[x * 4 + 1] = g; buf[x * 4 + 2] = b; buf[x * 4 + 3] = 255;
+    }
+  }
+  // Yapper: zaslepka wideo jako przebieg mowy push-to-talk
+  function drawVoice(t) {
+    px.fillStyle = "#0b0e13"; px.fillRect(0, 0, 440, 275);
+    px.fillStyle = "#5aa9ff";
+    for (let i = 0; i < 64; i++) {
+      const env = Math.max(0, Math.sin(t * 0.9 + i * 0.09)) * (0.35 + 0.65 * Math.abs(Math.sin(i * 0.7 + t * 3.1)));
+      const hh = 6 + env * 150; px.fillRect(24 + i * 6.2, 137 - hh / 2, 3.2, hh);
+    }
+    px.fillStyle = "#e8ebee"; px.font = "500 12px monospace"; px.fillText("PTT CH1 · ONLINE ENGINE", 24, 32);
+  }
+  const wf = $("#wf"), wc = wf.getContext("2d"), fm = $("#fmedia"), tcEl = $("#tc"); watch(fm);
+  wf.width = 640; wf.height = 360;
+  wc.fillStyle = "#081430"; wc.fillRect(0, 0, 640, 360);
+  for (let i = 0; i < 360; i++) { const id = new ImageData(640, 1); hiRow(640, i * 0.12, id.data); wc.putImageData(id, 0, 359 - i); }
+  let wfAcc = 0;
+  onTick((t) => {
+    if (RM || (!isOn(fm) && !(pv.classList.contains("on") && cur && cur.proc === "sky"))) return;
+    wfAcc += 1; if (wfAcc % 2) return;
+    wc.drawImage(wf, 0, 0, 640, 359, 0, 1, 640, 359);
+    const id = new ImageData(640, 1); hiRow(640, t, id.data); wc.putImageData(id, 0, 0);
+    const s = Math.floor(t); tcEl.textContent = "REC 00:" + String(Math.floor(s / 60) % 60).padStart(2, "0") + ":" + String(s % 60).padStart(2, "0");
+  });
+  // paralaksa: media wolniej niz tekst
+  if (hasGsap && window.ScrollTrigger && !RM) {
+    gsap.fromTo("#fmedia", { yPercent: 8 }, { yPercent: -8, ease: "none", scrollTrigger: { trigger: "#p-seesky", start: "top bottom", end: "bottom top", scrub: true } });
+    gsap.fromTo("#ftext", { y: 120 }, { y: -120, ease: "none", scrollTrigger: { trigger: "#p-seesky", start: "top bottom", end: "bottom top", scrub: true } });
+    // linie naglowkow: wejscie maska
+    gsap.utils.toArray(".step h2, .sec-head h2, .feature__text h3").forEach((el) => gsap.from(el, { yPercent: 40, opacity: 0, duration: 1.1, ease: "expo.out", scrollTrigger: { trigger: el, start: "top 85%" } }));
+  }
+
+  // ramka schodzi z drogi przy scrollu w dol, wraca przy scrollu w gore
+  let lastY = 0;
+  onTick(() => { const y = scrollY; if (Math.abs(y - lastY) < 4) return; root.classList.toggle("frame-away", y > 160 && y > lastY); lastY = y; });
+
+  // ---------- datasheet: zmiana tla na papier ----------
+  const ds = $("#datasheet");
+  onTick(() => { const r = ds.getBoundingClientRect(); root.classList.toggle("paper", r.top < innerHeight * 0.55 && r.bottom > innerHeight * 0.45); });
+
+  // pinout
+  const PINS = [
+    ["PYTHON", "Tooling, API integration and data processing. JobManager and Yapper run on it."],
+    ["JAVASCRIPT", "Interfaces and browser tools: Turf Matchmaking, Inventory Generator, the SeeSky panel."],
+    ["C / C++", "BlackBox and the stock-market terminal tool. Low-level coursework."],
+    ["JAVA", "LabInc: object model, economy simulation, Swing interface."],
+    ["REST API", "Endpoints and integrations, including the AD CS request endpoint at ASSECO."],
+    ["GIT", "Every project, solo and team."],
+    ["LINUX", "Daily driver for servers, containers and the cross-platform password manager."],
+    ["DOCKER", "Containerised project workflows."],
+    ["LTSPICE", "Circuit simulation before anything touches copper."],
+    ["KICAD", "Schematic capture and PCB layout."],
+    ["EAGLE", "PCB layout in lab coursework."],
+    ["VIVADO", "FPGA design and AXI4-Lite simulation on the Basys 3."],
+    ["MICRO-CAP", "Analog simulation in lab work."],
+    ["AUTOHOTKEY", "Automating everyday desktop tasks."],
+    ["CLAUDE CODE", "Implementation and iterations with AI, under my requirements and review."],
+    ["CODEX", "Code changes and verification."],
+  ];
+  const svg = $("#pinout"), NS = "http://www.w3.org/2000/svg", pd = $("#pindesc");
+  const el = (n, a) => { const e = document.createElementNS(NS, n); for (const k in a) e.setAttribute(k, a[k]); return e; };
+  svg.appendChild(el("rect", { x: 170, y: 20, width: 220, height: 320, fill: "none", stroke: "currentColor", "stroke-width": 1.5 }));
+  svg.appendChild(el("circle", { cx: 186, cy: 36, r: 5, fill: "none", stroke: "currentColor" }));
+  const tt = el("text", { x: 280, y: 178, "text-anchor": "middle", style: "font-size:15px;font-weight:500" }); tt.textContent = "PJ-2027"; svg.appendChild(tt);
+  const t2 = el("text", { x: 280, y: 214, "text-anchor": "middle", opacity: .6 }); t2.textContent = "TOP VIEW"; svg.appendChild(t2);
+  PINS.forEach(([name, desc], i) => {
+    const left = i < 8, k = left ? i : 15 - i, y = 40 + k * 38;
+    const g = el("g", { class: "pin", tabindex: 0, role: "button", "aria-label": name + ": " + desc });
+    g.appendChild(el("rect", { x: left ? 146 : 390, y: y - 6, width: 24, height: 12 }));
+    const num = el("text", { x: left ? 178 : 382, y: y + 4, "text-anchor": left ? "start" : "end", opacity: .55 }); num.textContent = String(i + 1); g.appendChild(num);
+    const lb = el("text", { class: "lbl", x: left ? 138 : 422, y: y + 4, "text-anchor": left ? "end" : "start" }); lb.textContent = name; g.appendChild(lb);
+    const show = () => { svg.querySelectorAll(".pin").forEach((p) => p.classList.remove("hot")); g.classList.add("hot"); pd.textContent = "Pin " + (i + 1) + ", " + name + ". " + desc; };
+    g.addEventListener("pointerenter", show); g.addEventListener("focus", show); g.addEventListener("click", show);
+    svg.appendChild(g);
+  });
+
+  // ---------- kontakt: sinus -> Fourier fali prostokatnej przy kursorze ----------
+  const osc = $("#osc"), cc = osc.getContext("2d"); watch(osc);
+  let mx = -1e4;
+  osc.parentElement.addEventListener("pointermove", (e) => { const r = osc.getBoundingClientRect(); mx = e.clientX - r.left; });
+  osc.parentElement.addEventListener("pointerleave", () => { mx = -1e4; });
+  onTick((t) => {
+    if (!isOn(osc)) return;
+    const w = osc.clientWidth, h = osc.clientHeight; fit(osc, w, h);
+    cc.setTransform(DPR, 0, 0, DPR, 0, 0); cc.clearRect(0, 0, w, h);
+    cc.strokeStyle = getComputedStyle(root).getPropertyValue("--fg2").trim() || "#8d96a3"; cc.globalAlpha = .25;
+    cc.beginPath(); cc.moveTo(0, h / 2); cc.lineTo(w, h / 2); cc.stroke(); cc.globalAlpha = 1;
+    cc.strokeStyle = "#5aa9ff"; cc.lineWidth = 1.6; cc.beginPath();
+    const ph = RM ? 0 : t * 1.4, k = Math.PI * 2 / 220;
+    for (let X = 0; X <= w; X += 2) {
+      const a = X * k - ph, s = Math.sin(a);
+      const sq = (4 / Math.PI) * (Math.sin(a) + Math.sin(3 * a) / 3 + Math.sin(5 * a) / 5 + Math.sin(7 * a) / 7);
+      const m = clamp(1 - Math.abs(X - mx) / 260, 0, 1);
+      const Y = h / 2 - (s * (1 - m) + sq * m * 0.8) * h * 0.36;
+      X ? cc.lineTo(X, Y) : cc.moveTo(X, Y);
+    }
+    cc.stroke();
+  });
+
+  // kopiowanie adresu
+  const cp = $("#copy");
+  cp.addEventListener("click", () => {
+    const done = () => { cp.textContent = "Copied"; setTimeout(() => (cp.textContent = "Copy address"), 1600); };
+    try { navigator.clipboard.writeText("jeleniewicz@op.pl").then(done, () => { getSelection().selectAllChildren($("#mail")); }); }
+    catch (e) { getSelection().selectAllChildren($("#mail")); }
+  });
+})();
+</script>

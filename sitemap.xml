@@ -2,21 +2,18 @@
 <urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9"
         xmlns:xhtml="http://www.w3.org/1999/xhtml">
   <url>
-    <loc>https://piotrjeleniewicz.com/</loc>
-    <lastmod>2026-07-13</lastmod>
-    <xhtml:link rel="alternate" hreflang="en" href="https://piotrjeleniewicz.com/" />
+    <loc>https://piotrjeleniewicz.com/en/</loc>
+    <xhtml:link rel="alternate" hreflang="en" href="https://piotrjeleniewicz.com/en/" />
     <xhtml:link rel="alternate" hreflang="pl" href="https://piotrjeleniewicz.com/pl/" />
-    <xhtml:link rel="alternate" hreflang="x-default" href="https://piotrjeleniewicz.com/" />
+    <xhtml:link rel="alternate" hreflang="x-default" href="https://piotrjeleniewicz.com/en/" />
   </url>
   <url>
     <loc>https://piotrjeleniewicz.com/pl/</loc>
-    <lastmod>2026-07-13</lastmod>
-    <xhtml:link rel="alternate" hreflang="en" href="https://piotrjeleniewicz.com/" />
+    <xhtml:link rel="alternate" hreflang="en" href="https://piotrjeleniewicz.com/en/" />
     <xhtml:link rel="alternate" hreflang="pl" href="https://piotrjeleniewicz.com/pl/" />
-    <xhtml:link rel="alternate" hreflang="x-default" href="https://piotrjeleniewicz.com/" />
+    <xhtml:link rel="alternate" hreflang="x-default" href="https://piotrjeleniewicz.com/en/" />
   </url>
   <url>
     <loc>https://piotrjeleniewicz.com/inventoryGen/</loc>
-    <lastmod>2026-07-13</lastmod>
   </url>
 </urlset>

@@ -1,0 +1,39 @@
+/* ---------- tablet ---------- */
+@media (max-width: 1080px) {
+  .cards3 { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+  .cards3 .card:last-child { grid-column: 1 / -1; }
+  .cards3 .card:last-child .media { aspect-ratio: 21 / 9; }
+  .grid { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+  .proj, .proj.rev { grid-template-columns: minmax(0, 1fr); }
+  .proj.rev .ptext { order: 0; }
+  .pmedia { max-width: 760px; }
+}
+/* ---------- telefon ---------- */
+@media (max-width: 900px) {
+  .f-tl span, .f-bl { display: none; }
+  .nav { gap: 14px; }
+  .nav a { padding-block: 12px; }
+  .hero { height: 160svh; }
+  .hero__copy { justify-items: start; align-content: end; padding-bottom: calc(70px + env(safe-area-inset-bottom, 0px)); }
+  .hero__text { width: 100%; }
+  .notes-toggle { display: none; }
+  .build, .me, .ai, .contact__grid { grid-template-columns: minmax(0, 1fr); }
+  .stack { aspect-ratio: 5 / 4; }
+  .tl::before { left: 6px; }
+  .tli { grid-template-columns: minmax(0, 1fr); gap: 10px; padding-left: 30px; }
+  .tli::after { left: 0; top: 34px; }
+  .tli .when { padding-right: 0; }
+}
+@media (max-width: 640px) {
+  .cards3, .grid { grid-template-columns: minmax(0, 1fr); }
+  .cards3 .card:last-child .media { aspect-ratio: 16 / 10; }
+  .stage3d { aspect-ratio: 1 / 1; }
+  .tools2 { grid-template-columns: minmax(0, 1fr); }
+  .talk { font-size: clamp(3.2rem, 17vw, 5rem); }
+}
+@media (prefers-reduced-motion: reduce) {
+  .loader { display: none; }
+  .hero { height: auto; }
+  .hero__stage { position: relative; }
+  * { transition-duration: .01ms !important; }
+}

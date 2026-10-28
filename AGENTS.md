@@ -9,6 +9,12 @@ This file provides guidance to Codex (Codex.ai/code) when working with code in t
 - Always use the ASCII hyphen-minus `-` (U+002D) instead.
 - Do not rewrite third-party minified vendor files solely for this rule, but never copy those characters into new project content.
 
+## Live site since 2026-10-28 (v5)
+
+- `/` only redirects by browser language to `/en/` or `/pl/`. `en/index.html` and `pl/index.html` are generated output from `docs/revamp/src/` and share `media/`. Never edit them by hand: change the sources, then run `python docs/revamp/src/build_v5.py` and `python docs/revamp/src/publish_v5.py`.
+- The old template page (former `index.html`, `css/`, `js/`, `scripts/generate_pl.py`) is no longer served. Do not run `scripts/generate_pl.py`: it would overwrite `pl/index.html`. The sections below describe that old page.
+- Pristine backup of the old live site: `C:\Users\user1\Documents\Backups\stronus\stronus_backup_2026-10-28_pre-v5-launch\`.
+
 ## Overview
 
 Static personal portfolio website (Piotr Jeleniewicz / "Xcape"), built by customizing the "Isti" ThemeForest HTML template, extended with custom electronics-themed canvas parallax backgrounds. Plain HTML/CSS/JS - no build system, package manager, linter, or test suite.

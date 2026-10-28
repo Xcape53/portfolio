@@ -1,0 +1,156 @@
+  <!-- JAK PRACUJĘ -->
+  <section class="work-how wrap" id="how" data-path="how-i-work" aria-labelledby="how-h" data-tag="TYPOGRAFIA ZAMIAST DRZEWA" data-note="Zamiast rysunku drzewa: jedno zdanie, które samo jest drzewem. Każda linia to poziom niżej i przy scrollu wysuwa się na swoje wcięcie. Tekst jest zawsze czytelny, nic go nie przykrywa." data-note-pos="tr">
+    <p class="label">How I work</p>
+    <h2 class="outline" id="how-h">
+      <span class="node breathe" aria-hidden="true"></span>
+      <span class="ln" data-d="0">Every problem starts as one node.</span>
+      <span class="ln" data-d="1">I split it into parts,</span>
+      <span class="ln" data-d="2">give each part one job,</span>
+      <span class="ln" data-d="3"><span class="g">and wire the parts into a tool.</span></span>
+    </h2>
+    <p class="body">I learn the same way: category, subcategory, then the connections between them. Automation is not a separate skill on my list. It is this habit applied to the tools I use every day, and the projects below are where it shows.</p>
+  </section>
+
+  <!-- WYBRANE PRACE -->
+  <section class="selected wrap" id="projects" data-path="work" aria-labelledby="sel-h">
+    <div class="sec-top">
+      <h2 id="sel-h">Selected work</h2>
+      <p>Two tools I use every day and the software of a 3 m radio telescope. Seven more further down.</p>
+    </div>
+
+    <article class="case" id="p-seesky" data-path="work / seesky" style="--tintbg: rgba(214,51,108,.5); --tintc: #d6336c">
+      <div class="case__head">
+        <h3><span class="node" aria-hidden="true"></span>SeeSky</h3>
+        <div class="case__meta"><b>Lead software developer</b>SimLE student research club<br>Python, Flask, Astropy, JavaScript</div>
+      </div>
+      <p class="case__lead">Software for the club's 3 m radio telescope: a backend, a tracking web interface and an interactive sky map.</p>
+      <div class="screen-wrap switch" data-tag="SYGNATURA + WIDEO" data-note="Prawdziwe nagranie z dema SeeSky (nagrałem je automatycznie z Twojej strony demo). Ekran 'włącza się' z węzła: kropka, potem linia oscyloskopu w gradiencie, linia rozchodzi się w górę i w dół i otwiera ekran, a ekran opada z lekkiego przechyłu 3D. Pod spodem poświata w kolorze projektu (tu malinowy SeeSky). Raz otwarty zostaje otwarty." data-note-pos="tr">
+        <span class="node node-0" aria-hidden="true"></span><span class="trace a" aria-hidden="true"></span><span class="trace b" aria-hidden="true"></span>
+        <div class="screen" style="--ar: 1280 / 800"><video muted loop playsinline preload="auto" poster="%%IMG_seeskyPoster%%" src="%%VID_seesky%%" aria-label="SeeSky sky map being rotated in the public demo"></video></div>
+      </div>
+      <div class="case__cap"><span>Sky map and tracking interface, recorded from the public demo.</span><button class="ctl" type="button" data-video-ctl>Pause</button></div>
+      <div class="breakdown">
+        <div class="k">Need</div>
+        <div>
+          <p class="need"><span class="node" aria-hidden="true"></span>Point a 3 m dish at objects that keep moving across the sky, and let people see and control where it points.</p>
+          <ul class="parts">
+            <li><span class="ring"></span><b>Backend</b><span>Python and Flask, with Astropy for the sky positions.</span></li>
+            <li><span class="ring"></span><b>Tracking</b><span>A web interface to pick a target and follow it.</span></li>
+            <li><span class="ring"></span><b>Sky map</b><span>Interactive, in the browser.</span></li>
+            <li><span class="ring"></span><b>Next</b><span>Hardware and an SDR receiver.</span></li>
+          </ul>
+        </div>
+        <div class="links"><a class="btn btn--solid small" href="https://xcape53.github.io/SeeSky-tracking/">Open the demo</a><a class="btn small" href="https://github.com/Xcape53/SeeSky-tracking">Source</a></div>
+      </div>
+    </article>
+
+    <article class="case" id="p-jobmanager" data-path="work / jobmanager" style="--tintbg: linear-gradient(135deg, rgba(58,245,85,.5), rgba(41,237,129,.5)); --tintc: #29ed81">
+      <div class="case__head">
+        <h3><span class="node" aria-hidden="true"></span>JobManager</h3>
+        <div class="case__meta"><b>In use daily</b>Private repository<br>Node.js, scraping, Gemini API</div>
+      </div>
+      <p class="case__lead">One list of job offers from justjoin.it, pracuj.pl, rocketjobs and olx, researched before I open a single listing.</p>
+      <div class="screen-wrap switch" data-tag="ZRZUT" data-note="Tu nie ma dema publicznego, więc uczciwy zrzut zamiast udawanego playera. Obraz lekko przesuwa się w kadrze przy scrollu. Docelowo możesz podmienić na nagranie z JobManagera.">
+        <span class="node node-0" aria-hidden="true"></span><span class="trace a" aria-hidden="true"></span><span class="trace b" aria-hidden="true"></span>
+        <div class="screen pan" style="--ar: 1600 / 697"><img src="%%IMG_jobm%%" alt="JobManager research view for one offer"></div>
+      </div>
+      <div class="case__cap"><span>The research view: company, salary against the market, the real stack and red flags.</span><button class="ctl" type="button" data-open>Open full size</button></div>
+      <div class="breakdown">
+        <div class="k">Need</div>
+        <div>
+          <p class="need"><span class="node" aria-hidden="true"></span>Checking several job portals by hand every day, with the same filters each time.</p>
+          <ul class="parts">
+            <li><span class="ring"></span><b>Collect</b><span>New listings from every portal land in one list.</span></li>
+            <li><span class="ring"></span><b>Filter</b><span>One set of shared rules works across all of them.</span></li>
+            <li><span class="ring"></span><b>Research</b><span>The Gemini API checks the company, salary against the market, the real stack and red flags.</span></li>
+            <li><span class="ring"></span><b>Notify</b><span>I hear about the matches, not the noise.</span></li>
+          </ul>
+        </div>
+        <div class="links"><a class="btn btn--solid small" href="#contact">Ask for a walkthrough</a></div>
+      </div>
+    </article>
+
+    <article class="case" id="p-yapper" data-path="work / yapper" style="--tintbg: rgba(100,46,253,.5); --tintc: #642efd">
+      <div class="case__head">
+        <h3><span class="node" aria-hidden="true"></span>Yapper</h3>
+        <div class="case__meta"><b>In use daily</b>Windows<br>Python, PyQt6, Groq, Vosk</div>
+      </div>
+      <p class="case__lead">Dictation for Windows. Hold a key, speak, and the text is in your clipboard.</p>
+      <div class="screen-wrap switch">
+        <span class="node node-0" aria-hidden="true"></span><span class="trace a" aria-hidden="true"></span><span class="trace b" aria-hidden="true"></span>
+        <div class="screen" style="--ar: 1200 / 630"><img src="%%IMG_yapper%%" alt="Yapper: speech to text for Windows, two push to talk channels"></div>
+      </div>
+      <div class="case__cap"><span>Two push to talk channels, one online and one offline.</span><button class="ctl" type="button" data-open>Open full size</button></div>
+      <div class="breakdown">
+        <div class="k">Need</div>
+        <div>
+          <p class="need"><span class="node" aria-hidden="true"></span>Typing long messages and prompts is slower than saying them.</p>
+          <ul class="parts">
+            <li><span class="ring"></span><b>Push to talk</b><span>Two channels on two hotkeys.</span></li>
+            <li><span class="ring"></span><b>Online</b><span>Fast transcription through Groq.</span></li>
+            <li><span class="ring"></span><b>Offline</b><span>Vosk runs locally when there is no connection.</span></li>
+            <li><span class="ring"></span><b>Output</b><span>Straight to the clipboard, ready to paste.</span></li>
+          </ul>
+        </div>
+        <div class="links"><a class="btn btn--solid small" href="https://github.com/Xcape53/Yapper">Source on GitHub</a></div>
+      </div>
+    </article>
+  </section>
+
+  <!-- WIĘCEJ -->
+  <section class="more wrap" id="more" data-path="more" aria-labelledby="more-h" data-tag="WIDEO W PODGLĄDZIE" data-note="Kategorie zamiast płaskiej listy (tak jak myślisz: kategoria, potem rzeczy). Najazd na Turf albo Inventory Generator odpala prawdziwe nagranie w podglądzie przy kursorze, otwierane tą samą linią co główne ekrany." data-note-pos="tr">
+    <div class="more__top"><h2 id="more-h">More work</h2><span class="muted mono">7 projects</span></div>
+    <div class="grp"><h3>Used by other people</h3><ul>
+      <li class="it"><a href="https://github.com/Xcape53/TurfMatchMaking" data-peek="turf"><span class="t"><span class="node"></span>Turf Matchmaking</span><span class="d">Krunker lobby finder with filters and live-data checks. Other players use it.</span><span class="s">JavaScript</span><img class="thumb" alt="" src="%%IMG_turfPoster%%"></a></li>
+      <li class="it"><a href="https://piotrjeleniewicz.com/inventoryGen/index.html" data-peek="inv"><span class="t"><span class="node"></span>Inventory Generator</span><span class="d">Minecraft style inventory builder with item search.</span><span class="s">Live demo</span><img class="thumb" alt="" src="%%IMG_invPoster%%"></a></li>
+      <li class="it"><div><span class="t">Florist website</span><span class="d">A site for a real client, built with a small team.</span><span class="s">Client</span></div></li>
+    </ul></div>
+    <div class="grp"><h3>Games</h3><ul>
+      <li class="it"><a href="https://github.com/Xcape53/LabInc" data-peek="labinc"><span class="t"><span class="node"></span>LabInc: Chemical Tycoon</span><span class="d">Java Swing incremental game with all 118 elements.</span><span class="s">Java</span><img class="thumb" alt="" src="%%IMG_labinc%%"></a></li>
+      <li class="it"><div><span class="t">BlackBox</span><span class="d">Terminal logic game in C++: find hidden atoms by reading ray paths.</span><span class="s">C++</span></div></li>
+    </ul></div>
+    <div class="grp"><h3>Systems and utilities</h3><ul>
+      <li class="it"><a href="#more" data-peek="passmgr"><span class="t"><span class="node"></span>Password Manager</span><span class="d">Team prototype of a credential vault for Windows and Linux.</span><span class="s">Team</span><img class="thumb" alt="" src="%%IMG_passmgr%%"></a></li>
+      <li class="it"><div><span class="t">Stock tool</span><span class="d">C++ terminal app that parses stock data and draws bar charts in the console.</span><span class="s">C++</span></div></li>
+    </ul></div>
+  </section>
+
+  <div class="osc-wrap wrap" aria-hidden="true"><canvas class="osc" data-osc></canvas></div>
+
+  <!-- O MNIE -->
+  <section class="about wrap" id="about" data-path="about" aria-labelledby="ab-h" data-tag="ELEKTRONIKA JAKO TŁO" data-note="Elektronika nie ma już osobnej sekcji. Nagłówek mówi priorytet: najpierw software, elektronika pod spodem. Umiejętności elektroniczne są przyciemnione i wcięte o poziom. Twoje zdjęcia (Basys 3, Vivado, CNC) pokazują się po najechaniu na słowa." data-note-pos="tr">
+    <div class="about__l">
+      <h2 id="ab-h">Software first.<span class="u">Electronics underneath.</span></h2>
+      <p class="p1">Most of what I write is Python and JavaScript, with Git and REST APIs every day. I pick up new tools quickly because I file them into what I already know, and I like tools that remove a manual step for good.</p>
+      <p class="p2">Underneath that sits the degree. I have simulated circuits in LTspice and Micro-Cap, drawn boards in KiCad and EAGLE, run logic on a <a class="ph" href="#about" data-pic="basys">Basys 3</a> in <a class="ph" href="#about" data-pic="axi">Vivado</a> and done some <a class="ph" href="#about" data-pic="cnc">CNC engraving</a>. That is why software that talks to hardware, embedded or IoT, is where I want to grow.</p>
+      <div class="strip" aria-label="Photos"><figure><img src="%%IMG_basys%%" alt="Basys 3 FPGA board on a breadboard"><figcaption>Basys 3</figcaption></figure><figure><img src="%%IMG_axi%%" alt="Vivado AXI4-Lite waveform"><figcaption>Vivado</figcaption></figure><figure><img src="%%IMG_cnc%%" alt="CNC machine engraving a logo"><figcaption>CNC</figcaption></figure></div>
+      <p class="chips-k">Every day</p>
+      <ul class="chips"><li>Python</li><li>JavaScript</li><li>REST APIs</li><li>Git</li><li>C / C++</li><li>Java</li><li>Docker</li><li>Linux</li><li>AutoHotkey</li><li>Claude Code</li><li>Codex</li></ul>
+      <p class="chips-k" style="padding-left: calc(100% / 7)">Underneath</p>
+      <ul class="chips sub"><li>LTspice</li><li>Micro-Cap</li><li>KiCad</li><li>EAGLE</li><li>Vivado</li><li>Basys 3</li></ul>
+    </div>
+    <div class="about__r">
+      <div class="panel" id="rightnow">
+        <h3>Right now</h3>
+        <ul class="check">
+          <li>Thesis: training DQN agents to play Mario and ViZDoom</li>
+          <li>SeeSky, next stage: hardware and SDR</li>
+          <li>My own tools, JobManager and Yapper first</li>
+          <li>Tutoring high school math</li>
+        </ul>
+      </div>
+      <p class="after">After hours: geography, blending music, gym and diet, AI audio separation tools, architectural visualisation in ComfyUI.</p>
+    </div>
+  </section>
+
+  <div class="osc-wrap wrap" aria-hidden="true"><canvas class="osc" data-osc></canvas></div>
+
+  <!-- KONTAKT -->
+  <section class="contact wrap" id="contact" data-path="contact" aria-labelledby="talk">
+    <p class="open">Open to a paid internship or a first part-time role</p>
+    <h2 class="talk" id="talk">Let's <span class="o" data-t="talk">talk</span></h2>
+    <div><div class="magzone" id="magzone"><a class="mag" id="mag" href="mailto:jeleniewicz@op.pl"><span>Email me</span></a></div></div>
+    <div class="mailrow" id="cv"><span class="mail" id="mail">jeleniewicz@op.pl</span><button class="ctl" type="button" id="copy">Copy</button></div>
+    <p class="note">Software development, system integration or automation. Remote, or hybrid in the Tricity.</p>
+    <footer class="foot"><span>© 2026 Piotr Jeleniewicz, Gdynia</span><nav aria-label="Profiles"><a href="https://github.com/Xcape53">GitHub</a><a href="https://www.linkedin.com/in/piotr-jeleniewicz/">LinkedIn</a></nav><span class="r">CV on request</span></footer>
+  </section>

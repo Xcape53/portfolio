@@ -1,0 +1,724 @@
+<title>Xcape Drzewo</title>
+<meta name="claude:viewport-fit-sides" content="cover">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Poppins:wght@600;800&family=Spline+Sans:wght@300..700&family=Spline+Sans+Mono:wght@400;500&display=swap">
+<style>
+/* Koncept "Drzewo": strona rośnie z jednego węzła jak Twój symbol. Każda sekcja to gałąź, ścieżka w rogu mówi, gdzie jesteś.
+   Kolory i fonty z obecnej strony: navy z banner_bg, #2c7ffe -> #642efd, Spline Sans + Poppins. */
+:root {
+  --navy: #020816;          /* tło z banner_bg.jpg */
+  --navy-glow: #0a2a78;     /* poświata w lewym górnym rogu banera */
+  --primary: #2c7ffe;       /* --colorPrimary */
+  --secondary: #642efd;     /* --colorSecondary */
+  --panel: #0e1216;         /* --colorDarkAccent */
+  --black: #09080c;         /* --colorBlack */
+  --text: #b1b1b1;          /* --colorBodyText */
+  --white: #ffffff;
+  --line: rgba(255,255,255,.1);
+  --grad: linear-gradient(135deg, var(--primary), var(--secondary));
+  --f-main: "Spline Sans", system-ui, sans-serif;
+  --f-poster: "Poppins", "Spline Sans", system-ui, sans-serif;
+  --f-mono: "Spline Sans Mono", ui-monospace, Menlo, monospace;
+  --t-mega: clamp(2.6rem, .8rem + 6.2vw, 7.6rem);
+  --t-xl: clamp(2.2rem, 1.2rem + 4.2vw, 5rem);
+  --t-l: clamp(1.5rem, 1.15rem + 1.6vw, 2.5rem);
+  --t-m: clamp(1.1rem, 1rem + .45vw, 1.4rem);
+  --gut: max(16px, 2.4vw);
+  --ease: cubic-bezier(.16, 1, .3, 1);
+  color-scheme: dark;
+}
+* { box-sizing: border-box; }
+html, body { background: var(--navy); color: var(--white); }
+body { margin: 0; font: 400 clamp(1rem, .96rem + .2vw, 1.1rem)/1.6 var(--f-main); overflow-x: clip; }
+::selection { background: var(--primary); color: var(--white); }
+a { color: inherit; }
+:focus-visible { outline: 2px solid var(--primary); outline-offset: 3px; }
+.wrap { padding-left: max(var(--gut), env(safe-area-inset-left, 0px)); padding-right: max(var(--gut), env(safe-area-inset-right, 0px)); }
+.mono { font-family: var(--f-mono); font-size: .75rem; letter-spacing: .02em; }
+.kicker { color: var(--primary); font-weight: 600; font-size: clamp(1rem, .9rem + .4vw, 1.25rem); margin: 0 0 .6rem; }
+.kicker--caps { font-size: .78rem; letter-spacing: .32em; text-transform: uppercase; }
+.grad-text { background: var(--grad); -webkit-background-clip: text; background-clip: text; color: transparent; }
+.skip { position: absolute; left: -999px; top: 8px; z-index: 100; background: var(--primary); color: #fff; padding: 8px 12px; }
+.skip:focus { left: 12px; }
+
+/* ---------- ramka ---------- */
+.frame { position: fixed; inset: 0; pointer-events: none; z-index: 40; }
+.frame > * { position: absolute; pointer-events: auto; }
+.f-tl { top: calc(16px + env(safe-area-inset-top, 0px)); left: max(var(--gut), env(safe-area-inset-left, 0px)); display: flex; gap: 10px; align-items: center; text-decoration: none; font-weight: 600; transition: translate .6s var(--ease); }
+.f-tl svg { width: 30px; height: 30px; }
+.f-tr { top: calc(20px + env(safe-area-inset-top, 0px)); right: max(var(--gut), env(safe-area-inset-right, 0px)); display: flex; gap: clamp(14px, 2.4vw, 36px); align-items: center; transition: translate .6s var(--ease); }
+html.frame-away .f-tl, html.frame-away .f-tr { translate: 0 -260%; }
+.nav a { text-decoration: none; font-weight: 600; font-size: .82rem; letter-spacing: .08em; text-transform: uppercase; position: relative; padding-block: 4px; }
+.nav a::after { content: ""; position: absolute; left: 0; right: 0; bottom: -2px; height: 2px; background: var(--grad); transform: scaleX(0); transform-origin: 0 50%; transition: transform .45s var(--ease); }
+.nav a:hover::after, .nav a:focus-visible::after, .nav a[aria-current]::after { transform: scaleX(1); }
+.nav a[aria-current] { color: var(--primary); }
+.lang { border: 1px solid var(--line); border-radius: 999px; padding: 6px 12px !important; font-size: .72rem !important; }
+.lang b { color: var(--primary); }
+.f-bl { bottom: calc(16px + env(safe-area-inset-bottom, 0px)); left: max(var(--gut), env(safe-area-inset-left, 0px)); color: var(--text); }
+.f-br { bottom: calc(16px + env(safe-area-inset-bottom, 0px)); right: max(var(--gut), env(safe-area-inset-right, 0px)); text-align: right; }
+.crumb { color: var(--text); }
+.crumb b { color: var(--white); font-weight: 500; }
+.crumb i { font-style: normal; color: var(--primary); }
+
+/* ---------- loader: symbol rośnie węzeł po węźle ---------- */
+.loader { position: fixed; inset: 0; z-index: 60; background: var(--navy); display: grid; place-items: center; transition: opacity .7s var(--ease); }
+.loader.out { opacity: 0; pointer-events: none; }
+.loader canvas { width: 160px; height: 160px; }
+.loader .lc { position: absolute; bottom: calc(16px + env(safe-area-inset-bottom, 0px)); right: max(var(--gut), env(safe-area-inset-right, 0px)); color: var(--text); }
+.loader .lc b { color: var(--white); font-weight: 500; }
+
+/* ---------- hero ---------- */
+.hero { position: relative; height: 190svh; }
+.hero__stage { position: sticky; top: 0; height: 100svh; overflow: clip;
+  background: radial-gradient(120% 90% at 0% 0%, var(--navy-glow) 0%, rgba(10,42,120,.35) 32%, rgba(2,8,22,0) 62%), var(--navy); }
+.field, .glyph { position: absolute; inset: 0; width: 100%; height: 100%; display: block; }
+.glyph { filter: drop-shadow(0 0 14px rgba(44,127,254,.55)) drop-shadow(0 0 34px rgba(100,46,253,.35)); }
+.hero__copy { position: absolute; inset: 0; display: grid; align-content: center; justify-items: end; padding-top: 80px; pointer-events: none; }
+.hero__text { width: min(46rem, 50%); pointer-events: auto; }
+.hero h1 { margin: 0 0 1.2rem; font: 700 var(--t-mega)/.9 var(--f-main); letter-spacing: -.04em; text-transform: uppercase; text-wrap: balance; }
+.hero h1 .l2 { display: block; }
+.hero .role { font: 500 var(--t-m)/1.35 var(--f-main); margin: 0 0 1rem; }
+.hero .lead { color: var(--text); max-width: 34rem; margin: 0 0 2rem; }
+.cta { display: flex; gap: 14px; flex-wrap: wrap; }
+.btn { font: 700 .85rem/1 var(--f-main); letter-spacing: .04em; text-transform: uppercase; display: inline-flex; gap: 10px; align-items: center; padding: 20px 30px;
+  text-decoration: none; border: 0; cursor: pointer; position: relative; overflow: hidden; isolation: isolate; color: var(--white); background: var(--black); }
+.btn::before { content: ""; position: absolute; inset: 0; background: var(--grad); z-index: -1; transform: translateY(101%); transition: transform .5s var(--ease); }
+.btn:hover::before, .btn:focus-visible::before { transform: translateY(0); }
+.btn--solid { background: var(--primary); color: var(--black); }
+.btn--solid:hover, .btn--solid:focus-visible { color: var(--white); }
+.btn:active { scale: .97; }
+.btn svg { width: 16px; height: 16px; }
+
+/* ---------- jak myślę: drzewo ---------- */
+.think { position: relative; display: grid; grid-template-columns: minmax(0, 5fr) minmax(0, 7fr); gap: var(--gut); }
+.think__steps { position: relative; z-index: 2; }
+.tstep { min-height: 90svh; display: grid; align-content: center; max-width: 32rem; padding-block: 10vh; }
+.tstep h2 { font: 700 var(--t-xl)/.95 var(--f-main); letter-spacing: -.035em; margin: 0 0 1.2rem; text-wrap: balance; }
+.tstep p { color: var(--text); margin: 0 0 1rem; }
+.flow { list-style: none; margin: 1.4rem 0 0; padding: 0; display: grid; gap: 8px; }
+.flow li { display: grid; grid-template-columns: 22px 1fr; gap: 12px; align-items: center; color: var(--text); transition: color .4s var(--ease); }
+.flow li::before { content: ""; width: 10px; height: 10px; border-radius: 50%; border: 2px solid var(--text); justify-self: center; transition: background .4s var(--ease), border-color .4s var(--ease); }
+.flow li.on { color: var(--white); }
+.flow li.on::before { background: var(--primary); border-color: var(--primary); box-shadow: 0 0 12px var(--primary); }
+.think__stage { position: sticky; top: 0; height: 100svh; display: grid; align-items: center; }
+.tree { width: 100%; height: auto; max-height: 82svh; overflow: visible; }
+.tree .edge { fill: none; stroke: url(#tg); stroke-width: 2.4; stroke-linecap: round; }
+.tree .node circle { fill: var(--navy); stroke: url(#tg); stroke-width: 2.4; }
+.tree .node.root circle { fill: url(#tg); }
+.tree text { fill: var(--white); font: 500 13px var(--f-main); }
+.tree text.sub { fill: var(--text); font: 400 11.5px var(--f-mono); }
+.tree .node, .tree text { transition: opacity .5s var(--ease); }
+
+/* ---------- projekty: trzy główne ---------- */
+.projects { padding-block: 18vh 6vh; overflow-x: clip; }
+.sec-head { display: grid; grid-template-columns: minmax(0, 6fr) minmax(0, 6fr); gap: var(--gut); align-items: end; margin-bottom: 10vh; }
+.sec-head h2 { font: 700 var(--t-xl)/.92 var(--f-main); letter-spacing: -.035em; margin: 0; }
+.sec-head p { color: var(--text); margin: 0; max-width: 34rem; }
+.proj { position: relative; display: grid; grid-template-columns: minmax(0, 5fr) minmax(0, 7fr); gap: calc(var(--gut) * 1.6); align-items: center; padding-block: 9vh; }
+.proj--rev .proj__text { order: 2; }
+.proj__text { position: relative; z-index: 2; }
+.proj h3 { font: 700 var(--t-l)/1 var(--f-main); letter-spacing: -.02em; margin: 0 0 1rem; display: flex; gap: 12px; align-items: center; flex-wrap: wrap; }
+.badge { font: 500 .78rem/1 var(--f-main); border: 1px solid var(--secondary); border-radius: 999px; padding: 6px 12px; letter-spacing: 0; }
+.proj p { color: var(--text); margin: 0 0 1.2rem; max-width: 34rem; }
+.mods { display: flex; flex-wrap: wrap; align-items: center; gap: 0; margin: 0 0 1.2rem; padding: 0; list-style: none; }
+.mods li { font: 500 .8rem/1 var(--f-mono); padding: 9px 12px; border: 1px solid rgba(44,127,254,.55); background: rgba(44,127,254,.08); }
+.mods li + li { margin-left: 22px; position: relative; }
+.mods li + li::before { content: ""; position: absolute; left: -23px; top: 50%; width: 22px; height: 2px; background: var(--grad); }
+.tags { display: flex; flex-wrap: wrap; gap: 8px; margin: 0 0 1.2rem; padding: 0; list-style: none; }
+.tags li { border: 1px solid var(--primary); border-radius: 999px; padding: 6px 14px; font-size: .85rem; }
+.more { color: var(--primary); font-weight: 600; text-decoration: none; }
+.more:hover { text-decoration: underline; text-underline-offset: 4px; }
+.proj__media { position: relative; z-index: 1; }
+.proj__media::before { content: ""; position: absolute; inset: 14% -6%; border-radius: 48px; background: rgba(var(--tint), .5); filter: blur(46px); z-index: -1; }
+.screen { position: relative; aspect-ratio: 16 / 10; max-width: 100%; overflow: hidden; background: var(--panel); border-radius: 10px; outline: 1px solid var(--line); will-change: transform; }
+.screen img { width: 100%; height: 100%; object-fit: cover; object-position: top; display: block; }
+.screen .bar { position: absolute; left: 0; right: 0; bottom: 0; padding: 10px 14px; display: flex; gap: 12px; align-items: center; background: linear-gradient(transparent, rgba(0,0,0,.75)); }
+.screen .play { width: 30px; height: 30px; border-radius: 50%; background: var(--white); display: grid; place-items: center; border: 0; cursor: pointer; flex: none; }
+.screen .play svg { width: 12px; height: 12px; fill: var(--black); }
+.screen .prog { flex: 1; height: 3px; background: rgba(255,255,255,.25); position: relative; }
+.screen .prog span { position: absolute; inset: 0 auto 0 0; width: 0; background: var(--grad); }
+.screen .tc { color: #e8ecf3; }
+
+/* ---------- więcej prac ---------- */
+.index-wrap { padding-block: 10vh 14vh; }
+.index-wrap h2 { font: 700 var(--t-l)/1 var(--f-main); letter-spacing: -.02em; margin: 0 0 4vh; }
+.index { list-style: none; margin: 0; padding: 0; border-top: 1px solid var(--line); }
+.row { border-bottom: 1px solid var(--line); }
+.row a { display: grid; grid-template-columns: minmax(0, 4fr) minmax(0, 6fr) minmax(0, 2fr); gap: var(--gut); align-items: baseline; padding: 20px 0; text-decoration: none; }
+.row .t { font: 600 var(--t-m)/1.1 var(--f-main); transition: transform .5s var(--ease), color .3s; display: inline-block; }
+.row .d { color: var(--text); }
+.row .s { text-align: right; color: var(--text); }
+.row a:hover .t, .row a:focus-visible .t { transform: translateX(.6em); color: var(--primary); }
+.row .thumb { display: none; }
+.preview { position: fixed; left: 0; top: 0; width: min(400px, 30vw); aspect-ratio: 16 / 10; z-index: 30; pointer-events: none; opacity: 0; transition: opacity .3s var(--ease); background: var(--panel); border-radius: 8px; overflow: hidden; outline: 1px solid var(--line); }
+.preview.on { opacity: 1; }
+.preview img { width: 100%; height: 100%; object-fit: cover; object-position: top; display: block; clip-path: inset(0 0 100% 0); transition: clip-path .7s var(--ease); }
+.preview.on img { clip-path: inset(0 0 0 0); }
+.preview .ph { position: absolute; inset: 0; display: grid; place-items: center; font: 700 1.6rem/1 var(--f-main); background: var(--grad); }
+
+/* ---------- elektronika ---------- */
+.hw { padding-block: 6vh 14vh; position: relative; }
+.osc { width: 100%; height: 110px; display: block; margin-bottom: 8vh; }
+.hw__grid { display: grid; grid-template-columns: minmax(0, 5fr) minmax(0, 7fr); gap: calc(var(--gut) * 1.6); align-items: start; }
+.hw h2 { font: 700 var(--t-xl)/.95 var(--f-main); letter-spacing: -.035em; margin: 0 0 1.2rem; }
+.hw p { color: var(--text); margin: 0 0 1rem; max-width: 34rem; }
+.hw p strong { color: var(--white); font-weight: 500; }
+.hw__cols { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: var(--gut); }
+.hw__cols figure { margin: 0; }
+.hw__cols img { width: 100%; aspect-ratio: 4 / 3; object-fit: cover; border-radius: 8px; display: block; margin-bottom: 12px; outline: 1px solid var(--line); }
+.hw__cols h3 { font: 600 1.05rem/1.2 var(--f-main); margin: 0 0 6px; }
+.hw__cols figcaption { color: var(--text); font-size: .9rem; }
+
+/* ---------- o mnie ---------- */
+.about { padding-block: 12vh; display: grid; grid-template-columns: minmax(0, 7fr) minmax(0, 5fr); gap: calc(var(--gut) * 1.6); }
+.about h2 { font: 700 var(--t-xl)/.95 var(--f-main); letter-spacing: -.035em; margin: 0 0 1.4rem; }
+.about .big { font: 500 var(--t-m)/1.45 var(--f-main); margin: 0 0 1.4rem; text-wrap: pretty; }
+.about p { color: var(--text); margin: 0 0 1rem; }
+.box { background: var(--panel); padding: clamp(20px, 3vw, 36px); border-radius: 4px; }
+.box h3 { font: 600 1.05rem/1.2 var(--f-main); margin: 0 0 1rem; }
+.check { list-style: none; margin: 0 0 1.6rem; padding: 0; display: grid; gap: 12px; }
+.check li { display: grid; grid-template-columns: 22px 1fr; gap: 10px; color: var(--text); }
+.check li::before { content: ""; width: 12px; height: 7px; border-left: 2px solid var(--primary); border-bottom: 2px solid var(--primary); transform: rotate(-45deg); margin-top: 7px; }
+.check b { color: var(--white); font-weight: 500; }
+.chips { display: flex; flex-wrap: wrap; gap: 8px; padding: 0; margin: 0; list-style: none; }
+.chips li { border: 1px solid var(--line); background: rgba(255,255,255,.03); border-radius: 999px; padding: 6px 14px; font-size: .85rem; }
+.chips li.ai { border-color: var(--secondary); }
+
+/* ---------- kontakt ---------- */
+.contact { padding-block: 10vh 16vh; position: relative; text-align: center; }
+.talk { font: 800 clamp(3.2rem, 1rem + 11vw, 12rem)/.9 var(--f-poster); letter-spacing: -.02em; margin: 0 0 6vh; }
+.talk .o { color: transparent; -webkit-text-stroke: 2px var(--white); transition: color .5s var(--ease), -webkit-text-stroke-color .5s var(--ease); }
+.talk:hover .o { color: var(--primary); -webkit-text-stroke-color: var(--primary); }
+.magzone { display: inline-block; padding: 60px; margin: -60px; }
+.mag { width: 170px; height: 170px; border-radius: 50%; background: var(--grad); display: grid; place-items: center; text-decoration: none; font: 700 .9rem/1.2 var(--f-main); letter-spacing: .06em; text-transform: uppercase; color: var(--white); will-change: transform; }
+.mail { margin-top: 5vh; font: 500 var(--t-m)/1.2 var(--f-main); user-select: all; }
+.foot { display: flex; justify-content: space-between; flex-wrap: wrap; gap: 12px; margin-top: 14vh; padding-top: 16px; border-top: 1px solid var(--line); color: var(--text); text-align: left; }
+.foot a { text-decoration: none; }
+.foot a:hover { color: var(--white); }
+
+/* ---------- notatki ---------- */
+:where([data-note]) { position: relative; }
+html.notes [data-note]::after { content: attr(data-tag) "  " attr(data-note); position: absolute; z-index: 35; left: 12px; top: 12px; max-width: min(360px, calc(100% - 24px));
+  font: 500 11.5px/1.45 var(--f-main); color: #fff; background: #3a1fb0; border: 1px solid #8a6bff; padding: 8px 10px; white-space: pre-line; pointer-events: none; text-align: left; box-shadow: 0 8px 30px rgba(0,0,0,.45); }
+html.notes [data-note] { outline: 1px dashed rgba(138,107,255,.6); outline-offset: -1px; }
+html.notes [data-note-pos="tr"]::after { left: auto; right: 12px; }
+html.notes [data-note-pos="bl"]::after { top: auto; bottom: 12px; }
+html.notes .hero__stage[data-note]::after { top: 76px; }
+.notes-toggle { position: fixed; left: 50%; transform: translateX(-50%); bottom: calc(14px + env(safe-area-inset-bottom, 0px)); z-index: 50;
+  font: 600 12px/1 var(--f-main); background: #3a1fb0; color: #fff; border: 1px solid #8a6bff; padding: 10px 14px; border-radius: 999px; cursor: pointer; }
+.notes-toggle[aria-pressed="false"] { background: var(--panel); border-color: var(--line); }
+
+/* ---------- telefon ---------- */
+@media (max-width: 900px) {
+  .f-tl span, .f-bl, .nav .hide-s { display: none; }
+  .hero { height: 160svh; }
+  .hero__copy { justify-items: start; align-content: end; padding-bottom: calc(70px + env(safe-area-inset-bottom, 0px)); }
+  .hero__text { width: 100%; }
+  .think { grid-template-columns: minmax(0, 1fr); }
+  .think__stage { grid-row: 1; height: 56svh; z-index: 3; background: var(--navy); padding-top: 64px; }
+  .think__steps { grid-row: 2; z-index: 1; }
+  .tstep { min-height: 70svh; padding-block: 5vh; }
+  .sec-head, .proj, .hw__grid, .about { grid-template-columns: minmax(0, 1fr); }
+  .proj--rev .proj__text { order: 0; }
+  .row a { grid-template-columns: minmax(0, 1fr); gap: 4px; }
+  .row .s { text-align: left; }
+  .hw__cols { grid-template-columns: minmax(0, 1fr); }
+  .mods li { margin-bottom: 8px; }
+}
+@media (hover: none) {
+  .row .thumb { display: block; width: 100%; max-width: 100%; aspect-ratio: 16 / 9; object-fit: cover; object-position: top; margin-top: 12px; border-radius: 6px; }
+  .preview { display: none; }
+}
+@media (prefers-reduced-motion: reduce) {
+  .loader { display: none; }
+  .hero { height: auto; }
+  .hero__stage { position: relative; }
+  * { transition-duration: .01ms !important; }
+}
+</style>
+
+<a class="skip" href="#main">Skip to content</a>
+
+<div class="loader" id="loader" aria-hidden="true">
+  <canvas id="grow"></canvas>
+  <div class="lc mono">Building structure <b id="lnodes">0 / 43</b></div>
+</div>
+
+<header class="frame">
+  <a class="f-tl" href="#top" aria-label="Piotr Jeleniewicz, home"><svg id="mini" viewBox="-400 -400 800 800" aria-hidden="true"></svg><span>Piotr Jeleniewicz</span></a>
+  <nav class="f-tr nav" aria-label="Main">
+    <a href="#projects">Projects</a>
+    <a href="#about" class="hide-s">About</a>
+    <a href="#cv">CV</a>
+    <a href="#contact">Contact</a>
+    <a href="#pl" class="lang"><b>EN</b> / PL</a>
+  </nav>
+  <div class="f-bl mono">Gdynia, PL · <span id="clock">--:--</span></div>
+  <div class="f-br mono crumb" aria-hidden="true">xcape <i>/</i> <b id="crumb">home</b></div>
+</header>
+
+<main id="main">
+  <!-- HERO -->
+  <section class="hero" id="top" data-path="home" aria-label="Intro">
+    <div class="hero__stage" data-tag="3D + PARALAKSA" data-note="Twój symbol jako model 3D: te same 43 węzły i dwie gałęzie co w animacji D3 na obecnej stronie, tylko w Three.js, z neonową poświatą #2c7ffe na #642efd (jak Twój neon Lq). Na starcie rośnie węzeł po węźle, potem obraca się za kursorem, a przy scrollu odjeżdża i staje się logo w lewym górnym rogu.&#10;W tle 3 warstwy węzłów jadą z różną prędkością (paralaksa). Tło to Twój banner_bg: granat z poświatą w lewym górnym rogu.">
+      <canvas class="field" id="field" aria-hidden="true"></canvas>
+      <canvas class="glyph" id="glyph" aria-hidden="true"></canvas>
+      <div class="hero__copy wrap">
+        <div class="hero__text" id="htext">
+          <p class="kicker">Hello, I am</p>
+          <h1><span class="l1">Piotr</span> <span class="l2">Jeleniewicz</span></h1>
+          <p class="role"><span class="grad-text">Software development</span> &amp; system integration</p>
+          <p class="lead">I build applications and automation tools that connect APIs, data and AI services. Final semester of Electronics and Telecommunications at Gdańsk University of Technology, so software that talks to hardware is familiar ground.</p>
+          <div class="cta">
+            <a class="btn btn--solid" href="#cv">Request my CV <svg viewBox="0 0 16 16" aria-hidden="true"><path d="M8 1v9m0 0L4.5 6.5M8 10l3.5-3.5M2 13h12" stroke="currentColor" stroke-width="1.8" fill="none"/></svg></a>
+            <a class="btn" href="#projects">My projects</a>
+          </div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- JAK MYŚLĘ -->
+  <section class="think wrap" id="think" data-path="how-i-think" aria-label="How I think">
+    <div class="think__steps">
+      <article class="tstep" data-step="0">
+        <p class="kicker kicker--caps">How I think</p>
+        <h2>Every problem starts as one node</h2>
+        <p>I break problems down like a tree: category, subcategory and the connections between them. I learn the same way, sorting new things into clear branches instead of letting them pile up.</p>
+        <p>Automation and chaining tools into systems are not a separate skill. They are what that habit looks like in practice.</p>
+      </article>
+      <article class="tstep" data-step="1">
+        <p class="kicker kicker--caps">Example: JobManager</p>
+        <h2>Split it into modules</h2>
+        <p>"I do not want to check six job portals every day" becomes four modules with clear responsibilities: collect, filter, research and notify.</p>
+      </article>
+      <article class="tstep" data-step="2">
+        <p class="kicker kicker--caps">Then build and connect</p>
+        <h2>Interfaces first, then the code</h2>
+        <p>Each module gets its data and interface defined before implementation. AI tools speed up the implementation; I set the requirements, design the boundaries and check how the whole system behaves.</p>
+        <ol class="flow" id="flow">
+          <li>Requirements</li><li>Modules</li><li>Implementation</li><li>Integration</li><li>Validation</li>
+        </ol>
+      </article>
+    </div>
+    <div class="think__stage" aria-hidden="true">
+      <div data-tag="SCROLL" data-note="Drzewo rysuje się razem ze scrollem: najpierw korzeń (problem), potem 4 moduły JobManagera, potem liście. Prawdziwy przykład z Twojego repo, nie ogólnik. Ten sam gradient co w symbolu." data-note-pos="tr">
+        <svg class="tree" id="tree" viewBox="0 0 640 560"></svg>
+      </div>
+    </div>
+  </section>
+
+  <!-- PROJEKTY -->
+  <section class="projects wrap" id="projects" data-path="projects" aria-labelledby="pj-h">
+    <div class="sec-head">
+      <div><p class="kicker kicker--caps">My projects</p><h2 id="pj-h">Things I use every day</h2></div>
+      <p>Three tools that solve my own problems and that other people use too. Each one has a short screen recording and its own case page.</p>
+    </div>
+
+    <article class="proj" id="p-jobmanager" data-path="projects / jobmanager" style="--tint: 58,245,120">
+      <div class="proj__text">
+        <p class="kicker">Data and AI tool</p>
+        <h3>JobManager <span class="badge">In use and evolving</span></h3>
+        <p>Collects listings from several job portals into one list, filters them with shared rules and researches promising offers with the Gemini API: company, salary against the market, the real stack and red flags. Notifications arrive when something matches.</p>
+        <ul class="mods" aria-label="Modules"><li>collect</li><li>filter</li><li>research</li><li>notify</li></ul>
+        <ul class="tags"><li>Web scraping</li><li>Gemini API</li><li>Node.js</li></ul>
+        <a class="more" href="#p-jobmanager">Case study</a>
+      </div>
+      <div class="proj__media" data-tag="WIDEO" data-note="Tu leci nagranie 10-15 s z JobManagera (lista ofert > filtr > research Gemini), wyciszone, w pętli, startuje gdy wjedzie na ekran, z przyciskiem pauzy. Kadr jedzie wolniej niż tekst (paralaksa).&#10;Zostaje Twoja poświata za panelem w kolorze projektu (tu zielona, jak teraz)." data-note-pos="tr">
+        <div class="screen" data-par="0.12"><img src="%%IMG_jobm%%" alt="JobManager offer research view"><div class="bar"><button class="play" type="button" aria-label="Pause video"><svg viewBox="0 0 12 12"><rect x="2" y="1" width="3" height="10"/><rect x="7" y="1" width="3" height="10"/></svg></button><div class="prog"><span></span></div><span class="tc mono">0:00 / 0:12</span></div></div>
+      </div>
+    </article>
+
+    <article class="proj proj--rev" id="p-seesky" data-path="projects / seesky" style="--tint: 214,40,110">
+      <div class="proj__text">
+        <p class="kicker">Lead software developer · SimLE</p>
+        <h3>SeeSky radio telescope</h3>
+        <p>Software for the 3 m radio telescope of the SimLE research club. I lead the backend, the web interface for tracking and the interactive sky map. Hardware and SDR integration come next.</p>
+        <ul class="mods" aria-label="Modules"><li>catalog</li><li>tracking</li><li>sky map</li><li>SDR</li></ul>
+        <ul class="tags"><li>Python</li><li>Flask</li><li>Astropy</li><li>JavaScript</li></ul>
+        <a class="more" href="#p-seesky">Case study</a>
+      </div>
+      <div class="proj__media" data-tag="WIDEO" data-note="Nagranie panelu SeeSky: tracking, katalog, mapa nieba. Poświata w malinowym kolorze samego SeeSky.">
+        <div class="screen" data-par="0.12"><img src="%%IMG_seesky%%" alt="SeeSky tracking dashboard"><div class="bar"><button class="play" type="button" aria-label="Pause video"><svg viewBox="0 0 12 12"><rect x="2" y="1" width="3" height="10"/><rect x="7" y="1" width="3" height="10"/></svg></button><div class="prog"><span></span></div><span class="tc mono">0:00 / 0:10</span></div></div>
+      </div>
+    </article>
+
+    <article class="proj" id="p-yapper" data-path="projects / yapper" style="--tint: 44,127,254">
+      <div class="proj__text">
+        <p class="kicker">Desktop app · daily use</p>
+        <h3>Yapper</h3>
+        <p>Windows dictation with two push-to-talk channels, online and offline transcription engines and automatic clipboard output. I use it every day, including to write this.</p>
+        <ul class="mods" aria-label="Modules"><li>hotkey</li><li>record</li><li>transcribe</li><li>clipboard</li></ul>
+        <ul class="tags"><li>Python</li><li>PyQt6</li><li>Groq API</li><li>Vosk</li></ul>
+        <a class="more" href="#p-yapper">Case study</a>
+      </div>
+      <div class="proj__media">
+        <div class="screen" data-par="0.12"><img src="%%IMG_yapper%%" alt="Yapper: speech to text for Windows"><div class="bar"><button class="play" type="button" aria-label="Pause video"><svg viewBox="0 0 12 12"><rect x="2" y="1" width="3" height="10"/><rect x="7" y="1" width="3" height="10"/></svg></button><div class="prog"><span></span></div><span class="tc mono">0:00 / 0:08</span></div></div>
+      </div>
+    </article>
+  </section>
+
+  <!-- WIĘCEJ -->
+  <section class="index-wrap wrap" id="more" data-path="projects / more" aria-labelledby="more-h">
+    <h2 id="more-h">More of my work</h2>
+    <ol class="index" data-tag="HOVER" data-note="Lista zamiast kart: najazd pokazuje podgląd przy kursorze (docelowo krótkie wideo), na telefonie miniatury w wierszach." data-note-pos="tr">
+      <li class="row"><a href="#labinc" data-img="labinc"><span class="t">LabInc: Chemical Tycoon</span><span class="d">Java incremental game: 118 elements, economy simulation, Swing UI</span><span class="s mono">Java</span><img class="thumb" src="%%IMG_labinc%%" alt="LabInc game screen"></a></li>
+      <li class="row"><a href="#turf" data-img="turf"><span class="t">Turf Matchmaking</span><span class="d">Krunker lobby finder with filters, live-data validation and retries</span><span class="s mono">JavaScript</span></a></li>
+      <li class="row"><a href="#passmgr" data-img="passmgr"><span class="t">Password Manager</span><span class="d">Credential vault for Windows and Linux, team project</span><span class="s mono">Desktop</span><img class="thumb" src="%%IMG_passmgr%%" alt="Password manager vault"></a></li>
+      <li class="row"><a href="#inventory" data-img="inventory"><span class="t">Inventory Generator</span><span class="d">Minecraft-style inventory builder with item search</span><span class="s mono">Live demo</span><img class="thumb" src="%%IMG_inventory%%" alt="Inventory generator"></a></li>
+      <li class="row"><a href="#florist" data-img="florist"><span class="t">Florist website</span><span class="d">A real client site for a local florist, built by a small team</span><span class="s mono">Client</span></a></li>
+      <li class="row"><a href="#blackbox" data-img="blackbox"><span class="t">BlackBox</span><span class="d">C++ terminal logic game with ray simulation</span><span class="s mono">C++</span></a></li>
+    </ol>
+  </section>
+
+  <!-- ELEKTRONIKA -->
+  <section class="hw wrap" id="hardware" data-path="below-the-api" aria-labelledby="hw-h">
+    <div data-tag="TWÓJ PODPIS" data-note="Separator oscyloskopu zostaje: sinus, a pod kursorem szereg Fouriera fali prostokątnej. Jedyne miejsce z motywem elektroniki poza tą jedną sekcją." data-note-pos="tr"><canvas class="osc" id="osc" aria-hidden="true"></canvas></div>
+    <div class="hw__grid">
+      <div>
+        <p class="kicker kicker--caps">Below the API</p>
+        <h2 id="hw-h">A developer who also knows electronics</h2>
+        <p>I write software, but I studied Electronics and Telecommunications. I read schematics, simulate circuits before they are built and understand what happens under the API.</p>
+        <p>That is why <strong>embedded systems, IoT and software that talks to devices</strong> are the direction I want to grow in. SeeSky is the first step: the next stage connects my software to the telescope's mount and an SDR receiver.</p>
+      </div>
+      <div class="hw__cols" data-tag="TREŚĆ" data-note="Elektronika skrócona do jednej sekcji z trzema Twoimi zdjęciami. Bez osobnych modeli 3D i bez rozdziałów o FPGA." data-note-pos="tr">
+        <figure><img src="%%IMG_axi%%" alt="Vivado AXI4-Lite waveform simulation"><h3>Simulate</h3><figcaption>LTspice, Micro-Cap and Vivado simulations before anything is built.</figcaption></figure>
+        <figure><img src="%%IMG_basys%%" alt="Basys 3 FPGA board on a breadboard"><h3>Prototype</h3><figcaption>Basys 3 FPGA, lab measurements, KiCad and EAGLE for boards.</figcaption></figure>
+        <figure><img src="%%IMG_cnc%%" alt="CNC machine engraving a logo"><h3>Make it real</h3><figcaption>From lab bench to a working device, then software on top.</figcaption></figure>
+      </div>
+    </div>
+  </section>
+
+  <!-- O MNIE -->
+  <section class="about wrap" id="about" data-path="about" aria-labelledby="ab-h">
+    <div>
+      <p class="kicker kicker--caps">About me</p>
+      <h2 id="ab-h">Piotr, also known as Xcape</h2>
+      <p class="big">Final-semester Electronics and Telecommunications student at Gdańsk University of Technology, Computer Electronic Systems. I build applications and automation tools around API integration, data flows and how modules work together.</p>
+      <p>Looking for a paid internship or a first part-time role in software development, system integration or automation. Remote, or hybrid in Tricity.</p>
+      <p>After hours: geography, blending music, the gym and diet, AI audio-separation tools and first steps in architectural visualisation with ComfyUI.</p>
+      <ul class="chips" aria-label="Tools">
+        <li>Python</li><li>JavaScript</li><li>REST APIs</li><li>C / C++</li><li>Java</li><li>Git</li><li>Linux</li><li>Docker</li><li>AutoHotkey</li><li class="ai">Claude Code</li><li class="ai">Codex</li><li>LTspice</li><li>KiCad</li><li>Vivado</li>
+      </ul>
+    </div>
+    <div class="box" data-tag="TREŚĆ" data-note="Twoja lista 'co mnie teraz zajmuje' zostaje, w Twoim ciemnym panelu i z ptaszkami.">
+      <h3>Right now</h3>
+      <ul class="check">
+        <li><span><b>Engineering thesis:</b> training DQN agents in Mario and ViZDoom, recording metrics and analysing experiments.</span></li>
+        <li><span><b>SimLE / SeeSky:</b> leading the radio telescope software, from backend to sky map.</span></li>
+        <li><span><b>Own tools:</b> JobManager, Yapper and Turf Matchmaking, improved through daily use.</span></li>
+        <li><span><b>Tutoring:</b> high-school mathematics with diagrams and analogies fitted to the student.</span></li>
+      </ul>
+      <h3>How I build with AI</h3>
+      <p>Claude Code and Codex for implementation and iterations. I define the problem, split it into modules, connect the interfaces and verify the behaviour myself.</p>
+    </div>
+  </section>
+
+  <!-- KONTAKT -->
+  <section class="contact wrap" id="contact" data-path="contact" aria-labelledby="talk">
+    <p class="kicker kicker--caps">Have a project in mind?</p>
+    <h2 class="talk" id="talk">Let's <span class="o">talk</span></h2>
+    <div class="magzone" id="magzone" data-tag="INTERAKCJA" data-note="Twój magnetyczny przycisk zostaje, teraz w gradiencie symbolu. TALK wypełnia się na niebiesko po najechaniu (Poppins, jak teraz).">
+      <a class="mag" id="mag" href="#contact">Email me</a>
+    </div>
+    <div class="mail" id="cv">jeleniewicz@op.pl</div>
+    <div class="foot mono">
+      <span>© 2026 Piotr Jeleniewicz · Gdynia, Poland</span>
+      <span><a href="https://github.com/Xcape53">GitHub</a> · <a href="https://www.linkedin.com/in/piotr-jeleniewicz/">LinkedIn</a></span>
+      <span>CV on request</span>
+    </div>
+  </section>
+</main>
+
+<button class="notes-toggle" id="notes" type="button" aria-pressed="true">Notatki projektowe: wł.</button>
+
+<script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.5/gsap.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.5/ScrollTrigger.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/lenis@1.1.13/dist/lenis.min.js"></script>
+<script>
+(() => {
+  "use strict";
+  const IMGS = { labinc: "%%IMG_labinc%%", passmgr: "%%IMG_passmgr%%", inventory: "%%IMG_inventory%%" };
+  const RM = matchMedia("(prefers-reduced-motion: reduce)").matches;
+  const root = document.documentElement;
+  const $ = (s) => document.querySelector(s);
+  const clamp = (v, a, b) => Math.min(b, Math.max(a, v));
+  const lerp = (a, b, t) => a + (b - a) * t;
+  const DPR = Math.min(window.devicePixelRatio || 1, 2);
+  root.classList.add("notes");
+
+  // ---------- symbol: te same dane co w js/animacja-banner.js ----------
+  const OFF = [[-86.25,31.5],[-148.5,-26.25],[-128.25,-112.5],[-189,-168.75],[-211.5,-83.25],[-295.5,-51.75],[-252.75,-225.75],[-168,-256.5],[-104.25,-200.25],[-22.5,-231],[-84,-288.75],[-61.5,-369],[63.75,-262.5],[42.75,-174.75],[105,-120],[191.25,-147],[128.25,-204.75],[148.5,-291.75],[273.75,-179.25],[252.75,-92.25],[168,-59.25],[128.25,112.5],[209.25,82.5],[232.5,-3.75],[294,52.5],[273,136.5],[-62.25,-57.75],[-42.75,-141.75],[84.75,-30.75],[63,56.25],[-22.5,88.5],[-43.5,174.75],[39,145.5],[102,201],[-66,261.75],[-128.25,205.5],[-99.75,104.25],[-233.25,6.75],[-254.25,92.25],[-192.75,149.25],[-276,179.25],[-338.25,123]];
+  const P = [[0, 0], ...OFF];                       // etykieta i -> P[i]
+  const SEG = [];                                    // [rodzic, dziecko]
+  SEG.push([0, 1]); for (let i = 1; i < 26; i++) SEG.push([i, i + 1]);
+  SEG.push([0, 27]); for (let i = 27; i < 42; i++) SEG.push([i, i + 1]);
+  // kolejność wzrostu jak w D3: gałęzie na zmianę
+  const A = SEG.slice(0, 26), B = SEG.slice(26), ORDER = [];
+  for (let i = 0; i < Math.max(A.length, B.length); i++) { if (A[i]) ORDER.push(A[i]); if (B[i]) ORDER.push(B[i]); }
+  const C1 = [44, 127, 254], C2 = [100, 46, 253];
+  const colAt = (x, y) => { const t = clamp(((x + y) / 2 + 300) / 600, 0, 1); return C1.map((c, k) => Math.round(lerp(c, C2[k], t))); };
+
+  // mini logo w rogu (SVG)
+  (function mini() {
+    const s = $("#mini"), NS = "http://www.w3.org/2000/svg";
+    const d = document.createElementNS(NS, "defs"); d.innerHTML = '<linearGradient id="mg" x1="0" y1="0" x2="1" y2="1"><stop offset="0" stop-color="#2c7ffe"/><stop offset="1" stop-color="#642efd"/></linearGradient>'; s.appendChild(d);
+    let dA = "M" + P[0].join(" "); for (let i = 1; i <= 26; i++) dA += " L" + P[i].join(" ");
+    let dB = "M" + P[0].join(" "); for (let i = 27; i <= 42; i++) dB += " L" + P[i].join(" ");
+    [dA, dB].forEach((dd) => { const e = document.createElementNS(NS, "path"); e.setAttribute("d", dd); e.setAttribute("fill", "none"); e.setAttribute("stroke", "url(#mg)"); e.setAttribute("stroke-width", "46"); e.setAttribute("stroke-linejoin", "round"); e.setAttribute("stroke-linecap", "round"); s.appendChild(e); });
+  })();
+
+  // ---------- notatki ----------
+  const nt = $("#notes");
+  nt.addEventListener("click", () => { const on = root.classList.toggle("notes"); nt.setAttribute("aria-pressed", String(on)); nt.textContent = "Notatki projektowe: " + (on ? "wł." : "wył."); });
+  const clk = $("#clock");
+  const tick = () => { try { clk.textContent = new Intl.DateTimeFormat("en-GB", { timeZone: "Europe/Warsaw", hour: "2-digit", minute: "2-digit" }).format(new Date()); } catch (e) {} };
+  tick(); setInterval(tick, 30000);
+
+  // ---------- jeden zegar ----------
+  const hasGsap = !!window.gsap;
+  if (hasGsap && window.ScrollTrigger) gsap.registerPlugin(ScrollTrigger);
+  const loops = []; const onTick = (f) => loops.push(f); let T = 0;
+  const run = (t) => { T = t; for (const f of loops) f(t); };
+  if (hasGsap) gsap.ticker.add(run); else { const r = (ms) => { run(ms / 1000); requestAnimationFrame(r); }; requestAnimationFrame(r); }
+  if (!RM && window.Lenis && hasGsap) {
+    try {
+      const lenis = new Lenis({ lerp: 0.1 });
+      lenis.on("scroll", ScrollTrigger.update);
+      gsap.ticker.add((t) => lenis.raf(t * 1000));
+      gsap.ticker.lagSmoothing(0);
+      document.querySelectorAll('a[href^="#"]').forEach((a) => a.addEventListener("click", (e) => { const el = document.querySelector(a.getAttribute("href")); if (el) { e.preventDefault(); lenis.scrollTo(el); } }));
+    } catch (e) {}
+  }
+  const vis = new Map();
+  const io = new IntersectionObserver((es) => es.forEach((e) => vis.set(e.target, e.isIntersecting)), { rootMargin: "120px" });
+  const watch = (el) => { if (el) { vis.set(el, true); io.observe(el); } };
+  const isOn = (el) => vis.get(el) !== false;
+  const ptr = { x: 0, y: 0, sx: 0, sy: 0, px: -1, py: -1 };
+  addEventListener("pointermove", (e) => { ptr.x = e.clientX / innerWidth * 2 - 1; ptr.y = e.clientY / innerHeight * 2 - 1; ptr.px = e.clientX; ptr.py = e.clientY; }, { passive: true });
+  const fit = (cv, w, h) => { const W = Math.round(w * DPR), H = Math.round(h * DPR); if (cv.width !== W || cv.height !== H) { cv.width = W; cv.height = H; } };
+  let lastY = 0;
+  onTick(() => { ptr.sx = lerp(ptr.sx, ptr.x, 0.06); ptr.sy = lerp(ptr.sy, ptr.y, 0.06); const y = scrollY; if (Math.abs(y - lastY) > 4) { root.classList.toggle("frame-away", y > 200 && y > lastY); lastY = y; } });
+
+  // okruszek: ścieżka w drzewie
+  const crumb = $("#crumb"), paths = [...document.querySelectorAll("[data-path]")];
+  const navLinks = [...document.querySelectorAll(".nav a")];
+  onTick(() => {
+    const mid = innerHeight * 0.45; let cur = paths[0];
+    for (const s of paths) { const r = s.getBoundingClientRect(); if (r.top < mid && r.bottom > mid) cur = s; }
+    const p = cur.dataset.path; if (crumb.textContent !== p) { crumb.textContent = p; const top = p.split(" / ")[0]; navLinks.forEach((a) => a.toggleAttribute("aria-current", a.getAttribute("href") === "#" + top)); }
+  });
+
+  // ---------- pole węzłów: 3 warstwy paralaksy ----------
+  const field = $("#field"), fc = field.getContext("2d"), stage = $(".hero__stage"); watch(stage);
+  const LAYERS = [0.12, 0.3, 0.6].map((sp, li) => {
+    const pts = Array.from({ length: [70, 40, 18][li] }, () => ({ x: Math.random(), y: Math.random() * 1.5, r: [1, 1.6, 2.4][li] }));
+    const links = []; pts.forEach((a, i) => { let best = -1, bd = 9; pts.forEach((b, j) => { if (i !== j) { const d = Math.hypot(a.x - b.x, (a.y - b.y) * 0.6); if (d < bd) { bd = d; best = j; } } }); if (bd < 0.16) links.push([i, best]); });
+    return { sp, pts, links, a: [0.18, 0.28, 0.4][li] };
+  });
+  let heroP = 0;
+  onTick((t) => {
+    if (!isOn(stage)) return;
+    const w = field.clientWidth, h = field.clientHeight; fit(field, w, h);
+    fc.setTransform(DPR, 0, 0, DPR, 0, 0); fc.clearRect(0, 0, w, h);
+    for (const L of LAYERS) {
+      const oy = heroP * h * L.sp, ox = ptr.sx * 24 * L.sp, dr = RM ? 0 : Math.sin(t * 0.2) * 6 * L.sp;
+      const pos = L.pts.map((p) => [p.x * w + ox, ((p.y * h - oy + dr) % (h * 1.5) + h * 1.5) % (h * 1.5)]);
+      fc.strokeStyle = "rgba(100,46,253," + L.a * 0.8 + ")"; fc.lineWidth = 1;
+      for (const [i, j] of L.links) { const a = pos[i], b = pos[j]; if (Math.abs(a[1] - b[1]) > h * 0.5) continue; fc.beginPath(); fc.moveTo(a[0], a[1]); fc.lineTo(b[0], b[1]); fc.stroke(); }
+      fc.fillStyle = "rgba(44,127,254," + L.a + ")";
+      L.pts.forEach((p, i) => { fc.beginPath(); fc.arc(pos[i][0], pos[i][1], p.r, 0, 6.283); fc.fill(); });
+    }
+  });
+
+  // ---------- symbol 3D ----------
+  const hasGL = !!window.THREE && (() => { try { const c = document.createElement("canvas"); return !!(c.getContext("webgl") || c.getContext("experimental-webgl")); } catch (e) { return false; } })();
+  let grow = RM ? 1 : 0;   // 0..1 postęp wzrostu
+  if (hasGL) {
+    const cv = $("#glyph");
+    const r = new THREE.WebGLRenderer({ canvas: cv, antialias: true, alpha: true });
+    r.setPixelRatio(DPR); r.outputEncoding = THREE.sRGBEncoding;
+    const scene = new THREE.Scene(), cam = new THREE.PerspectiveCamera(34, 1, 0.1, 100);
+    const G = new THREE.Group(); scene.add(G);
+    const S = 1 / 100, up = new THREE.Vector3(0, 1, 0);
+    const v3 = (i) => new THREE.Vector3(P[i][0] * S, -P[i][1] * S, Math.sin(i * 0.55) * 0.12);
+    const segMeshes = [];
+    ORDER.forEach(([a, b], k) => {
+      const A3 = v3(a), B3 = v3(b), d = new THREE.Vector3().subVectors(B3, A3), len = d.length();
+      const c = colAt((P[a][0] + P[b][0]) / 2, (P[a][1] + P[b][1]) / 2), col = new THREE.Color(`rgb(${c[0]},${c[1]},${c[2]})`);
+      const core = new THREE.CylinderGeometry(0.075, 0.075, len, 10); core.translate(0, len / 2, 0);
+      const halo = new THREE.CylinderGeometry(0.2, 0.2, len, 10); halo.translate(0, len / 2, 0);
+      const g = new THREE.Group(); g.position.copy(A3); g.quaternion.setFromUnitVectors(up, d.clone().normalize());
+      const m1 = new THREE.Mesh(core, new THREE.MeshBasicMaterial({ color: col.clone().lerp(new THREE.Color(0xffffff), 0.25) }));
+      const m2 = new THREE.Mesh(halo, new THREE.MeshBasicMaterial({ color: col, transparent: true, opacity: 0.16, blending: THREE.AdditiveBlending, depthWrite: false }));
+      g.add(m1, m2);
+      const j = new THREE.Mesh(new THREE.SphereGeometry(0.075, 12, 10), m1.material); j.position.copy(B3); G.add(j);
+      g.scale.y = 0.0001; j.scale.setScalar(0.0001);
+      G.add(g); segMeshes.push({ g, j, k });
+    });
+    const rootM = new THREE.Mesh(new THREE.SphereGeometry(0.19, 20, 16), new THREE.MeshBasicMaterial({ color: 0xffffff }));
+    const rootH = new THREE.Mesh(new THREE.SphereGeometry(0.42, 20, 16), new THREE.MeshBasicMaterial({ color: 0x2c7ffe, transparent: true, opacity: 0.22, blending: THREE.AdditiveBlending, depthWrite: false }));
+    G.add(rootM, rootH);
+    let narrow = false;
+    const size = () => { const w = cv.clientWidth, h = cv.clientHeight; r.setSize(w, h, false); cam.aspect = w / h; cam.updateProjectionMatrix(); narrow = w < 900; };
+    addEventListener("resize", size); size();
+    const N = segMeshes.length;
+    onTick((t) => {
+      if (!isOn(stage)) return;
+      segMeshes.forEach(({ g, j, k }) => { const s = clamp(grow * N - k, 0, 1); g.scale.y = Math.max(0.0001, s); j.scale.setScalar(Math.max(0.0001, s >= 1 ? 1 : 0)); });
+      const idle = RM ? 0 : t;
+      const p = heroP, e = p * p * (3 - 2 * p);
+      // spoczynek: powolny obrót + kursor; scroll: odjazd do logo w rogu
+      G.rotation.y = Math.sin(idle * 0.25) * 0.35 + ptr.sx * 0.45 + e * 1.2;
+      G.rotation.x = Math.sin(idle * 0.18) * 0.12 - ptr.sy * 0.25 + e * 0.3;
+      G.rotation.z = -idle * 0.04;
+      const bx = narrow ? 0 : -3.3, by = narrow ? 1.7 : 0;
+      G.position.set(lerp(bx, -7.5, e), lerp(by, 5.2, e), lerp(0, -4, e));
+      G.scale.setScalar(lerp(narrow ? 0.5 : 0.66, 0.25, e));
+      rootH.scale.setScalar(1 + Math.sin(idle * 2) * 0.08);
+      cam.position.set(0, 0, 11.5); cam.lookAt(0, 0, 0);
+      cv.style.opacity = String(1 - clamp((p - 0.75) / 0.25, 0, 1));
+      r.render(scene, cam);
+    });
+  }
+  const hero = $(".hero"), htext = $("#htext");
+  onTick(() => {
+    const rc = hero.getBoundingClientRect(), span = rc.height - innerHeight;
+    heroP = span > 0 ? clamp(-rc.top / span, 0, 1) : 0;
+    if (!RM) { htext.style.transform = "translate3d(0," + (-heroP * 30) + "vh,0)"; htext.style.opacity = String(1 - clamp(heroP * 1.3 - 0.2, 0, 1)); }
+  });
+
+  // ---------- loader: symbol rośnie, potem przechodzi w 3D ----------
+  const loader = $("#loader");
+  (function runLoader() {
+    if (RM) { loader.remove(); return; }
+    const cv = $("#grow"), c = cv.getContext("2d"), ln = $("#lnodes"), t0 = performance.now(), D = 1400;
+    const f = () => {
+      const p = clamp((performance.now() - t0) / D, 0, 1), n = Math.floor(p * ORDER.length);
+      ln.textContent = Math.min(43, n + 1) + " / 43";
+      fit(cv, 160, 160); c.setTransform(DPR * 160 / 800, 0, 0, DPR * 160 / 800, DPR * 80, DPR * 80);
+      c.clearRect(-400, -400, 800, 800); c.lineWidth = 40; c.lineCap = "round"; c.lineJoin = "round";
+      const g = c.createLinearGradient(-300, -300, 300, 300); g.addColorStop(0, "#2c7ffe"); g.addColorStop(1, "#642efd"); c.strokeStyle = g;
+      c.shadowColor = "#2c7ffe"; c.shadowBlur = 40;
+      for (let k = 0; k < n; k++) { const [a, b] = ORDER[k]; c.beginPath(); c.moveTo(P[a][0], P[a][1]); c.lineTo(P[b][0], P[b][1]); c.stroke(); }
+      if (p < 1) requestAnimationFrame(f);
+      else { loader.classList.add("out"); setTimeout(() => loader.remove(), 800);
+        if (hasGsap) { const o = { v: 0 }; gsap.to(o, { v: 1, duration: 1.8, ease: "expo.out", onUpdate: () => { grow = o.v; } }); } else grow = 1; }
+    };
+    f();
+  })();
+
+  // ---------- drzewo myślenia ----------
+  const svg = $("#tree"), NS = "http://www.w3.org/2000/svg";
+  const mk = (n, a, txt) => { const e = document.createElementNS(NS, n); for (const k in a) e.setAttribute(k, a[k]); if (txt) e.textContent = txt; return e; };
+  svg.appendChild(mk("defs", {})).innerHTML = '<linearGradient id="tg" x1="0" y1="0" x2="1" y2="1"><stop offset="0" stop-color="#2c7ffe"/><stop offset="1" stop-color="#642efd"/></linearGradient>';
+  const ROOT = [320, 60];
+  const BR = [
+    { x: 80, name: "collect", leaves: ["justjoin.it", "pracuj.pl", "rocketjobs", "olx"] },
+    { x: 240, name: "filter", leaves: ["shared rules", "profile to filters"] },
+    { x: 400, name: "research", leaves: ["company", "salary vs market", "real stack", "red flags"] },
+    { x: 560, name: "notify", leaves: ["matches", "alerts"] },
+  ];
+  const parts = []; // {el, at: próg 0..1, kind}
+  const edge = (d, at) => { const e = mk("path", { d, class: "edge", pathLength: 1, "stroke-dasharray": 1, "stroke-dashoffset": 1 }); svg.appendChild(e); parts.push({ el: e, at, kind: "edge" }); };
+  const node = (x, y, r, label, sub, at, cls) => {
+    const g = mk("g", { class: "node " + (cls || ""), opacity: 0 }); g.appendChild(mk("circle", { cx: x, cy: y, r }));
+    if (label) g.appendChild(mk("text", { x: x, y: y - r - 10, "text-anchor": "middle" }, label));
+    if (sub) g.appendChild(mk("text", { x: x + r + 8, y: y + 4, class: "sub" }, sub));
+    svg.appendChild(g); parts.push({ el: g, at, kind: "node" });
+  };
+  node(ROOT[0], ROOT[1], 11, "", "", 0.02, "root");
+  const rt = mk("text", { x: ROOT[0], y: ROOT[1] - 24, "text-anchor": "middle", opacity: 0 }, "Problem: six job portals to check every day"); svg.appendChild(rt); parts.push({ el: rt, at: 0.05, kind: "node" });
+  BR.forEach((b, i) => {
+    const at = 0.3 + i * 0.05;
+    edge(`M${ROOT[0]} ${ROOT[1] + 11} C ${ROOT[0]} 140, ${b.x} 120, ${b.x} 192`, at);
+    node(b.x, 200, 8, b.name, "", at + 0.06);
+    b.leaves.forEach((lf, j) => {
+      const y = 280 + j * 62, at2 = 0.62 + i * 0.04 + j * 0.025;
+      edge(`M${b.x} 208 L ${b.x} ${y - 6}`, at2);
+      node(b.x, y, 5, "", lf, at2 + 0.03);
+    });
+  });
+  edge(`M80 520 L 560 520`, 0.93);
+  const tf = mk("text", { x: 320, y: 548, "text-anchor": "middle", class: "sub", opacity: 0 }, "integrated into one workflow I use every day"); svg.appendChild(tf); parts.push({ el: tf, at: 0.95, kind: "node" });
+  const think = $("#think"), flowLis = [...document.querySelectorAll("#flow li")];
+  onTick(() => {
+    const rc = think.getBoundingClientRect(), span = rc.height - innerHeight;
+    const p = RM ? 1 : (span > 0 ? clamp((-rc.top + innerHeight * 0.3) / span, 0, 1) : 0);
+    for (const q of parts) {
+      const v = clamp((p - q.at) / 0.08, 0, 1);
+      if (q.kind === "edge") q.el.setAttribute("stroke-dashoffset", String(1 - v)); else q.el.setAttribute("opacity", String(v));
+    }
+    flowLis.forEach((li, i) => li.classList.toggle("on", p > 0.6 + i * 0.07));
+  });
+
+  // ---------- projekty: paralaksa kadrów + udawany postęp wideo ----------
+  const screens = [...document.querySelectorAll(".screen")];
+  screens.forEach((s) => { s._t0 = 0; s._paused = false; const b = s.querySelector(".play"); b.addEventListener("click", () => { s._paused = !s._paused; b.setAttribute("aria-label", s._paused ? "Play video" : "Pause video"); b.innerHTML = s._paused ? '<svg viewBox="0 0 12 12"><path d="M3 1l8 5-8 5z"/></svg>' : '<svg viewBox="0 0 12 12"><rect x="2" y="1" width="3" height="10"/><rect x="7" y="1" width="3" height="10"/></svg>'; }); watch(s); });
+  let lastT = 0;
+  onTick((t) => {
+    const dt = Math.min(0.1, t - lastT); lastT = t;
+    for (const s of screens) {
+      const rc = s.getBoundingClientRect(), c = (rc.top + rc.height / 2 - innerHeight / 2) / innerHeight;
+      if (!RM) s.style.transform = "translate3d(0," + (c * parseFloat(s.dataset.par) * -200) + "px,0)";
+      if (!isOn(s) || s._paused || RM) continue;
+      const dur = parseFloat(s.querySelector(".tc").textContent.split("/ 0:")[1]) || 10;
+      s._t0 = (s._t0 + dt) % dur;
+      s.querySelector(".prog span").style.width = (s._t0 / dur * 100) + "%";
+      s.querySelector(".tc").textContent = "0:" + String(Math.floor(s._t0)).padStart(2, "0") + " / 0:" + String(dur).padStart(2, "0");
+    }
+  });
+  if (hasGsap && window.ScrollTrigger && !RM) {
+    gsap.utils.toArray(".sec-head h2, .proj h3, .hw h2, .about h2, .index-wrap h2").forEach((el) => gsap.from(el, { y: 40, opacity: 0, duration: 1.1, ease: "expo.out", scrollTrigger: { trigger: el, start: "top 88%" } }));
+  }
+
+  // ---------- więcej prac: podgląd przy kursorze ----------
+  const pv = document.createElement("div"); pv.className = "preview"; pv.setAttribute("aria-hidden", "true"); document.body.appendChild(pv);
+  let pvx = 0, pvy = 0;
+  document.querySelectorAll(".index a").forEach((a) => {
+    const show = () => {
+      const k = a.dataset.img; pv.classList.remove("on");
+      pv.innerHTML = IMGS[k] ? '<img alt="" src="' + IMGS[k] + '">' : '<div class="ph">' + a.querySelector(".t").textContent + "</div>";
+      requestAnimationFrame(() => pv.classList.add("on"));
+    };
+    a.addEventListener("pointerenter", show); a.addEventListener("pointerleave", () => pv.classList.remove("on"));
+    a.addEventListener("focus", () => { const r = a.getBoundingClientRect(); ptr.px = r.right - 300; ptr.py = r.top + r.height / 2; show(); }); a.addEventListener("blur", () => pv.classList.remove("on"));
+  });
+  onTick(() => {
+    if (!pv.classList.contains("on")) return;
+    pvx = lerp(pvx, ptr.px + 30, 0.18); pvy = lerp(pvy, ptr.py - 130, 0.18);
+    pv.style.transform = "translate3d(" + clamp(pvx, 8, innerWidth - pv.offsetWidth - 8) + "px," + clamp(pvy, 8, innerHeight - pv.offsetHeight - 8) + "px,0)";
+  });
+
+  // ---------- oscyloskop: sinus -> Fourier przy kursorze ----------
+  const osc = $("#osc"), oc = osc.getContext("2d"); watch(osc);
+  let mx = -1e4;
+  osc.parentElement.addEventListener("pointermove", (e) => { mx = e.clientX - osc.getBoundingClientRect().left; });
+  osc.parentElement.addEventListener("pointerleave", () => { mx = -1e4; });
+  onTick((t) => {
+    if (!isOn(osc)) return;
+    const w = osc.clientWidth, h = osc.clientHeight; fit(osc, w, h);
+    oc.setTransform(DPR, 0, 0, DPR, 0, 0); oc.clearRect(0, 0, w, h);
+    const g = oc.createLinearGradient(0, 0, w, 0); g.addColorStop(0, "#2c7ffe"); g.addColorStop(1, "#642efd");
+    oc.strokeStyle = g; oc.lineWidth = 2; oc.shadowColor = "#2c7ffe"; oc.shadowBlur = 10; oc.beginPath();
+    const ph = RM ? 0 : t * 1.4, k = Math.PI * 2 / 220;
+    for (let X = 0; X <= w; X += 2) {
+      const a = X * k - ph, s = Math.sin(a), sq = (4 / Math.PI) * (Math.sin(a) + Math.sin(3 * a) / 3 + Math.sin(5 * a) / 5 + Math.sin(7 * a) / 7);
+      const m = clamp(1 - Math.abs(X - mx) / 260, 0, 1), Y = h / 2 - (s * (1 - m) + sq * m * 0.8) * h * 0.34;
+      X ? oc.lineTo(X, Y) : oc.moveTo(X, Y);
+    }
+    oc.stroke(); oc.shadowBlur = 0;
+  });
+
+  // ---------- magnetyczny przycisk ----------
+  const mz = $("#magzone"), mag = $("#mag");
+  if (!RM) {
+    const st = { x: 0, y: 0, tx: 0, ty: 0 };
+    mz.addEventListener("pointermove", (e) => { const r = mz.getBoundingClientRect(); st.tx = (e.clientX - r.left - r.width / 2) * 0.35; st.ty = (e.clientY - r.top - r.height / 2) * 0.35; });
+    mz.addEventListener("pointerleave", () => { st.tx = 0; st.ty = 0; });
+    onTick(() => { st.x = lerp(st.x, st.tx, 0.15); st.y = lerp(st.y, st.ty, 0.15); mag.style.transform = "translate3d(" + st.x + "px," + st.y + "px,0)"; });
+  }
+})();
+</script>
