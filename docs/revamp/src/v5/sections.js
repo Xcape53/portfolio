@@ -311,15 +311,16 @@
   // amt narasta i zanika w czasie, kolejne harmoniczne (3, 5, 7) dochodzą po kolei, pozycja kursora jest wygładzona
   document.querySelectorAll("[data-osc]").forEach((osc) => {
     const oc = osc.getContext("2d"); watch(osc);
-    let mx = null, cx = null, amt = 0, last = 0;
+    let mx = null, cx = null, amt = 0, last = 0, sq = true;
     osc.parentElement.addEventListener("pointermove", (e) => { mx = e.clientX - osc.getBoundingClientRect().left; });
     osc.parentElement.addEventListener("pointerleave", () => { mx = null; });
+    osc.parentElement.addEventListener("click", () => { if (!fine) sq = !sq; });   // na dotyku: stuknięcie przełącza sinus / szereg Fouriera
     onTick((t) => {
       if (!isOn(osc)) { last = t; return; }
       const dt = Math.min(0.05, t - last); last = t;
       const w = osc.clientWidth, h = osc.clientHeight; fit(osc, w, h);
       let goal = mx;
-      if (!fine) goal = RM ? null : (Math.sin(t * 0.3) * 0.38 + 0.5) * w;   // na dotyku: powolny przejazd
+      if (!fine) goal = sq ? w / 2 : null;   // na dotyku: cała fala jako szereg Fouriera
       if (goal !== null) { cx = cx === null ? goal : lerp(cx, goal, 1 - Math.exp(-dt * 11)); amt = Math.min(1, amt + dt / 0.55); }
       else amt = Math.max(0, amt - dt / 0.8);
       const A = smooth(amt), wh = [0, 1, 2].map((k) => smooth(A * 3.4 - k * 0.8));   // wagi harmonicznych 3, 5, 7
@@ -328,7 +329,7 @@
       oc.strokeStyle = g; oc.lineWidth = 2; oc.shadowColor = "#2c7ffe"; oc.shadowBlur = 10; oc.beginPath();
       const ph = RM ? 0 : t * 1.4, k = Math.PI * 2 / 220, c = cx === null ? -1e4 : cx;
       for (let X = 0; X <= w; X += 2) {
-        const a = X * k - ph, near = smooth(1 - Math.abs(X - c) / 300), m = near * A;
+        const a = X * k - ph, near = fine ? smooth(1 - Math.abs(X - c) / 300) : 1, m = near * A;
         const sq = (4 / Math.PI) * (Math.sin(a) + wh[0] * Math.sin(3 * a) / 3 + wh[1] * Math.sin(5 * a) / 5 + wh[2] * Math.sin(7 * a) / 7) * 0.8;
         const Y = h / 2 - (Math.sin(a) * (1 - m) + sq * m) * h * 0.32;
         X ? oc.lineTo(X, Y) : oc.moveTo(X, Y);

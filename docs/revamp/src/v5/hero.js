@@ -13,20 +13,28 @@
     const ST1 = [[-0.75, 0, 0], [0.75, 0, 0]];             // stan 1 z oryginału: dwa węzły w poziomie
     const pos = tgt.map(() => [0, 0, 0]), vel = tgt.map(() => [0, 0, 0]), life = tgt.map(() => 0);
     if (RM) tgt.forEach((t, i) => { pos[i] = t.slice(); life[i] = 1; });
-    let cx = RM ? N : 1, W = 0, H = 0, narrow = false, last = 0;
-    const size = () => { W = cv.clientWidth; H = cv.clientHeight; fit(cv, W, H); narrow = W < 900; };
-    addEventListener("resize", size); size();
+    const CAMZ = 11.5, FOVH = 2 * CAMZ * Math.tan(17 * Math.PI / 180);
+    let cx = RM ? N : 1, W = 0, H = 0, narrow = false, last = 0, mBy = 1.95, mGs = 0.31;
+    const EXT = Math.max(...tgt.map((p) => Math.max(Math.abs(p[0]), Math.abs(p[1]))));
+    // telefon: symbol mieści się między menu a imieniem, z marginesem (wcześniej stała pozycja nachodziła na oba)
+    const fitMobile = () => {
+      const ht = document.getElementById("htext"); if (!ht || !H) return;
+      const ppu = H / FOVH, top = 78, bot = ht.getBoundingClientRect().top - cv.getBoundingClientRect().top - 28;
+      mGs = Math.min(0.31, Math.max(20, (bot - top) / 2) / (EXT * 1.2 * ppu));
+      mBy = (H / 2 - (top + bot) / 2) / ppu;
+    };
+    const size = () => { W = cv.clientWidth; H = cv.clientHeight; fit(cv, W, H); narrow = W < 900; if (narrow) fitMobile(); };
+    addEventListener("resize", size); addEventListener("load", size); size();
     const rot = (p, rx, ry, rz) => {
       let [x, y, z] = p, c = Math.cos(rz), s = Math.sin(rz); [x, y] = [x * c - y * s, x * s + y * c];
       c = Math.cos(rx); s = Math.sin(rx); [y, z] = [y * c - z * s, y * s + z * c];
       c = Math.cos(ry); s = Math.sin(ry); [x, z] = [x * c + z * s, -x * s + z * c]; return [x, y, z];
     };
-    const CAMZ = 11.5, FOVH = 2 * CAMZ * Math.tan(17 * Math.PI / 180);
     onTick((t) => {
       if (!isOn(stage)) { last = t; return; }
       if (cv.clientWidth !== W || cv.clientHeight !== H) size();
       const dt = Math.min(0.05, t - last || 0.016); last = t;
-      const idle = RM ? 0 : t, bx = narrow ? 0 : -3.0, by = narrow ? 1.95 : 0, gs = narrow ? 0.31 : 0.62, ppu = H / FOVH;
+      const idle = RM ? 0 : t, bx = narrow ? 0 : -3.0, by = narrow ? mBy : 0, gs = narrow ? mGs : 0.62, ppu = H / FOVH;
       // jak w oryginale: złożoność zależy od tego, gdzie symbol jest na ekranie (środek: 43 węzły, dalej 7, przy krawędzi 2)
       const rc0 = cv.getBoundingClientRect(), u = (rc0.top + H / 2 - by * ppu) / innerHeight, u0 = u + scrollY / innerHeight, dz = Math.abs(u - Math.min(0.5, u0));   // względem pozycji startowej (na telefonie symbol stoi wyżej)
       const cZone = dz < 0.17 ? N : dz < 0.3 ? lerp(N, 7, (dz - 0.17) / 0.13) : dz < 0.42 ? lerp(7, 2, (dz - 0.3) / 0.12) : 2;
