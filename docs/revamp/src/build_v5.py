@@ -40,14 +40,28 @@ s = s.replace(".loader canvas { width: 160px; height: 160px; }", ".loader canvas
 s = s.replace(".glyph { filter: drop-shadow(0 0 14px rgba(44,127,254,.55)) drop-shadow(0 0 34px rgba(100,46,253,.35)); }", ".glyph { filter: none; }")
 s = s.replace("a przy scrollu odjeżdża i staje się logo w lewym górnym rogu.", "a przy scrollu jedzie razem z tekstem i upraszcza się (43, 7, 2 węzły) jak w animacji D3, w zależności od pozycji na ekranie.")
 # SeeSky: d3-celestial w tej samej wersji co w projekcie (d3 v3)
-s = s.replace('<script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>', '<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/d3-celestial@0.7.35/celestial.css">\n<script src="https://cdn.jsdelivr.net/npm/d3@3.5.17/d3.min.js"></script>\n<script src="https://cdn.jsdelivr.net/npm/d3-celestial@0.7.35/lib/d3.geo.projection.min.js"></script>\n<script src="https://cdn.jsdelivr.net/npm/d3-celestial@0.7.35/celestial.min.js"></script>', 1)
+# (ładowany leniwie w sections.js, gdy sekcja SeeSky zbliża się do ekranu: blokował start strony na 1,6 s)
+s = s.replace('<script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>\n', '', 1)
 # hero ma teraz jeden ekran wysokości: postęp przewijania hero był ~0/0, więc tekst znikał po pierwszym ruchu kółka.
 # Tekst i symbol po prostu przewijają się razem ze stroną.
 old_fade = '    if (!RM) { htext.style.transform = "translate3d(0," + (-heroP * 30) + "vh,0)"; htext.style.opacity = String(1 - clamp(heroP * 1.3 - 0.2, 0, 1)); }'
 assert old_fade in s
 s = s.replace(old_fade, "")
 # hero: pełne zdanie zamiast równoważnika (humanizer)
-s = s.replace('I build applications and automation tools that connect APIs, data and AI services. Final semester of Electronics and Telecommunications at Gdańsk University of Technology, so software that talks to hardware is familiar ground.', "I build applications and automation tools that connect APIs, data and AI services. I'm in my final semester of Electronics and Telecommunications at Gdańsk University of Technology, so software that talks to hardware is familiar ground.", 1)
+s = s.replace('I build applications and automation tools that connect APIs, data and AI services. Final semester of Electronics and Telecommunications at Gdańsk University of Technology, so software that talks to hardware is familiar ground.', "I build applications and automation tools that connect APIs, data and AI services. I'm in my final semester of Electronics and Telecommunications at Gdańsk University of Technology, and I've been into automation since primary school.", 1)
+# hero bez "Hello, I am": imię samo, wyśrodkowane pionowo
+s = s.replace('          <p class="kicker">Hello, I am</p>\n', '', 1)
+s = s.replace('.hero__copy { position: absolute; inset: 0; display: grid; align-content: center; justify-items: end; padding-top: 80px;', '.hero__copy { position: absolute; inset: 0; display: grid; align-content: center; justify-items: end; padding-top: 0;', 1)
+old_ld = "      fit(cv, 240, 240); c.setTransform(DPR * 160 / 800, 0, 0, DPR * 160 / 800, DPR * 120, DPR * 120);\n      c.clearRect(-600, -600, 1200, 1200); c.lineWidth = 40; c.lineCap = \"round\"; c.lineJoin = \"round\";\n      const g = c.createLinearGradient(-300, -300, 300, 300); g.addColorStop(0, \"#2c7ffe\"); g.addColorStop(1, \"#642efd\"); c.strokeStyle = g;\n      c.shadowColor = \"#2c7ffe\"; c.shadowBlur = 40;\n      for (let k = 0; k < n; k++) { const [a, b] = ORDER[k]; c.beginPath(); c.moveTo(P[a][0], P[a][1]); c.lineTo(P[b][0], P[b][1]); c.stroke(); }"
+assert old_ld in s, "loader"
+s = s.replace(old_ld, "      if (!cv._fit) { fit(cv, 240, 240); cv._fit = 1; }\n      c.setTransform(DPR * 160 / 800, 0, 0, DPR * 160 / 800, DPR * 120, DPR * 120);\n      c.clearRect(-600, -600, 1200, 1200); c.lineWidth = 40; c.lineCap = \"round\"; c.lineJoin = \"round\";\n      const g = c.createLinearGradient(-300, -300, 300, 300); g.addColorStop(0, \"#2c7ffe\"); g.addColorStop(1, \"#642efd\"); c.strokeStyle = g;\n      c.shadowColor = \"#2c7ffe\"; c.shadowBlur = 40;\n      c.beginPath(); for (let k = 0; k < n; k++) { const [a, b] = ORDER[k]; c.moveTo(P[a][0], P[a][1]); c.lineTo(P[b][0], P[b][1]); } c.stroke();", 1)
+# loader rusza dopiero po załadowaniu strony (najpóźniej po 1,5 s): wcześniej dociąganie obrazów i start skryptów zjadało klatki
+old_t0 = 'const cv = $("#grow"), c = cv.getContext("2d"), ln = $("#lnodes"), t0 = performance.now(), D = 1400;\n    const f = () => {\n      const p = clamp((performance.now() - t0) / D, 0, 1)'
+assert old_t0 in s, "loader t0"
+s = s.replace(old_t0, 'const cv = $("#grow"), c = cv.getContext("2d"), ln = $("#lnodes"), tStart = performance.now(), D = 1400;\n    let t0 = 0;\n    const f = () => {\n      if (!t0) { if (document.readyState !== "complete" && performance.now() - tStart < 1500) { requestAnimationFrame(f); return; } t0 = performance.now(); }\n      const p = clamp((performance.now() - t0) / D, 0, 1)', 1)
+FONTS = "https://fonts.googleapis.com/css2?family=Poppins:wght@600;800&family=Spline+Sans:wght@300..700&family=Spline+Sans+Mono:wght@400;500&display=swap"
+assert '<link rel="stylesheet" href="' + FONTS + '">' in s, "fonts"
+s = s.replace('<link rel="stylesheet" href="' + FONTS + '">', '<link rel="preload" as="style" href="' + FONTS + '">\n<link rel="stylesheet" href="' + FONTS + '" media="print" onload="this.media=\'all\'">\n<noscript><link rel="stylesheet" href="' + FONTS + '"></noscript>\n<link rel="icon" type="image/png" sizes="48x48" href="%%IMG_favicon%%">', 1)
 # notatki domyślnie wyłączone
 s = s.replace('  root.classList.add("notes");\n', "")
 s = s.replace('aria-pressed="true">Notatki projektowe: wł.', 'aria-pressed="false">Notatki projektowe: wył.')
@@ -62,16 +76,22 @@ RESP_ALL = {pathlib.Path(f).stem: pathlib.Path(f) for f in glob.glob(str(here.pa
 IM = {"labinc": resp / "labinc-720.webp", "passmgr": resp / "passmgr-1-720.webp", "inventory": resp / "inventoryGen-720.webp", "axi": resp / "plain_axi4_lite-480.webp",
       "basys": resp / "basys3-fpga-board-480.webp", "cnc": resp / "cnc-eti-logo-480.webp", "jobm": img / "jobm-analysis-1600.webp", "yapper": img / "yapper-720.webp",
       "seeskyPoster": img / "seesky-poster.webp", "turfPoster": img / "turf-poster.webp", "invPoster": img / "inv-poster.webp",
-      "florist-480": img / "florist-480.webp", "florist-720": img / "florist-720.webp"}
+      "florist-480": img / "florist-480.webp", "favicon": here.parents[2] / "images" / "favicon-48.png", "florist-720": img / "florist-720.webp"}
 VI = {"seesky": vid / "seesky.webm", "turf": vid / "turf.webm", "inv": vid / "inv.webm", "seeskyTracking": vid / "seesky-tracking.webm", "factory": vid / "factory.webm", "factoryMp4": vid / "factory.mp4"}
 IM.update({"factoryPoster": img / "factory-poster.webp", "seesky": img / "seesky-720.webp", "seeskyTrackingPoster": img / "seesky-tracking-poster.webp"})
 for k in set(__import__("re").findall(r"%%IMG_([\w-]+)%%", s)):
     if k not in IM and k in RESP_ALL: IM[k] = RESP_ALL[k]
-b64 = lambda f: base64.b64encode(f.read_bytes()).decode()
+# obrazy i wideo jako osobne pliki obok strony (wcześniej data URI: 4,4 MB HTML i 2,5 s bez klatki przy ładowaniu)
+import shutil
+AS = here.parent / "v5-assets"; AS.mkdir(exist_ok=True)
+def asset(f):
+    shutil.copyfile(f, AS / f.name); return "v5-assets/" + f.name
 for k, f in IM.items():
-    if "%%IMG_" + k + "%%" in s: s = s.replace("%%IMG_" + k + "%%", "data:image/webp;base64," + b64(f))
+    if "%%IMG_" + k + "%%" in s: s = s.replace("%%IMG_" + k + "%%", asset(f))
 for k, f in VI.items():
-    if "%%VID_" + k + "%%" in s: s = s.replace("%%VID_" + k + "%%", "data:video/" + f.suffix[1:] + ";base64," + b64(f))
+    if "%%VID_" + k + "%%" in s: s = s.replace("%%VID_" + k + "%%", asset(f))
+# obrazki poza pierwszym ekranem: leniwie i bez blokowania dekodowania
+s = __import__("re").sub(r'<img (?![^>]*loading=)', '<img loading="lazy" decoding="async" ', s)
 # podpisy fabryki: rzut punktów sceny z Blendera (factory.py) na kadr
 LBL = {"miner": "15.7%;--ly:22.2%", "smelter": "37.8%;--ly:48.5%", "sell": "69.1%;--ly:27.6%", "lab": "69.7%;--ly:56.4%"}
 for k, v in LBL.items(): s = s.replace("%%LBL_" + k + "%%", v)

@@ -64,7 +64,7 @@
   .jm__row small { display: none; }
   .factory__labels li { font-size: .62rem; padding: 4px 7px; }
   .talk { font-size: clamp(3.2rem, 17vw, 5rem); }
-  .mag__sym { width: 104px; height: 104px; }
+  .mag__sym { width: 84px; height: 84px; }
 }
 @media (prefers-reduced-motion: reduce) {
   .loader { display: none; }

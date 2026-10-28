@@ -159,7 +159,7 @@
 
   // ===== SeeSky: mapa d3-celestial z konfiguracją z projektu + ikona teleskopu z wiązką za kursorem =====
   const skyEl = $("#skymap");
-  if (skyEl && window.Celestial) {
+  const initSky = () => {
     const LAT = 54.35, LON = 18.65, D2R = Math.PI / 180, DATA = "https://ofrohn.github.io/data/";
     let mapW = Math.round(skyEl.clientWidth * 1.15);   // zbliżenie na niebo północne; canvas większy od ramki, krawędzie wygaszone maską
     addEventListener("resize", () => { const w = Math.round(skyEl.clientWidth * 1.15); if (Math.abs(w - mapW) > 4) { mapW = w; Celestial.resize({ width: w }); } });
@@ -174,7 +174,7 @@
       lines: { graticule: { show: false, stroke: "#1a2235", width: 0.5, opacity: 0.4, lon: { pos: [] }, lat: { pos: [] } }, equatorial: { show: false, stroke: "#2244aa", width: 0.8, opacity: 0.3 }, ecliptic: { show: false }, galactic: { show: false }, supergalactic: { show: false } },
       horizon: { show: true, stroke: "#b22f57", width: 3, fill: "#000000", opacity: 0.5 },
       planets: { show: false }, daylight: { show: false },
-      formFields: { location: false, general: false, stars: false, dsos: false, constellations: false, lines: false, other: false, download: false }
+      form: false, formFields: { location: false, general: false, stars: false, dsos: false, constellations: false, lines: false, other: false, download: false }
     });
     // d3-celestial nadpisuje style canvasa: wyśrodkuj go ręcznie (większy od ramki, więc wygaszanie działa ze wszystkich stron)
     const centerMap = () => { const cv = $("#celestial-map canvas"); if (cv) Object.assign(cv.style, { position: "absolute", left: "50%", top: "50%", transform: "translate(-50%, -50%)", margin: "0" }); };
@@ -237,6 +237,18 @@
         card.style.transform = "translate3d(" + x.toFixed(1) + "px," + y.toFixed(1) + "px,0)";
       }
     });
+  };
+  // biblioteki mapy (d3 v3 + d3-celestial) dociągane dopiero, gdy sekcja jest blisko ekranu
+  if (skyEl) {
+    const CDN = "https://cdn.jsdelivr.net/npm/";
+    const load = (u) => new Promise((ok, err) => { const el = document.createElement("script"); el.src = u; el.onload = ok; el.onerror = err; document.head.appendChild(el); });
+    const io = new IntersectionObserver((es) => {
+      if (!es.some((e) => e.isIntersecting)) return;
+      io.disconnect();
+      const css = document.createElement("link"); css.rel = "stylesheet"; css.href = CDN + "d3-celestial@0.7.35/celestial.css"; document.head.appendChild(css);
+      load(CDN + "d3@3.5.17/d3.min.js").then(() => load(CDN + "d3-celestial@0.7.35/lib/d3.geo.projection.min.js")).then(() => load(CDN + "d3-celestial@0.7.35/celestial.min.js")).then(initSky).catch(() => {});
+    }, { rootMargin: "800px 0px" });
+    io.observe(skyEl);
   }
 
   // ===== LabInc: pętla z Blendera, gra tylko gdy widać =====
