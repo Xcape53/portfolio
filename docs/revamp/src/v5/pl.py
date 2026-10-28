@@ -43,7 +43,7 @@ PL = [
 
     # ---------- od układu do kodu ----------
     ('<p class="k">Core strengths</p>', '<p class="k">Mocne strony</p>'),
-    ('<h2 id="st-h">From circuits to code</h2>', '<h2 id="st-h">Od układów do kodu</h2>'),
+    ('<h2 id="st-h">Tools and skills</h2>', '<h2 id="st-h">Narzędzia i umiejętności</h2>'),
     ('Vivado: AXI4-Lite simulation', 'Vivado: symulacja AXI4-Lite'),
     ('Basys 3 FPGA board on a breadboard', 'Płytka FPGA Basys 3 na płytce stykowej'),
     ('data-cap="Standard-cell IC layout"', 'data-cap="Layout układu scalonego z komórek standardowych"'),

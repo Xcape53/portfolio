@@ -657,7 +657,7 @@ html.notes .hero__stage[data-note]::after { top: 76px; }
   <!-- OD UKŁADU DO KODU -->
   <section class="sec wrap" id="service" data-path="strengths" aria-labelledby="st-h">
     <div class="container">
-      <div class="head reveal"><p class="k">Mocne strony</p><h2 id="st-h">Od układów do kodu</h2></div>
+      <div class="head reveal"><p class="k">Mocne strony</p><h2 id="st-h">Narzędzia i umiejętności</h2></div>
       <div class="layers" data-tag="WARSTWY" data-note="Zamiast trzech identycznych kart: trzy warstwy jednego systemu, od układu do kodu. Po lewej jedno okno ze zdjęciami aktywnej warstwy (zmienia się przy scrollu albo najechaniu), po prawej opis. Na telefonie każda warstwa ma swoje zdjęcie.">
         <div class="layers__media reveal" aria-hidden="true">
           <div class="lm" data-layer="0">
@@ -677,21 +677,21 @@ html.notes .hero__stage[data-note]::after { top: 76px; }
             <h3>Elektronika i symulacje</h3>
             <p>Robiłem pomiary laboratoryjne, symulacje układów i projekty PCB, więc oprogramowanie dla urządzeń, systemów wbudowanych czy IoT byłoby dla mnie niedużym krokiem.</p>
             <p class="layer__tools mono">LTspice / Micro-Cap / KiCad / EAGLE / Vivado / Basys 3</p>
-            <div class="layer__shot"><img src="v5-assets/basys3-fpga-board-480.webp" alt="Płytka FPGA Basys 3 na płytce stykowej" loading="lazy"></div>
+            <div class="layer__shot"><img src="v5-assets/basys3-fpga-board-960.webp" alt="Płytka FPGA Basys 3 na płytce stykowej" loading="lazy"></div>
           </li>
           <li class="layer reveal" data-layer="1">
             <p class="layer__tag mono">systemy</p>
             <h3>Narzędzia i środowiska IT</h3>
             <p>W projektach pracuję z Windowsem i Windows Server, maszynami wirtualnymi, Linuksem i Dockerem. Drobne, powtarzalne zadania oddaję skryptom w AutoHotkey.</p>
             <p class="layer__tools mono">Git / Linux / Docker / Windows Server / VMware / AutoHotkey</p>
-            <div class="layer__shot"><img src="v5-assets/Screenshot_14-480.webp" alt="Docker Desktop z kontenerami projektów" loading="lazy"></div>
+            <div class="layer__shot"><img src="v5-assets/Screenshot_14-960.webp" alt="Docker Desktop z kontenerami projektów" loading="lazy"></div>
           </li>
           <li class="layer reveal" data-layer="2">
             <p class="layer__tag mono">oprogramowanie</p>
             <h3>Programowanie i integracja</h3>
             <p>W Pythonie i JavaScripcie piszę narzędzia, integracje API i przetwarzanie danych. C/C++ i Javę znam z zajęć, projektów i własnej nauki.</p>
             <p class="layer__tools mono">Python / JavaScript / REST APIs / C/C++ / Java</p>
-            <div class="layer__shot"><img src="v5-assets/jobagg-1-720.webp" alt="Tabela ofert w JobManagerze" loading="lazy"></div>
+            <div class="layer__shot"><img src="v5-assets/jobagg-1-960.webp" alt="Tabela ofert w JobManagerze" loading="lazy"></div>
           </li>
         </ol>
       </div>
@@ -1095,20 +1095,28 @@ html.notes .hero__stage[data-note]::after { top: 76px; }
     const ST1 = [[-0.75, 0, 0], [0.75, 0, 0]];             // stan 1 z oryginału: dwa węzły w poziomie
     const pos = tgt.map(() => [0, 0, 0]), vel = tgt.map(() => [0, 0, 0]), life = tgt.map(() => 0);
     if (RM) tgt.forEach((t, i) => { pos[i] = t.slice(); life[i] = 1; });
-    let cx = RM ? N : 1, W = 0, H = 0, narrow = false, last = 0;
-    const size = () => { W = cv.clientWidth; H = cv.clientHeight; fit(cv, W, H); narrow = W < 900; };
-    addEventListener("resize", size); size();
+    const CAMZ = 11.5, FOVH = 2 * CAMZ * Math.tan(17 * Math.PI / 180);
+    let cx = RM ? N : 1, W = 0, H = 0, narrow = false, last = 0, mBy = 1.95, mGs = 0.31;
+    const EXT = Math.max(...tgt.map((p) => Math.max(Math.abs(p[0]), Math.abs(p[1]))));
+    // telefon: symbol mieści się między menu a imieniem, z marginesem (wcześniej stała pozycja nachodziła na oba)
+    const fitMobile = () => {
+      const ht = document.getElementById("htext"); if (!ht || !H) return;
+      const ppu = H / FOVH, top = 78, bot = ht.getBoundingClientRect().top - cv.getBoundingClientRect().top - 28;
+      mGs = Math.min(0.31, Math.max(20, (bot - top) / 2) / (EXT * 1.2 * ppu));
+      mBy = (H / 2 - (top + bot) / 2) / ppu;
+    };
+    const size = () => { W = cv.clientWidth; H = cv.clientHeight; fit(cv, W, H); narrow = W < 900; if (narrow) fitMobile(); };
+    addEventListener("resize", size); addEventListener("load", size); size();
     const rot = (p, rx, ry, rz) => {
       let [x, y, z] = p, c = Math.cos(rz), s = Math.sin(rz); [x, y] = [x * c - y * s, x * s + y * c];
       c = Math.cos(rx); s = Math.sin(rx); [y, z] = [y * c - z * s, y * s + z * c];
       c = Math.cos(ry); s = Math.sin(ry); [x, z] = [x * c + z * s, -x * s + z * c]; return [x, y, z];
     };
-    const CAMZ = 11.5, FOVH = 2 * CAMZ * Math.tan(17 * Math.PI / 180);
     onTick((t) => {
       if (!isOn(stage)) { last = t; return; }
       if (cv.clientWidth !== W || cv.clientHeight !== H) size();
       const dt = Math.min(0.05, t - last || 0.016); last = t;
-      const idle = RM ? 0 : t, bx = narrow ? 0 : -3.0, by = narrow ? 1.95 : 0, gs = narrow ? 0.31 : 0.62, ppu = H / FOVH;
+      const idle = RM ? 0 : t, bx = narrow ? 0 : -3.0, by = narrow ? mBy : 0, gs = narrow ? mGs : 0.62, ppu = H / FOVH;
       // jak w oryginale: złożoność zależy od tego, gdzie symbol jest na ekranie (środek: 43 węzły, dalej 7, przy krawędzi 2)
       const rc0 = cv.getBoundingClientRect(), u = (rc0.top + H / 2 - by * ppu) / innerHeight, u0 = u + scrollY / innerHeight, dz = Math.abs(u - Math.min(0.5, u0));   // względem pozycji startowej (na telefonie symbol stoi wyżej)
       const cZone = dz < 0.17 ? N : dz < 0.3 ? lerp(N, 7, (dz - 0.17) / 0.13) : dz < 0.42 ? lerp(7, 2, (dz - 0.3) / 0.12) : 2;
@@ -1500,15 +1508,16 @@ html.notes .hero__stage[data-note]::after { top: 76px; }
   // amt narasta i zanika w czasie, kolejne harmoniczne (3, 5, 7) dochodzą po kolei, pozycja kursora jest wygładzona
   document.querySelectorAll("[data-osc]").forEach((osc) => {
     const oc = osc.getContext("2d"); watch(osc);
-    let mx = null, cx = null, amt = 0, last = 0;
+    let mx = null, cx = null, amt = 0, last = 0, sq = true;
     osc.parentElement.addEventListener("pointermove", (e) => { mx = e.clientX - osc.getBoundingClientRect().left; });
     osc.parentElement.addEventListener("pointerleave", () => { mx = null; });
+    osc.parentElement.addEventListener("click", () => { if (!fine) sq = !sq; });   // na dotyku: stuknięcie przełącza sinus / szereg Fouriera
     onTick((t) => {
       if (!isOn(osc)) { last = t; return; }
       const dt = Math.min(0.05, t - last); last = t;
       const w = osc.clientWidth, h = osc.clientHeight; fit(osc, w, h);
       let goal = mx;
-      if (!fine) goal = RM ? null : (Math.sin(t * 0.3) * 0.38 + 0.5) * w;   // na dotyku: powolny przejazd
+      if (!fine) goal = sq ? w / 2 : null;   // na dotyku: cała fala jako szereg Fouriera
       if (goal !== null) { cx = cx === null ? goal : lerp(cx, goal, 1 - Math.exp(-dt * 11)); amt = Math.min(1, amt + dt / 0.55); }
       else amt = Math.max(0, amt - dt / 0.8);
       const A = smooth(amt), wh = [0, 1, 2].map((k) => smooth(A * 3.4 - k * 0.8));   // wagi harmonicznych 3, 5, 7
@@ -1517,7 +1526,7 @@ html.notes .hero__stage[data-note]::after { top: 76px; }
       oc.strokeStyle = g; oc.lineWidth = 2; oc.shadowColor = "#2c7ffe"; oc.shadowBlur = 10; oc.beginPath();
       const ph = RM ? 0 : t * 1.4, k = Math.PI * 2 / 220, c = cx === null ? -1e4 : cx;
       for (let X = 0; X <= w; X += 2) {
-        const a = X * k - ph, near = smooth(1 - Math.abs(X - c) / 300), m = near * A;
+        const a = X * k - ph, near = fine ? smooth(1 - Math.abs(X - c) / 300) : 1, m = near * A;
         const sq = (4 / Math.PI) * (Math.sin(a) + wh[0] * Math.sin(3 * a) / 3 + wh[1] * Math.sin(5 * a) / 5 + wh[2] * Math.sin(7 * a) / 7) * 0.8;
         const Y = h / 2 - (Math.sin(a) * (1 - m) + sq * m) * h * 0.32;
         X ? oc.lineTo(X, Y) : oc.moveTo(X, Y);
